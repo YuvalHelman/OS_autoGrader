@@ -1,0 +1,316 @@
+{
+   supp1
+   Memcheck:Cond
+   fun:strlen
+   fun:main
+}
+
+
+{
+   addr1 main
+   Memcheck:Addr1
+   fun:main
+}
+
+{
+   strcpyAddr1
+   Memcheck:Addr1
+   fun:strcpy
+   fun:main
+}
+
+{
+   strlen
+   Memcheck:Cond
+   fun:strlen
+   fun:main
+}
+
+{
+  strcmp
+   Memcheck:Addr1
+   fun:strcmp
+   fun:main
+}
+
+{
+   printf
+   Memcheck:Addr1
+   fun:__GI_strlen
+   fun:vfprintf
+   fun:printf
+   fun:main
+}
+
+{
+   strstr
+   Memcheck:Addr1
+   fun:strstr
+   fun:main
+}
+
+{
+   b3
+   Memcheck:Addr1
+   fun:strstr
+   fun:strrep
+   fun:main
+}
+
+{
+   opennat
+   Memcheck:Param
+   openat(filename)
+   fun:open
+   fun:main
+}
+
+{
+   a1
+   Memcheck:Overlap
+   fun:strcat
+   fun:combain_file_name
+   fun:main
+}
+
+{
+  a2
+   Memcheck:Cond
+   fun:__GI_strlen
+   fun:vfprintf
+   fun:printf
+   fun:concatenate_string
+   fun:main
+}
+
+{
+   a3
+   Memcheck:Addr1
+   fun:strcat
+   fun:main
+}
+
+{
+   b2
+   Memcheck:Addr2
+   fun:main
+}
+
+{
+   b5
+   Memcheck:Param
+   read(buf)
+   fun:read
+   fun:read_entire_file
+   fun:main
+}
+
+{
+   b6
+   Memcheck:Cond
+   fun:strcat
+   fun:main
+}
+
+{
+   b7
+   Memcheck:Param
+   read(buf)
+   fun:read
+   fun:main
+}
+
+{
+  b8
+   Memcheck:Cond
+   fun:__GI_strlen
+   fun:vfprintf
+   fun:printf
+   fun:main
+}
+
+{
+  b9
+   Memcheck:Cond
+   fun:strstr
+   fun:main
+}
+
+{
+  b10
+   Memcheck:Param
+   read(buf)
+   fun:read
+   fun:readIntoBuffer
+   fun:processFile
+   fun:main
+}
+
+{
+   b11
+   Memcheck:Overlap
+   fun:strcat
+   fun:main
+}
+
+{
+   b12
+   Memcheck:Cond
+   fun:strlen
+   fun:insert
+   fun:main
+}
+
+{
+   b13
+   Memcheck:Addr1
+   fun:strncat
+   fun:main
+}
+
+{
+   b14
+   Memcheck:Addr1
+   fun:insert
+   fun:main
+}
+
+{
+  b15
+   Memcheck:Overlap
+   fun:strcat
+   fun:main
+}
+
+{
+   b16
+   Memcheck:Overlap
+   fun:strcpy
+   fun:combine
+   fun:getfile
+   fun:main
+}
+
+{
+  b17
+   Memcheck:Addr1
+   fun:combine
+   fun:getfile
+   fun:main
+}
+
+{
+   b18
+   Memcheck:Cond
+   fun:main
+}
+
+{
+   b19
+   Memcheck:Param
+   openat(filename)
+   fun:open
+   fun:_IO_file_open
+   fun:_IO_file_fopen@@GLIBC_2.1
+   fun:__fopen_internal
+   fun:fopen@@GLIBC_2.1
+   fun:main
+}
+
+{
+   b20
+   Memcheck:Addr1
+   fun:strlen
+   fun:check
+   fun:main
+}
+
+{
+   b21
+   Memcheck:Cond
+   fun:strcpy
+   fun:main
+}
+
+{
+   b22
+   Memcheck:Addr1
+   fun:_IO_default_xsputn
+   fun:vfprintf
+   fun:vsprintf
+   fun:sprintf
+   fun:main
+}
+
+{
+   b23
+   Memcheck:Addr1
+   fun:vsprintf
+   fun:sprintf
+   fun:main
+}
+
+{
+   b24
+   Memcheck:Cond
+   fun:strstr
+   fun:printOutput
+   fun:main
+}
+
+{
+   b25
+   Memcheck:Cond
+   fun:__GI_strlen
+   fun:vfprintf
+   fun:printf
+   fun:printOutput
+   fun:main
+}
+
+{
+   b26
+   Memcheck:Cond
+   fun:strcpy
+   fun:main
+}
+
+{
+   b27
+   Memcheck:Cond
+   fun:strncat
+   fun:main
+}
+
+{
+   b28
+   Memcheck:Cond
+   fun:strncat
+   fun:main
+}
+
+{
+   b29
+   Memcheck:Cond
+   fun:strlen
+   fun:checkEqual
+   fun:main
+}
+
+{
+   b30
+   Memcheck:Addr1
+   fun:vsprintf
+   fun:sprintf
+   fun:main
+}
+
+{
+   b31
+   Memcheck:Addr1
+   fun:_IO_default_xsputn
+   fun:vfprintf
+   fun:vsprintf
+   fun:sprintf
+   fun:main
+}
