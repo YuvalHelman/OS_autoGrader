@@ -1,0 +1,8 @@
+.idea/
+assignments/
+zip_files/
+hw3/
+names.csv
+**/__pycache__/
+compile_log.txt
+valgrind_log.txt
