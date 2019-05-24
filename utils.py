@@ -26,7 +26,9 @@ def zip_out_folders():
     for file in os.listdir(directory_str):
         splitted_filename = file.split("_")
         print(file)  # DEBUG
-        full_stud_name = splitted_filename[0] + "_" + splitted_filename[4]
+        # Get FirstName_LastName_ID string
+        full_stud_name = splitted_filename[0].split(" ")[0] + "_" +\
+                         splitted_filename[0].split(" ")[0] + "_" + splitted_filename[4]
         print(full_stud_name)  # DEBUG
 
         # Create a new folder with the students name_ID

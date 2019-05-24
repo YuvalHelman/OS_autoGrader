@@ -1,12 +1,30 @@
 import os
 import subprocess as sp
-from utils import write_to_csv
-from utils import zip_out_folders
-from utils import build_comments
 import utils
+from utils import build_comments
+from utils import write_to_csv
 
 
-def compile_files_and_check_tests():
+def compile_files(exe_files_path, compile_log):
+    p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=c99', "hw1_concat.c"
+        , "-o", "message_reader.c"],
+                 cwd=exe_files_path,
+                 stdout=compile_log, stderr=compile_log
+                 )
+    p.wait()
+    p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=c99', "hw1_concat.c"
+        , "-o", "message_sender.c"],
+                 cwd=exe_files_path,
+                 stdout=compile_log, stderr=compile_log
+                 )
+    p.wait()
+
+    if p.returncode != 0:  # check if compilation works
+        return 1
+    else:  # tests
+        return 0
+
+def iterate_students_directories():
     utils.open_names_csv()
 
     directory_str = "./assignments/"
@@ -14,6 +32,7 @@ def compile_files_and_check_tests():
     compile_log.write('.\n')
     compile_log.close()
     compile_log = open('compilation_log.txt', 'a')
+
 
     for student_dir in os.listdir(directory_str):  # iterate on all student folders!
         splitted_filename = student_dir.split("_")
@@ -24,7 +43,8 @@ def compile_files_and_check_tests():
 
         exe_files_path = directory_str + student_dir + "/"  # ->  ./assignments/Yuval Checker_999999999/
         try:
-            compile_log.write("{}\n".format(student_dir))  # Not syncronized.. but doesnt matter At the moment
+            compile_files(exe_files_path, compile_log)
+            compile_log.write("Starting on: {}\n".format(student_dir))  # Not syncronized.. but doesnt matter At the moment
             # p = sp.Popen(args=['pwd'], #debug
             #              cwd=exe_files_path,
             #              stdout=compile_log, stderr=compile_log
@@ -170,6 +190,5 @@ def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
 
 
 if __name__ == '__main__':
-        # zip_out_folders()
-        # compile_files_and_check_tests()
-        print("hi")
+    # compile_files_and_check_tests()
+    print("hi")
