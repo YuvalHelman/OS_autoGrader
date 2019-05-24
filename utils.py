@@ -2,6 +2,15 @@ import csv
 import os
 import zipfile as zip
 
+def open_names_csv():
+    # Open a new names.csv for writing the results.
+    with open(r'names.csv', 'w') as csvfile:
+        fieldnames = ['name', 'id', 'grade', 'comment']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writerow({'name': 'FULL NAME', 'id': 'ID', 'grade': 'GRADE', 'comment': 'COMMENT'})
+
+
 
 def write_to_csv(name, id, grade, comment_string):
     with open(r'names.csv', 'a') as csvfile:

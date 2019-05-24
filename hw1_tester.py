@@ -1,17 +1,13 @@
 import os
 import subprocess as sp
 import csv
+import utils
 from utils import write_to_csv
 from utils import zip_out_folders
 from utils import build_comments
 
 def compile_files_and_check_tests():
-    # Open a new names.csv for writing the results.
-    with open(r'names.csv', 'w') as csvfile:
-        fieldnames = ['name', 'id', 'grade', 'comment']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-        writer.writerow({'name': 'FULL NAME', 'id': 'ID', 'grade': 'GRADE', 'comment': 'COMMENT'})
 
     directory_str = "./assignments/"
     compile_log = open('compilation_log.txt', 'w')
@@ -19,7 +15,7 @@ def compile_files_and_check_tests():
     compile_log.close()
     compile_log = open('compilation_log.txt', 'a')
 
-    for student_dir in os.listdir(directory_str):  # iterate on all student folders!
+    for student_dir in os.listdir(directory_str):  # iterate on all students folders!
         splitted_filename = student_dir.split("_")
         student_id = splitted_filename[1]
         student_name = splitted_filename[0]

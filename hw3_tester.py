@@ -3,15 +3,11 @@ import subprocess as sp
 from utils import write_to_csv
 from utils import zip_out_folders
 from utils import build_comments
+import utils
 
 
 def compile_files_and_check_tests():
-    # Open a new names.csv for writing the results.
-    with open(r'names.csv', 'w') as csvfile:
-        fieldnames = ['name', 'id', 'grade', 'comment']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-        writer.writerow({'name': 'FULL NAME', 'id': 'ID', 'grade': 'GRADE', 'comment': 'COMMENT'})
+    utils.open_names_csv()
 
     directory_str = "./assignments/"
     compile_log = open('compilation_log.txt', 'w')
@@ -29,7 +25,7 @@ def compile_files_and_check_tests():
         exe_files_path = directory_str + student_dir + "/"  # ->  ./assignments/Yuval Checker_999999999/
         try:
             compile_log.write("{}\n".format(student_dir))  # Not syncronized.. but doesnt matter At the moment
-            # p = sp.Popen(args=['pwd'],
+            # p = sp.Popen(args=['pwd'], #debug
             #              cwd=exe_files_path,
             #              stdout=compile_log, stderr=compile_log
             #              )
