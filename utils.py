@@ -49,3 +49,8 @@ def build_comments(is_mem_leak, is_test_errors):
         student_comment = 'Not all tests were successful + Some memory leaks detected'
 
     return student_comment
+
+if __name__ == '__main__':
+        zip_out_folders()
+        # compile_files_and_check_tests()
+        print("hi")
