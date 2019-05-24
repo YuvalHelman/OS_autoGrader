@@ -28,7 +28,7 @@ def zip_out_folders():
         print(file)  # DEBUG
         # Get FirstName_LastName_ID string
         full_stud_name = splitted_filename[0].split(" ")[0] + "_" +\
-                         splitted_filename[0].split(" ")[0] + "_" + splitted_filename[4]
+                         splitted_filename[0].split(" ")[1] + "_" + splitted_filename[4]
         print(full_stud_name)  # DEBUG
 
         # Create a new folder with the students name_ID
