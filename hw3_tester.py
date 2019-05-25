@@ -40,7 +40,7 @@ def compile_files(exe_files_path, compile_log):
         return 1
 
     # Check if the .ko file was created
-    if (os.path.exists(exe_files_path + "message_slot.ko") == 1):
+    if (os.path.exists(exe_files_path + "message_slot.ko") == False):
         print(".ko file missing")  # DEBUG
         return 1
 
