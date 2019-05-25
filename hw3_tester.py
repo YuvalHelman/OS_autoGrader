@@ -49,16 +49,29 @@ def compile_files(exe_files_path, compile_log):
     return 0
 
 
-# Not useful.. as most students print extra junk in addition to the needed text... in different ways..
-# Should read alone from the device..
-def read_message(file_path_to_exe, log_fd, dev_name, chID):
+'''
+@param is_user_file - a boolean that specifies if the function will use the user's message_reader code, or mine.
+@param file_path_to_exe - the path to the user's directory
+@param log_fd - a file descriptor to throw output, for later debugging
+@param dev_name - the device name to read from
+@param chID - the chanel to read from within the device
+@return: 0 on success. 1 else
+'''
+def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputFilePath):
     device_path = "/dev/%s".format(dev_name)
+    directory_src = "./src/"
     try:
-        # Using the user's "Message reader"
-        p = sp.Popen(args=['./message_reader', device_path, chID],
-                     cwd=file_path_to_exe,
-                     stdout=log_fd, stderr=log_fd)
-        p.wait()
+        if is_user_file == True:
+            # Using the user's "Message reader"
+            p = sp.Popen(args=['./message_reader', device_path, chID, ">", outputFilePath], # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
+                         cwd=file_path_to_exe,
+                         stdout=log_fd, stderr=log_fd)
+            p.wait()
+        else:
+            p = sp.Popen(args=['./message_reader', device_path, ">", outputFilePath],
+                         cwd=directory_src, # set to the src directory where my message_reader is at
+                         stdout=log_fd, stderr=log_fd)
+            p.wait()
         if (p.returncode != 0):
             print("message_reader failed", file_path_to_exe)
             return 1
@@ -184,7 +197,7 @@ def remove_module(file_path_to_exe, log_fd):
             sys.exit()  # DEBUG: if I cant remove the Module, I shouldn't run the other directories until its off
     except OSError as e:
         print("OSError remove_module: ", e)
-        return 1
+        sys.exit()  # DEBUG: if I cant remove the Module, I shouldn't run the other directories until its off
 
     return 0
 
@@ -194,25 +207,22 @@ Checks the tests on 1 student
 Returns the number of points needed to reduct from the student
 @param file_path_to_exe: 
 @param myParam2:
-@return: (Points_to_deduct, is_test_errors) == (int, boolean)
+@return: (Points_to_deduct, test_errors_str) == (100>=int>=0, String)
 '''
 points_to_reduct_for_test = 3  # TODO: change this to whatever would work with the tests
 points_to_reduct_mem_leak = 1  # TODO: change this to whatever would work with the tests
-overwrite, append = 0, 1 # overwrite mode = 0, append_mode = 1
+overwrite_mode, append_mode = 0, 1 # overwrite mode = 0, append_mode = 1
 
-def run_tests(file_path_to_exe):
-    log_name_path = file_path_to_exe + 'opLog.txt'
-    with open(log_name_path, 'w') as output_log:  # a File to throw logs for debugging
-        output_log.write('.\n')
-    output_log = open(log_name_path, 'a')
-
-    points_to_reduct = 0
-    is_test_errors = False
-    majorNumber = 0
+def run_tests(file_path_to_exe, o_log):
 
     print("Running tests for: " + file_path_to_exe)
+    o_log.write('.\n')
+    points_to_reduct = 0
+    test_errors_str = ""
+    majorNumber = 0
+
     try:
-        ret, majorNumber = load_module(file_path_to_exe, log_name_path)
+        ret, majorNumber = load_module(file_path_to_exe, o_log)
     except OSError as e:
         print("OSError22: ", e)
     except:
@@ -222,28 +232,33 @@ def run_tests(file_path_to_exe):
     minor_num = 34
     dev_name = "test_char"
     try:
-        create_char_device(file_path_to_exe, log_name_path, majorNumber, minor_num, dev_name)
+        create_char_device(file_path_to_exe, o_log, majorNumber, minor_num, dev_name)
     except OSError as e:
-        print("OSError22: ", e)
+        print("OSError First One: ", e)
 
-    arguments = [  # debug: (dev_name, chID, msgSTR, minor_num,
-        (dev_name, 1, "messageRead", minor_num),
+
+    arguments = [  # debug: (dev_name, chID, msgSTR, minor_num, overwrite/append_mode)
+        (dev_name, 1, "messageRead", minor_num, overwrite_mode),
 
     ]
 
     for args_test_num, test_tuple in enumerate(arguments):
-        # Check the output of the test.
-        try:
-            # output_file = "output{}.txt".format(args_test_num)  # output1_1.txt . the output of the program. TODO: erase?
-            output_log_path = file_path_to_exe + 'output{}.txt'.format(
-                args_test_num)  # ./assignments/Yuval Checker_999999999/output1_1.txt
-            o_log = open(output_log_path, 'w')
+        test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
+        test_log = open(test_output_name, 'w') # ./assignments/Yuval_Checker_999999999/output1.txt
 
-            ret_v = send_message(file_path_to_exe, o_log, test_tuple[0], overwrite, 1,
-                                 "string\0 to be written")
-        except OSError as e:
-            print("OSError2: ", e)
+        # TODO: add different char_devices to this
 
+        if send_message(file_path_to_exe, o_log, test_tuple[0], overwrite_mode, test_tuple[1], test_tuple[2]) == 1:
+            test_errors_str += "message_sender doesn't work, "
+            points_to_reduct += points_to_reduct_for_test
+            print("write message failed on test ", args_test_num)
+            continue
+        # Read with my message_reader
+        if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_output_name) == 1:
+            print("Read message failed on test ", args_test_num)
+
+
+        test_log.close()
         # Add a "newline" to the output of the student because some students do a newline to make me work harder :(
         # with open(output_log_path, 'r') as o_log:
         #     log_lines_list = o_log.readlines()
@@ -263,18 +278,28 @@ def run_tests(file_path_to_exe):
         # except OSError as e:
         #     print("OSError3: ", e)
 
-        remove_char_device(file_path_to_exe, log_name_path, "test_char")
-        o_log.close()
 
     try:
+        test_output_name = file_path_to_exe + 'outputUserReader.txt'
+        with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval Checker_999999999/output1.txt
+            # Check If the user's message_reader is valid (Most of them aren't...) :(
+            if send_message(file_path_to_exe, o_log, dev_name, overwrite_mode, 1, "messageToBeRead") == 1:
+                test_errors_str += "message_sender doesn't work, "
+            # Read with user's message_reader
+            if read_message(True, file_path_to_exe, o_log, dev_name, 1, test_output_name) == 1:
+                test_errors_str += "message_reader output not as requested, "
+                points_to_reduct += 3
 
-        remove_module(file_path_to_exe, log_name_path)
     except OSError as e:
-        print("OSError22: ", e)
+        print("OSError First One: ", e)
 
-    print(points_to_reduct, is_test_errors)
+    remove_char_device(file_path_to_exe, o_log, "test_char")
 
-    return points_to_reduct, is_test_errors
+    remove_module(file_path_to_exe, o_log)
+
+    print(points_to_reduct, test_errors_str)
+
+    return points_to_reduct, test_errors_str
 
 
 def iterate_students_directories():
@@ -305,10 +330,10 @@ def iterate_students_directories():
                     # write_to_csv(student_name, student_id, 0, 'Compilation error')
                 else:  # tests
                     print("student {} ".format(student_name), "compilation successful")
-                    # points_to_reduct, is_test_errors = run_tests(exe_files_path)
-                    # student_GRADE -= points_to_reduct
-                    # student_comment = build_comments(False, is_test_errors)
-                    # write_to_csv(student_name, student_id, student_GRADE, student_comment)
+                    points_to_reduct, test_errors_str = run_tests(exe_files_path)
+                    student_GRADE -= points_to_reduct
+                    print("students grade: " ,student_GRADE)
+                    # write_to_csv(student_name, student_id, student_GRADE, test_errors_str)
 
             except OSError as e:
                 print("OSError1: ", e)
