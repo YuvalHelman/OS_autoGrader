@@ -43,45 +43,6 @@ def compile_files(exe_files_path, compile_log):
     return 0
 
 
-def iterate_students_directories():
-    utils.open_names_csv()
-
-    directory_str = "./assignments/"
-    with open('compilation_log.txt', 'w') as compile_log:
-        compile_log.write('.\n')
-
-    with open('compilation_log.txt', 'a') as compile_log:
-        for student_dir in os.listdir(directory_str):  # iterate on all student folders!
-            splitted_filename = student_dir.split("_")
-            student_id = splitted_filename[1]
-            student_name = splitted_filename[0]
-            student_GRADE = 100
-            student_comment = ''
-
-            exe_files_path = directory_str + student_dir + "/"  # ->  ./assignments/Yuval Checker_999999999/
-            log_name_path = exe_files_path + 'opLog.txt'
-            with open(log_name_path, 'w') as val_log:  # a file to throw logs for debugging
-                val_log.write('.\n')
-            try:
-                compile_log.write(
-                    "Starting on: {}\n".format(student_dir))
-
-                if (compile_files(exe_files_path, log_name_path) != 0):
-                    print("{}".format(student_name), " Compilation Failed")
-                    write_to_csv(student_name, student_id, 0, 'Compilation error')
-                else:  # tests
-                    # print("student {} ".format(student_name), "compilation successful")
-                    points_to_reduct, is_mem_leak, is_test_errors = run_tests(exe_files_path)
-                    student_GRADE -= points_to_reduct
-                    student_comment = build_comments(is_mem_leak, is_test_errors)
-                    write_to_csv(student_name, student_id, student_GRADE, student_comment)
-
-            except OSError as e:
-                print("OSError1: ", e)
-            except ValueError as e2:
-                print("ValueError1: ", e2)
-
-
 def send_message(file_path_to_exe, log_name_path, dev_name, write_mode, chID, msgStr):
     device_path = "/dev/%s".format(dev_name)
     try:
@@ -134,6 +95,20 @@ def create_char_device(file_path_to_exe, log_name_path, majorNumber, minorNumber
         return 1
     except OSError as e:
         print("OSError22: ", e)
+        return 1
+
+    return 0
+
+
+def remove_char_device(file_path_to_exe, log_name_path, dev_name):
+    try:
+        p = sp.Popen(args=['rm -f /dev/%s'.format(dev_name)],
+                     cwd=file_path_to_exe,
+                     stdout=log_name_path, stderr=log_name_path
+                     )
+        p.wait()
+    except OSError as e:
+        print("OSError on remove_char_device: ", e)
         return 1
 
     return 0
@@ -209,9 +184,9 @@ Returns the number of points needed to reduct from the student
 def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
     # TODO: go over all of the directories I used.. didn't put too much effort into doing this in this function
     log_name_path = file_path_to_exe + 'opLog.txt'
-    with open(log_name_path, 'w') as val_log:  # a File to throw logs for debugging
-        val_log.write('.\n')
-    val_log = open(log_name_path, 'a')
+    with open(log_name_path, 'w') as output_log:  # a File to throw logs for debugging
+        output_log.write('.\n')
+    output_log = open(log_name_path, 'a')
 
     supp_file_path = "../../supp_file.supp"
     valgrind_err_num = 33
@@ -222,29 +197,24 @@ def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
     os.unsetenv("HW1TF")
     os.unsetenv("HW1DIR")
 
+    majorNumber = 0
+
     try:
-        load_module(file_path_to_exe, log_name_path)
+        ret, majorNumber = load_module(file_path_to_exe, log_name_path)
+
     except OSError as e:
         print("OSError22: ", e)
+    except:
+        if (majorNumber <= 0)
+            return 100, True, True
 
-    try:  # check "not defined ENV variables"
-        p = sp.Popen(args=["./hw1_concat", "a", "b"],
-                     cwd=file_path_to_exe,
-                     stdout=val_log, stderr=val_log
-                     )
-        p.wait()
-        if p.returncode != 1 and p.returncode != -1:
-            val_log.write('not defined ENV wasn\'t checked \n')
-            points_to_reduct += points_to_reduct_for_test
-    except OSError as e:
-        print("OSError22: ", e)
+    create_char_device(file_path_to_exe, log_name_path, majorNumber, minorNumber, dev_name)
 
-    environment_vars = [{'HW1DIR': '../../input_files', 'HW1TF': "test_0"},
-                        {'HW1DIR': '../../input_files', 'HW1TF': "test_1"}
-                        # ,{'HW1DIR': '../../input_files', 'HW1TF': "test2"},
-                        # {'HW1DIR': '../../input_files', 'HW1TF': "test3"},
-                        ]
-    arguments = [('a', 'b'), ('ab', '_c'), ('a', '')]  # TODO: Iterate on different values of these tuples
+    arguments = [  # debug: ( dev_name, minorNumber,
+        ('a', 'b'),
+        ('ab', '_c'),
+        ('a', '')
+    ]  # TODO: Iterate on different values of these tuples
 
     print("Running tests for: " + file_path_to_exe)
     for env_test_num, env_dict in enumerate(environment_vars):
@@ -260,7 +230,7 @@ def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
                     p = sp.Popen(args=["./hw1_concat", test_tuple[0], test_tuple[1]],
                                  cwd=file_path_to_exe,
                                  env=env_dict,
-                                 stdout=o_log, stderr=val_log
+                                 stdout=o_log, stderr=output_log
                                  )
                 p.wait()
 
@@ -281,7 +251,7 @@ def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
             try:
                 p = sp.Popen(
                     args=['diff', output_log_path, "./input_files/expected_{}_{}".format(env_test_num, args_test_num)],
-                    stdout=val_log, stderr=val_log
+                    stdout=output_log, stderr=output_log
 
                 )
                 p.wait()
@@ -296,7 +266,7 @@ def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
                                             "./hw1_concat", test_tuple[0], test_tuple[1]],
                                       cwd=file_path_to_exe,
                                       env=env_dict,
-                                      stdout=val_log, stderr=val_log
+                                      stdout=output_log, stderr=output_log
                                       )
                     pgrind.wait()
 
@@ -310,9 +280,53 @@ def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
                 points_to_reduct += points_to_reduct_for_test
                 is_test_errors = True
 
-    print(points_to_reduct, is_mem_leak, is_test_errors)
+    try:
+        remove_module(file_path_to_exe, log_name_path)
+    except OSError as e:
+        print("OSError22: ", e)
 
-    return points_to_reduct, is_mem_leak, is_test_errors
+    print(points_to_reduct, is_test_errors)
+
+    return points_to_reduct, is_test_errors
+
+
+def iterate_students_directories():
+    utils.open_names_csv()
+
+    directory_str = "./assignments/"
+    with open('compilation_log.txt', 'w') as compile_log:
+        compile_log.write('.\n')
+
+    with open('compilation_log.txt', 'a') as compile_log:
+        for student_dir in os.listdir(directory_str):  # iterate on all student folders!
+            splitted_filename = student_dir.split("_")
+            student_id = splitted_filename[1]
+            student_name = splitted_filename[0]
+            student_GRADE = 100
+            student_comment = ''
+
+            exe_files_path = directory_str + student_dir + "/"  # ->  ./assignments/Yuval Checker_999999999/
+            log_name_path = exe_files_path + 'opLog.txt'
+            with open(log_name_path, 'w') as output_log:  # a file to throw logs for debugging
+                output_log.write('.\n')
+            try:
+                compile_log.write(
+                    "Starting on: {}\n".format(student_dir))
+
+                if (compile_files(exe_files_path, log_name_path) != 0):
+                    print("{}".format(student_name), " Compilation Failed")
+                    write_to_csv(student_name, student_id, 0, 'Compilation error')
+                else:  # tests
+                    # print("student {} ".format(student_name), "compilation successful")
+                    points_to_reduct, is_test_errors = run_tests(exe_files_path)
+                    student_GRADE -= points_to_reduct
+                    student_comment = build_comments(is_mem_leak, is_test_errors)
+                    write_to_csv(student_name, student_id, student_GRADE, student_comment)
+
+            except OSError as e:
+                print("OSError1: ", e)
+            except ValueError as e2:
+                print("ValueError1: ", e2)
 
 
 if __name__ == '__main__':

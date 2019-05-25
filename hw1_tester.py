@@ -65,10 +65,10 @@ Returns the number of points needed to reduct from the student
 def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
     # TODO: go over all of the directories I used.. didn't put too much effort into doing this in this function
     log_name_path = file_path_to_exe + 'valgrind_log.txt'
-    val_log = open(log_name_path, 'w')  # a File to throw logs for debugging
-    val_log.write('.\n')
-    val_log.close()
-    val_log = open(log_name_path, 'a')
+    output_log = open(log_name_path, 'w')  # a File to throw logs for debugging
+    output_log.write('.\n')
+    output_log.close()
+    output_log = open(log_name_path, 'a')
 
     supp_file_path = "../../supp_file.supp"
     valgrind_err_num = 33
@@ -84,11 +84,11 @@ def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
     try:  # check "not defined ENV variables"
         p = sp.Popen(args=["./hw1_concat", "a", "b"],
                      cwd=file_path_to_exe,
-                     stdout=val_log, stderr=val_log
+                     stdout=output_log, stderr=output_log
                      )
         p.wait()
         if p.returncode != 1 and p.returncode != -1:
-            val_log.write('not defined ENV wasn\'t checked \n')
+            output_log.write('not defined ENV wasn\'t checked \n')
             points_to_reduct += points_to_reduct_for_test
     except OSError as e:
         print("OSError22: ", e)
@@ -114,7 +114,7 @@ def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
                     p = sp.Popen(args=["./hw1_concat", test_tuple[0], test_tuple[1]],
                                  cwd=file_path_to_exe,
                                  env=env_dict,
-                                 stdout=o_log, stderr=val_log
+                                 stdout=o_log, stderr=output_log
                                  )
                 p.wait()
 
@@ -135,7 +135,7 @@ def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
             try:
                 p = sp.Popen(
                     args=['diff', output_log_path, "./input_files/expected_{}_{}".format(env_test_num, args_test_num)],
-                    stdout=val_log, stderr=val_log
+                    stdout=output_log, stderr=output_log
 
                 )
                 p.wait()
@@ -150,7 +150,7 @@ def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
                                             "./hw1_concat", test_tuple[0], test_tuple[1]],
                                       cwd=file_path_to_exe,
                                       env=env_dict,
-                                      stdout=val_log, stderr=val_log
+                                      stdout=output_log, stderr=output_log
                                       )
                     pgrind.wait()
 
