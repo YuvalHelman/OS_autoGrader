@@ -176,109 +176,72 @@ def remove_module(file_path_to_exe, log_name_path):
 points_to_reduct_for_test = 3  # TODO: change this to whatever would work with the tests
 points_to_reduct_mem_leak = 1  # TODO: change this to whatever would work with the tests
 ''' 
-Checks the tests on 1 student
-Returns the number of points needed to reduct from the student
+
 '''
 
-
-def run_tests(file_path_to_exe):  # ./assignments/Yuval Checker_999999999/
-    # TODO: go over all of the directories I used.. didn't put too much effort into doing this in this function
+'''
+Checks the tests on 1 student
+Returns the number of points needed to reduct from the student
+@param file_path_to_exe: 
+@param myParam2:
+@return: (Points_to_deduct, is_test_errors) == (int, boolean)
+'''
+def run_tests(file_path_to_exe):
     log_name_path = file_path_to_exe + 'opLog.txt'
     with open(log_name_path, 'w') as output_log:  # a File to throw logs for debugging
         output_log.write('.\n')
     output_log = open(log_name_path, 'a')
 
-    supp_file_path = "../../supp_file.supp"
-    valgrind_err_num = 33
     points_to_reduct = 0
-    is_mem_leak, is_test_errors = False, False
-
-    # os.putenv(varname, value)
-    os.unsetenv("HW1TF")
-    os.unsetenv("HW1DIR")
-
+    is_test_errors = False
     majorNumber = 0
 
+    print("Running tests for: " + file_path_to_exe)
     try:
         ret, majorNumber = load_module(file_path_to_exe, log_name_path)
-
     except OSError as e:
         print("OSError22: ", e)
     except:
         if (majorNumber <= 0)
             return 100, True, True
 
-    create_char_device(file_path_to_exe, log_name_path, majorNumber, minorNumber, dev_name)
-
-    arguments = [  # debug: ( dev_name, minorNumber,
+    arguments = [  # debug: (
         ('a', 'b'),
         ('ab', '_c'),
         ('a', '')
-    ]  # TODO: Iterate on different values of these tuples
+    ]
 
-    print("Running tests for: " + file_path_to_exe)
-    for env_test_num, env_dict in enumerate(environment_vars):
-        for args_test_num, test_tuple in enumerate(
-                arguments):  # Iterate test_0 against expected_{env_test_num}{args_test_num} (example: expected_0_1 )
-            # Check the output of the test.
-            try:
-                output_file = 'output{}_{}.txt'.format(env_test_num,
-                                                       args_test_num)  # output1_1.txt . the output of the program.
-                output_log_path = file_path_to_exe + 'output{}_{}.txt'.format(env_test_num,
-                                                                              args_test_num)  # ./assignments/Yuval Checker_999999999/output1_1.txt
-                with open(output_log_path, 'w') as o_log:
-                    p = sp.Popen(args=["./hw1_concat", test_tuple[0], test_tuple[1]],
-                                 cwd=file_path_to_exe,
-                                 env=env_dict,
-                                 stdout=o_log, stderr=output_log
-                                 )
-                p.wait()
+    for args_test_num, test_tuple in enumerate(arguments):
+        # Check the output of the test.
+        try:
+            # output_file = "output{}.txt".format(args_test_num)  # output1_1.txt . the output of the program. TODO: erase?
+            output_log_path = file_path_to_exe + 'output{}.txt'.format(args_test_num)  # ./assignments/Yuval Checker_999999999/output1_1.txt
+            with open(output_log_path, 'w') as o_log:
 
-            except OSError as e:
-                print("OSError2: ", e)
+        except OSError as e:
+            print("OSError2: ", e)
 
-            # Add a "newline" to the output of the student because some students do a newline to make me work harder :(
-            with open(output_log_path, 'r') as o_log:
-                log_lines_list = o_log.readlines()
-                if (log_lines_list):
-                    last_line = log_lines_list[len(log_lines_list) - 1]
-                    if (last_line.endswith('\n') == False):  # add only if there isn't a newline already
-                        with open(output_log_path, 'a') as o_log:
-                            o_log.write('\n')
+        # Add a "newline" to the output of the student because some students do a newline to make me work harder :(
+        # with open(output_log_path, 'r') as o_log:
+        #     log_lines_list = o_log.readlines()
+        #     if (log_lines_list):
+        #         last_line = log_lines_list[len(log_lines_list) - 1]
+        #         if (last_line.endswith('\n') == False):  # add only if there isn't a newline already
+        #             with open(output_log_path, 'a') as o_log:
+        #                 o_log.write('\n')
 
-            # Run diff with the expected test
-            path = "./input_files/"
-            try:
-                p = sp.Popen(
-                    args=['diff', output_log_path, "./input_files/expected_{}_{}".format(env_test_num, args_test_num)],
-                    stdout=output_log, stderr=output_log
 
-                )
-                p.wait()
-            except OSError as e:
-                print("OSError3: ", e)
-            if p.returncode == 0:  # see if the outputs are the same and if its ok Check for memory leaks
-                try:
-                    pgrind = sp.Popen(args=['valgrind', "--gen-suppressions=all", "--log-file=valgrind_log.txt",
-                                            "--leak-check=full",
-                                            "--suppressions={}".format(supp_file_path),
-                                            "--error-exitcode={}".format(valgrind_err_num),
-                                            "./hw1_concat", test_tuple[0], test_tuple[1]],
-                                      cwd=file_path_to_exe,
-                                      env=env_dict,
-                                      stdout=output_log, stderr=output_log
-                                      )
-                    pgrind.wait()
 
-                    if pgrind.returncode == valgrind_err_num:
-                        points_to_reduct += points_to_reduct_mem_leak
-                        is_mem_leak = True
-                except OSError as e:
-                    print("OSError4: ", e)
+        # Run diff with the expected test
+        path = "./input_files/"
+        try:
+            p = sp.Popen(
+                args=['diff', output_log_path, "./input_files/expected_{}_{}".format(env_test_num, args_test_num)],
+                stdout=output_log, stderr=output_log)
+            p.wait()
+        except OSError as e:
+            print("OSError3: ", e)
 
-            else:  # This point indicates the outputs aren't the same
-                points_to_reduct += points_to_reduct_for_test
-                is_test_errors = True
 
     try:
         remove_module(file_path_to_exe, log_name_path)
@@ -318,10 +281,10 @@ def iterate_students_directories():
                     write_to_csv(student_name, student_id, 0, 'Compilation error')
                 else:  # tests
                     # print("student {} ".format(student_name), "compilation successful")
-                    points_to_reduct, is_test_errors = run_tests(exe_files_path)
-                    student_GRADE -= points_to_reduct
-                    student_comment = build_comments(is_mem_leak, is_test_errors)
-                    write_to_csv(student_name, student_id, student_GRADE, student_comment)
+                    # points_to_reduct, is_test_errors = run_tests(exe_files_path)
+                    # student_GRADE -= points_to_reduct
+                    # student_comment = build_comments(False, is_test_errors)
+                    # write_to_csv(student_name, student_id, student_GRADE, student_comment)
 
             except OSError as e:
                 print("OSError1: ", e)
@@ -330,5 +293,5 @@ def iterate_students_directories():
 
 
 if __name__ == '__main__':
-    # compile_files_and_check_tests()
+    iterate_students_directories()
     print("hi")
