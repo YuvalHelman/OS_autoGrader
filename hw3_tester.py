@@ -216,7 +216,7 @@ def run_tests(file_path_to_exe):
         try:
             # output_file = "output{}.txt".format(args_test_num)  # output1_1.txt . the output of the program. TODO: erase?
             output_log_path = file_path_to_exe + 'output{}.txt'.format(args_test_num)  # ./assignments/Yuval Checker_999999999/output1_1.txt
-            with open(output_log_path, 'w') as o_log:
+            # with open(output_log_path, 'w') as o_log:
 
         except OSError as e:
             print("OSError2: ", e)
@@ -279,7 +279,7 @@ def iterate_students_directories():
                 if (compile_files(exe_files_path, log_name_path) != 0):
                     print("{}".format(student_name), " Compilation Failed")
                     write_to_csv(student_name, student_id, 0, 'Compilation error')
-                else:  # tests
+                # else:  # tests
                     # print("student {} ".format(student_name), "compilation successful")
                     # points_to_reduct, is_test_errors = run_tests(exe_files_path)
                     # student_GRADE -= points_to_reduct
