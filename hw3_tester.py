@@ -66,7 +66,7 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputF
     try:
         if is_user_file == True:
             # Using the user's "Message reader"
-            p = sp.Popen(args=['./message_reader', device_path, chID, ">", outputFilePath], # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
+            p = sp.Popen(args=['./message_reader', device_path, str(chID), ">", outputFilePath], # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,
                          stdout=log_fd, stderr=log_fd)
             p.wait()
@@ -89,7 +89,7 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
     device_path = "/dev/%s".format(dev_name)
     try:
         # Using the user's "Message Sender"
-        p = sp.Popen(args=['./message_sender', device_path, write_mode, chID, msgStr],
+        p = sp.Popen(args=['./message_sender', device_path, str(write_mode), str(chID), msgStr],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
@@ -107,7 +107,7 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
 def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_name):
     try:
         # Use mknod
-        p = sp.Popen(args=['mknod /dev/%s'.format(dev_name), 'c', majorNumber, minorNumber],
+        p = sp.Popen(args=['mknod /dev/%s'.format(dev_name), 'c', str(majorNumber), str(minorNumber)],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd)
         p.wait()
