@@ -12,8 +12,8 @@ def compile_files(exe_files_path, compile_log):
     #              cwd=exe_files_path,
     #              stdout=compile_log, stderr=compile_log
     #              )
-    p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader"
-        , "-o", "message_reader.c"],
+    p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
+        , "-o", "message_reader"],
                  cwd=exe_files_path,
                  stdout=compile_log, stderr=compile_log
                  )
