@@ -19,6 +19,7 @@ def compile_files(exe_files_path, compile_log):
                  )
     p.wait()
     if p.returncode != 0:  # check if compilation works
+        print("reader compile failed") # DEBUG
         return 1
     p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_sender.c"
         , "-o", "message_sender"],
@@ -27,6 +28,7 @@ def compile_files(exe_files_path, compile_log):
                  )
     p.wait()
     if p.returncode != 0:  # check if compilation works
+        print("sender compile failed") # DEBUG
         return 1
     p = sp.Popen(args=['make'],
                  cwd=exe_files_path,
@@ -34,10 +36,12 @@ def compile_files(exe_files_path, compile_log):
                  )
     p.wait()
     if p.returncode != 0:  # check if compilation works
+        print("Make failed") # DEBUG
         return 1
 
     # Check if the .ko file was created
     if (os.path.exists(exe_files_path + "message_slot.ko") == 1):
+        print(".ko file missing")  # DEBUG
         return 1
 
     return 0
@@ -263,8 +267,8 @@ def iterate_students_directories():
     with open('compilation_log.txt', 'a') as compile_log:
         for student_dir in os.listdir(directory_str):  # iterate on all student folders!
             splitted_filename = student_dir.split("_")
-            student_id = splitted_filename[1]
-            student_name = splitted_filename[0]
+            student_id = splitted_filename[2]
+            student_name = splitted_filename[0]+ " " + splitted_filename[1]
             student_GRADE = 100
             student_comment = ''
 
@@ -273,13 +277,12 @@ def iterate_students_directories():
             with open(log_name_path, 'w') as output_log:  # a file to throw logs for debugging
                 output_log.write('.\n')
             try:
-                compile_log.write(
-                    "Starting on: {}\n".format(student_dir))
+                compile_log.write("Starting on: {}\n".format(student_dir))
                 with open(log_name_path, 'w') as output_log:
                     compiledRet = compile_files(exe_files_path, output_log)
                 if (compiledRet != 0):
                     print("{}".format(student_name), " Compilation Failed")
-                    write_to_csv(student_name, student_id, 0, 'Compilation error')
+                    # write_to_csv(student_name, student_id, 0, 'Compilation error')
                 # else:  # tests
                     # print("student {} ".format(student_name), "compilation successful")
                     # points_to_reduct, is_test_errors = run_tests(exe_files_path)
