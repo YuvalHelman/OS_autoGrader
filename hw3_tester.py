@@ -202,7 +202,7 @@ def run_tests(file_path_to_exe):
     except OSError as e:
         print("OSError22: ", e)
     except:
-        if (majorNumber <= 0)
+        if (majorNumber <= 0):
             return 100, True, True
 
     arguments = [  # debug: (
@@ -232,15 +232,15 @@ def run_tests(file_path_to_exe):
 
 
 
-        # Run diff with the expected test
-        path = "./input_files/"
-        try:
-            p = sp.Popen(
-                args=['diff', output_log_path, "./input_files/expected_{}_{}".format(env_test_num, args_test_num)],
-                stdout=output_log, stderr=output_log)
-            p.wait()
-        except OSError as e:
-            print("OSError3: ", e)
+        # # Run diff with the expected test
+        # path = "./input_files/"
+        # try:
+        #     p = sp.Popen(
+        #         args=['diff', output_log_path, "./input_files/expected_{}_{}".format(env_test_num, args_test_num)],
+        #         stdout=output_log, stderr=output_log)
+        #     p.wait()
+        # except OSError as e:
+        #     print("OSError3: ", e)
 
 
     try:
