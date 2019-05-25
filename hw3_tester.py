@@ -5,16 +5,16 @@ import sys
 import utils
 
 
-def compile_files(exe_files_path, compile_log):
+def compile_files(exe_files_path, output_log):
     # p = sp.Popen(args=['pwd'], #debug
     #              cwd=exe_files_path,
-    #              stdout=compile_log, stderr=compile_log
+    #              stdout=output_log, stderr=output_log
     #              )
     try:
         p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
             , "-o", "message_reader"],
                      cwd=exe_files_path,
-                     stdout=compile_log, stderr=compile_log
+                     stdout=output_log, stderr=output_log
                      )
         p.wait()
         if p.returncode != 0:  # check if compilation works
@@ -23,7 +23,7 @@ def compile_files(exe_files_path, compile_log):
         p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_sender.c"
             , "-o", "message_sender"],
                      cwd=exe_files_path,
-                     stdout=compile_log, stderr=compile_log
+                     stdout=output_log, stderr=output_log
                      )
         p.wait()
         if p.returncode != 0:  # check if compilation works
@@ -31,7 +31,7 @@ def compile_files(exe_files_path, compile_log):
             return 1
         p = sp.Popen(args=['make'],
                      cwd=exe_files_path,
-                     stdout=compile_log, stderr=compile_log
+                     stdout=output_log, stderr=output_log
                      )
         p.wait()
         if p.returncode != 0:  # check if compilation works
@@ -44,6 +44,9 @@ def compile_files(exe_files_path, compile_log):
             return 1
     except OSError as e:
         print("OSError compile_files: ", e)
+        return 1
+    except:
+        print("error on compile_files")
         return 1
 
     return 0
@@ -214,9 +217,6 @@ points_to_reduct_mem_leak = 1  # TODO: change this to whatever would work with t
 overwrite_mode, append_mode = 0, 1 # overwrite mode = 0, append_mode = 1
 
 def run_tests(file_path_to_exe, o_log):
-
-    print("Running tests for: " + file_path_to_exe)
-    o_log.write('.\n')
     points_to_reduct = 0
     test_errors_str = ""
     majorNumber = 0
@@ -306,39 +306,44 @@ def iterate_students_directories():
     utils.open_names_csv()
 
     directory_str = "./assignments/"
-    with open('compilation_log.txt', 'w') as compile_log:
-        compile_log.write('.\n')
 
-    with open('compilation_log.txt', 'a') as compile_log:
-        for student_dir in os.listdir(directory_str):  # iterate on all student folders!
-            splitted_filename = student_dir.split("_")
-            student_id = splitted_filename[2]
-            student_name = splitted_filename[0] + " " + splitted_filename[1]
-            student_GRADE = 100
-            student_comment = ''
+    with open('compilation_log.txt', 'w') as general_log:
+        general_log.write('.\n')
+    general_log = open('compilation_log.txt', 'a')
 
-            exe_files_path = directory_str + student_dir + "/"  # ->  ./assignments/Yuval Checker_999999999/
-            log_name_path = exe_files_path + 'opLog.txt'
+    for student_dir in os.listdir(directory_str):  # iterate on all student folders!
+        general_log.write("Starting on: {}\n".format(student_dir))
+        splitted_filename = student_dir.split("_")
+        student_name = splitted_filename[0] + " " + splitted_filename[1]
+        student_id = splitted_filename[2]
+        student_GRADE = 100
+
+        stud_dir_path = directory_str + student_dir + "/"  # ->  ./assignments/Yuval Checker_999999999/
+        log_name_path = stud_dir_path + 'opLog.txt'
+        print("Running tests for: " + stud_dir_path)
+        try:
             with open(log_name_path, 'w') as output_log:  # a file to throw logs for debugging
-                output_log.write('.\n')
-            try:
-                compile_log.write("Starting on: {}\n".format(student_dir))
-                with open(log_name_path, 'w') as output_log:
-                    compiledRet = compile_files(exe_files_path, output_log)
+                compiledRet = compile_files(stud_dir_path, output_log)
                 if (compiledRet != 0):
                     print("{}".format(student_name), " Compilation Failed")
                     # write_to_csv(student_name, student_id, 0, 'Compilation error')
                 else:  # tests
                     print("student {} ".format(student_name), "compilation successful")
-                    points_to_reduct, test_errors_str = run_tests(exe_files_path)
+                    points_to_reduct, test_errors_str = run_tests(stud_dir_path, output_log)
                     student_GRADE -= points_to_reduct
                     print("students grade: " ,student_GRADE)
                     # write_to_csv(student_name, student_id, student_GRADE, test_errors_str)
+                    output_log.close()
 
-            except OSError as e:
-                print("OSError1: ", e)
-            except ValueError as e2:
-                print("ValueError1: ", e2)
+        except OSError as e:
+            print("OSError1: ", e)
+        except ValueError as e2:
+            print("ValueError1: ", e2)
+
+
+    general_log.close()
+
+
 
 
 if __name__ == '__main__':
