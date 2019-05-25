@@ -275,8 +275,9 @@ def iterate_students_directories():
             try:
                 compile_log.write(
                     "Starting on: {}\n".format(student_dir))
-
-                if (compile_files(exe_files_path, log_name_path) != 0):
+                with open(log_name_path, 'w') as output_log:
+                    compiledRet = compile_files(exe_files_path, output_log)
+                if (compiledRet != 0):
                     print("{}".format(student_name), " Compilation Failed")
                     write_to_csv(student_name, student_id, 0, 'Compilation error')
                 # else:  # tests
