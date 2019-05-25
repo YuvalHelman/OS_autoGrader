@@ -283,8 +283,8 @@ def iterate_students_directories():
                 if (compiledRet != 0):
                     print("{}".format(student_name), " Compilation Failed")
                     # write_to_csv(student_name, student_id, 0, 'Compilation error')
-                # else:  # tests
-                    # print("student {} ".format(student_name), "compilation successful")
+                else:  # tests
+                    print("student {} ".format(student_name), "compilation successful")
                     # points_to_reduct, is_test_errors = run_tests(exe_files_path)
                     # student_GRADE -= points_to_reduct
                     # student_comment = build_comments(False, is_test_errors)
