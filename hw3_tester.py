@@ -144,7 +144,7 @@ def load_module(file_path_to_exe, log_fd):
     MajorNum_file = file_path_to_exe + 'dmesg_file.txt'
     majorNumber = 0
     try:
-        p = sp.Popen(args=['sudo modprobe message_slot.ko'],
+        p = sp.Popen(args=['sudo insmod ./message_slot.ko'],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
