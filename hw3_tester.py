@@ -1,7 +1,7 @@
 import os
 import subprocess as sp
 import sys
-import kmod
+# import kmod
 import utils
 
 
