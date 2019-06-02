@@ -1,6 +1,7 @@
 import os
 import subprocess as sp
 import sys
+
 # import kmod
 import utils
 
@@ -60,19 +61,22 @@ def compile_files(exe_files_path, output_log):
 @param chID - the chanel to read from within the device
 @return: 0 on success. 1 else
 '''
+
+
 def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputFilePath):
     device_path = "/dev/%s".format(dev_name)
     directory_src = "./src/"
     try:
         if is_user_file == True:
             # Using the user's "Message reader"
-            p = sp.Popen(args=['./message_reader', device_path, str(chID), ">", outputFilePath], # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
+            p = sp.Popen(args=['./message_reader', device_path, str(chID), ">", outputFilePath],
+                         # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,
                          stdout=log_fd, stderr=log_fd)
             p.wait()
         else:
             p = sp.Popen(args=['./message_reader', device_path, ">", outputFilePath],
-                         cwd=directory_src, # set to the src directory where my message_reader is at
+                         cwd=directory_src,  # set to the src directory where my message_reader is at
                          stdout=log_fd, stderr=log_fd)
             p.wait()
         if (p.returncode != 0):
@@ -139,11 +143,19 @@ def remove_char_device(file_path_to_exe, log_fd, dev_name):
     return 0
 
 
+def addStudentDirToPath(file_path_to_exe, o_log)
+
+
 def load_module(file_path_to_exe, log_fd):
     dmesg_file = file_path_to_exe + 'dmesg_file.txt'
     MajorNum_file = file_path_to_exe + 'dmesg_file.txt'
     majorNumber = 0
     try:
+        p = sp.Popen(args=['pwd'],
+                     cwd=file_path_to_exe,
+                     stdout=log_fd, stderr=log_fd
+                     )
+        p.wait()
         p = sp.Popen(args=['sudo insmod ./message_slot.ko'],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
@@ -217,7 +229,8 @@ Returns the number of points needed to reduct from the student
 '''
 points_to_reduct_for_test = 3  # TODO: change this to whatever would work with the tests
 points_to_reduct_mem_leak = 1  # TODO: change this to whatever would work with the tests
-overwrite_mode, append_mode = 0, 1 # overwrite mode = 0, append_mode = 1
+overwrite_mode, append_mode = 0, 1  # overwrite mode = 0, append_mode = 1
+
 
 def run_tests(file_path_to_exe, o_log):
     points_to_reduct = 0
@@ -225,6 +238,7 @@ def run_tests(file_path_to_exe, o_log):
     majorNumber = 0
 
     try:
+        addStudentDirToPath(file_path_to_exe)
         ret, majorNumber = load_module(file_path_to_exe, o_log)
     except OSError as e:
         print("OSError22: ", e)
@@ -239,7 +253,6 @@ def run_tests(file_path_to_exe, o_log):
     except OSError as e:
         print("OSError First One: ", e)
 
-
     arguments = [  # debug: (dev_name, chID, msgSTR, minor_num, overwrite/append_mode)
         (dev_name, 1, "messageRead", minor_num, overwrite_mode),
 
@@ -247,7 +260,7 @@ def run_tests(file_path_to_exe, o_log):
 
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
-        test_log = open(test_output_name, 'w') # ./assignments/Yuval_Checker_999999999/output1.txt
+        test_log = open(test_output_name, 'w')  # ./assignments/Yuval_Checker_999999999/output1.txt
 
         # TODO: add different char_devices to this
 
@@ -259,7 +272,6 @@ def run_tests(file_path_to_exe, o_log):
         # Read with my message_reader
         if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_output_name) == 1:
             print("Read message failed on test ", args_test_num)
-
 
         test_log.close()
         # Add a "newline" to the output of the student because some students do a newline to make me work harder :(
@@ -280,7 +292,6 @@ def run_tests(file_path_to_exe, o_log):
         #     p.wait()
         # except OSError as e:
         #     print("OSError3: ", e)
-
 
     try:
         test_output_name = file_path_to_exe + 'outputUserReader.txt'
@@ -334,7 +345,7 @@ def iterate_students_directories():
                     print("student {} ".format(student_name), "compilation successful")
                     points_to_reduct, test_errors_str = run_tests(stud_dir_path, output_log)
                     student_GRADE -= points_to_reduct
-                    print("students grade: " ,student_GRADE)
+                    print("students grade: ", student_GRADE)
                     # write_to_csv(student_name, student_id, student_GRADE, test_errors_str)
                     output_log.close()
 
@@ -343,10 +354,7 @@ def iterate_students_directories():
         except ValueError as e2:
             print("ValueError1: ", e2)
 
-
     general_log.close()
-
-
 
 
 if __name__ == '__main__':
