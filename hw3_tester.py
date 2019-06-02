@@ -143,16 +143,13 @@ def remove_char_device(file_path_to_exe, log_fd, dev_name):
     return 0
 
 
-# def addStudentDirToPath(file_path_to_exe, o_log)
-
-
 def load_module(file_path_to_exe, log_fd):
     dmesg_file = file_path_to_exe + 'dmesg_file.txt'
     MajorNum_file = file_path_to_exe + 'dmesg_file.txt'
     majorNumber = 0
     try:
         print(file_path_to_exe)
-        p = sp.Popen(args=['bash insmod_turnaround.sh', './assignments/Yoav_Halperin_313431009/'],
+        p = sp.Popen(args=['bash insmod_turnaround.sh', '/home/yuval/Downloads/OS_autoGrader/assignments/Yoav_Halperin_313431009'],
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
