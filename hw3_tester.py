@@ -149,7 +149,7 @@ def load_module(file_path_to_exe, log_fd):
     majorNumber = 0
     try:
         print(file_path_to_exe)
-        p = sp.Popen(args=['bash insmod_turnaround.sh', '/home/yuval/Downloads/OS_autoGrader/assignments/Yoav_Halperin_313431009'],
+        p = sp.Popen(args=['bash insmod_turnaround.sh'],
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
