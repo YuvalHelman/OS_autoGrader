@@ -156,7 +156,7 @@ def load_module(file_path_to_exe, log_fd):
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
-        p = sp.Popen(args=['sudo insmod ./message_slot.ko'],
+        p = sp.Popen(args=['sudo modprobe ./message_slot.ko'],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
