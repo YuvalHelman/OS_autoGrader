@@ -151,12 +151,7 @@ def load_module(file_path_to_exe, log_fd):
     MajorNum_file = file_path_to_exe + 'dmesg_file.txt'
     majorNumber = 0
     try:
-        p = sp.Popen(args=['pwd'],
-                     cwd=file_path_to_exe,
-                     stdout=log_fd, stderr=log_fd
-                     )
-        p.wait()
-        p = sp.Popen(args=['sudo modprobe message_slot'],
+        p = sp.Popen(args=['bash insmod_turnaround.sh', file_path_to_exe],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
