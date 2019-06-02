@@ -152,7 +152,6 @@ def load_module(file_path_to_exe, log_fd):
     majorNumber = 0
     try:
         p = sp.Popen(args=['bash insmod_turnaround.sh', file_path_to_exe],
-                     cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
