@@ -143,7 +143,7 @@ def remove_char_device(file_path_to_exe, log_fd, dev_name):
     return 0
 
 
-def addStudentDirToPath(file_path_to_exe, o_log)
+# def addStudentDirToPath(file_path_to_exe, o_log)
 
 
 def load_module(file_path_to_exe, log_fd):
@@ -238,7 +238,7 @@ def run_tests(file_path_to_exe, o_log):
     majorNumber = 0
 
     try:
-        addStudentDirToPath(file_path_to_exe)
+        # addStudentDirToPath(file_path_to_exe)
         ret, majorNumber = load_module(file_path_to_exe, o_log)
     except OSError as e:
         print("OSError22: ", e)
