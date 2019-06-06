@@ -162,6 +162,11 @@ def load_module(file_path_to_exe, log_fd):
         if (p.returncode == 1):
             print("insmod failed for user: %s", file_path_to_exe)
             return 1, -1
+    except OSError as e:
+        print("OSError : ", e)
+        print("1")
+        return 1, -1
+    try:
         p = sp.Popen(args=['cp', './src/bash_rmmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
@@ -169,6 +174,11 @@ def load_module(file_path_to_exe, log_fd):
         if (p.returncode == 1):
             print("insmod failed for user: %s", file_path_to_exe)
             return 1, -1
+    except OSError as e:
+        print("OSError : ", e)
+        print("2:")
+        return 1, -1
+    try:
         print(file_path_to_exe) # debug
         p = sp.Popen(args=['./bash_insmod'],
                      cwd=file_path_to_exe,
@@ -180,7 +190,7 @@ def load_module(file_path_to_exe, log_fd):
             return 1, -1
     except OSError as e:
         print("OSError : ", e)
-        print("path is:", file_path_to_exe)
+        print("3:")
         return 1, -1
     try:
         #  load the last message of "dmesg" into a MajorNum_file.
