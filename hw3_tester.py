@@ -159,10 +159,16 @@ def load_module(file_path_to_exe, log_fd):
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
+        if (p.returncode == 1):
+            print("insmod failed for user: %s", file_path_to_exe)
+            return 1, -1
         p = sp.Popen(args=['cp', './src/bash_rmmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
+        if (p.returncode == 1):
+            print("insmod failed for user: %s", file_path_to_exe)
+            return 1, -1
         print(file_path_to_exe) # debug
         p = sp.Popen(args=['./bash_insmod'],
                      cwd=file_path_to_exe,
