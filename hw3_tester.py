@@ -151,7 +151,7 @@ def load_module(file_path_to_exe, log_fd):
     majorNumber = 0
     try:
         print(file_path_to_exe)
-        p = sp.Popen(args=['./insmod_turnaround'],
+        p = sp.Popen(args=['./bash_insmod'],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
@@ -196,13 +196,30 @@ def load_module(file_path_to_exe, log_fd):
         print("OSError load_module: ", e)
         return 1, -1
 
-    print("load module success") # DEBUG
+    print("load module success")  # DEBUG
     return 0, majorNumber
+
+
+def module_Exists():
+
+    '''
+        :returns 'True' if module exists. 'False' if it doesnt exist
+    '''
+    try:
+        p = sp.Popen(args=['lsmod | grep message_slot'], )
+        p.wait()
+        if (p.returncode == 1):
+            return True
+        else:
+            return False
+    except OSError as e:
+        print("OSError module_Exists: ", e)
+        return True
 
 
 def remove_module(file_path_to_exe, log_fd):
     try:
-        p = sp.Popen(args=['sudo rmmod message_slot'],
+        p = sp.Popen(args=['./bash_rmmod'],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
