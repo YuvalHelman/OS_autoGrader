@@ -150,7 +150,10 @@ def load_module(file_path_to_exe, log_fd):
     MajorNum_file = file_path_to_exe + 'dmesg_file.txt'
     majorNumber = 0
     try:
-        print(file_path_to_exe)
+        # Copy bash_insmod from /src to file_path_to_exe
+        # TODO: start here.
+
+        print(file_path_to_exe) # debug
         p = sp.Popen(args=['./bash_insmod'],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
