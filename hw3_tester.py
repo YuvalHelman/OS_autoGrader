@@ -1,9 +1,12 @@
 import os
 import subprocess as sp
 import sys
+from pathlib import Path
 
 # import kmod
 import utils
+
+p = Path(__file__).resolve()
 
 
 def compile_files(exe_files_path, output_log):
@@ -150,9 +153,16 @@ def load_module(file_path_to_exe, log_fd):
     MajorNum_file = file_path_to_exe + 'dmesg_file.txt'
     majorNumber = 0
     try:
-        # Copy bash_insmod from /src to file_path_to_exe
+        # Copy bash scripts from /src to file_path_to_exe
         # TODO: start here.
-
+        p = sp.Popen(args=['cp', './src/bash_insmod', file_path_to_exe],
+                     stdout=log_fd, stderr=log_fd
+                     )
+        p.wait()
+        p = sp.Popen(args=['cp', './src/bash_rmmod', file_path_to_exe],
+                     stdout=log_fd, stderr=log_fd
+                     )
+        p.wait()
         print(file_path_to_exe) # debug
         p = sp.Popen(args=['./bash_insmod'],
                      cwd=file_path_to_exe,
@@ -206,7 +216,7 @@ def load_module(file_path_to_exe, log_fd):
 def module_Exists():
 
     '''
-        :returns 'True' if module exists. 'False' if it doesnt exist
+        :returns 'True' if module exists. 'False' if it doesn't exist.
     '''
     try:
         p = sp.Popen(args=['lsmod | grep message_slot'], )
