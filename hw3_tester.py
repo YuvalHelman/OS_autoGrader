@@ -158,7 +158,8 @@ def load_module(file_path_to_exe, log_fd):
             print("insmod failed for user: %s", file_path_to_exe)
             return 1, -1
     except OSError as e:
-        print("OSError insmod: ", e)
+        print("OSError : ", e)
+        print("path is:", file_path_to_exe)
         return 1, -1
     try:
         #  load the last message of "dmesg" into a MajorNum_file.
