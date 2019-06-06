@@ -269,7 +269,7 @@ def run_tests(file_path_to_exe, o_log):
         print("OSError First One: ", e)
 
     arguments = [  # debug: (dev_name, chID, msgSTR, minor_num, overwrite/append_mode)
-        (dev_name, 1, "messageRead", minor_num, overwrite_mode),
+        (dev_name, 1, "MessageString", minor_num, overwrite_mode),
 
     ]
 
