@@ -127,6 +127,7 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
         print("OSError create_char: ", e)
         return 1
 
+    print("create char device success")  # DEBUG
     return 0
 
 
@@ -140,6 +141,7 @@ def remove_char_device(file_path_to_exe, log_fd, dev_name):
         print("OSError on remove_char_device: ", e)
         return 1
 
+    print("remove char device success")  # DEBUG
     return 0
 
 
@@ -194,6 +196,7 @@ def load_module(file_path_to_exe, log_fd):
         print("OSError load_module: ", e)
         return 1, -1
 
+    print("load module success") # DEBUG
     return 0, majorNumber
 
 
@@ -211,6 +214,7 @@ def remove_module(file_path_to_exe, log_fd):
         print("OSError remove_module: ", e)
         sys.exit()  # DEBUG: if I cant remove the Module, I shouldn't run the other directories until its off
 
+    print("remove module success")  # DEBUG
     return 0
 
 
