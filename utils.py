@@ -56,6 +56,6 @@ def build_comments(is_mem_leak, is_test_errors):
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         argStr = sys.argv[1]
-        if argStr == "zip"
+        if argStr == "zip":
             zip_out_folders()
-        
+
