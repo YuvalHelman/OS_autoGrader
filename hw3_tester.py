@@ -180,7 +180,7 @@ def load_module(file_path_to_exe, log_fd):
         print("2:")
         return 1, -1
 
-    chmod_everything()
+    # chmod_everything()
 
     try:
         p = sp.Popen(args=['./bash_insmod'],
@@ -416,6 +416,6 @@ def chmod_everything():
     return 0
 
 if __name__ == '__main__':
-    chmod_everything()
+    #chmod_everything()
     iterate_students_directories()
     print("hi")
