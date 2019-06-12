@@ -401,7 +401,18 @@ def iterate_students_directories():
 
     general_log.close()
 
+def chmod_everything():
+    try:
+        p = sp.Popen(args=['chmod -R 777 ./'])
+        p.wait()
+        if (p.returncode != 0):
+            return 1
+    except OSError as e:
+        print("OSError: ", e)
+        return 1
+    return 0
 
 if __name__ == '__main__':
+    chmod_everything()
     iterate_students_directories()
     print("hi")
