@@ -1,4 +1,7 @@
 #!/bin/bash
 
+pwd
 cd "${0%/*}"
- sudo insmod /home/yuval/Downloads/OS_autoGrader/assignments/Yoav_Halperin_313431009/message_slot.ko
+pwd
+sudo insmod /home/yuval/Downloads/OS_autoGrader/assignments/Yoav_Halperin_313431009/message_slot.ko
+pwd
