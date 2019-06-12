@@ -154,7 +154,6 @@ def load_module(file_path_to_exe, log_fd):
     majorNumber = 0
     try:
         # Copy bash scripts from /src to file_path_to_exe
-        # TODO: start here.
         p = sp.Popen(args=['cp', './src/bash_insmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
@@ -166,6 +165,7 @@ def load_module(file_path_to_exe, log_fd):
         print("OSError : ", e)
         print("1")
         return 1, -1
+
     try:
         p = sp.Popen(args=['cp', './src/bash_rmmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
@@ -178,8 +178,8 @@ def load_module(file_path_to_exe, log_fd):
         print("OSError : ", e)
         print("2:")
         return 1, -1
+
     try:
-        print(file_path_to_exe) # debug
         p = sp.Popen(args=['./bash_insmod'],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
@@ -192,6 +192,7 @@ def load_module(file_path_to_exe, log_fd):
         print("OSError : ", e)
         print("3:")
         return 1, -1
+    
     try:
         #  load the last message of "dmesg" into a MajorNum_file.
         p = sp.Popen(args=['dmesg >', dmesg_file],
