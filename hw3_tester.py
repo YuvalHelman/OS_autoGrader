@@ -154,7 +154,7 @@ def load_module(file_path_to_exe, log_fd):
     majorNumber = 0
     try:
         # Copy bash scripts from /src to file_path_to_exe
-        p = sp.Popen(args=['cp', './src/bash_insmod', file_path_to_exe],
+        p = sp.Popen(args=['cp -p', './src/bash_insmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
@@ -167,7 +167,7 @@ def load_module(file_path_to_exe, log_fd):
         return 1, -1
 
     try:
-        p = sp.Popen(args=['cp', './src/bash_rmmod', file_path_to_exe],
+        p = sp.Popen(args=['cp -p', './src/bash_rmmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
