@@ -204,20 +204,36 @@ def load_module(file_path_to_exe, log_fd):
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
+    except OSError as e:
+        print("4: ", e)
+        return 1, -1
+    try:
         p = sp.Popen(args=['tail -1', dmesg_file, '>', MajorNum_file],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
         # read the file into a string and fetch the MajorNumber
+    except OSError as e:
+        print("5: ", e)
+        return 1, -1
+    try:
         with open(MajorNum_file, 'r') as o_log:
             majorNumber = int(o_log.readlines()[0].split(' ')[7])
+    except OSError as e:
+        print("6: ", e)
+        return 1, -1
+    try:
         # Remove the files created.
         p = sp.Popen(args=['rm -f ', MajorNum_file],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
+    except OSError as e:
+        print("7: ", e)
+        return 1, -1
+    try:
         p = sp.Popen(args=['rm -f ', dmesg_file],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
