@@ -198,8 +198,9 @@ def load_module(file_path_to_exe, log_fd):
 
     # TODO: start from here. others work!
     try:
+         # TODO: start here
         #  load the last message of "dmesg" into a MajorNum_file.
-        p = sp.Popen(args=['dmesg >', dmesg_file_name],
+        p = sp.Popen(args=['/var/log/kern.log', dmesg_file_name],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
