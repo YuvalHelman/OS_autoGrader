@@ -180,7 +180,7 @@ def load_module(file_path_to_exe, log_fd):
         return 1, -1
 
     try:
-        p = sp.Popen(args=['./bash_insmod'],
+        p = sp.Popen(args=['sudo bash bash_insmod'],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
