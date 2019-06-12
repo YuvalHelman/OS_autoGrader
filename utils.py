@@ -1,6 +1,7 @@
 import csv
 import os
 import zipfile as zip
+import sys
 
 def open_names_csv():
     # Open a new names.csv for writing the results.
@@ -53,6 +54,8 @@ def build_comments(is_mem_leak, is_test_errors):
     return student_comment
 
 if __name__ == '__main__':
-        zip_out_folders()
-        # compile_files_and_check_tests()
-        print("hi")
+    if len(sys.argv) > 1:
+        argStr = sys.argv[1]
+        if argStr == "zip"
+            zip_out_folders()
+        

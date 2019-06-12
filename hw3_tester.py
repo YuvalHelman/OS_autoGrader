@@ -192,7 +192,7 @@ def load_module(file_path_to_exe, log_fd):
         print("OSError : ", e)
         print("3:")
         return 1, -1
-    
+
     try:
         #  load the last message of "dmesg" into a MajorNum_file.
         p = sp.Popen(args=['dmesg >', dmesg_file],
@@ -402,6 +402,6 @@ def iterate_students_directories():
     general_log.close()
 
 
-
+if __name__ == '__main__':
     iterate_students_directories()
     print("hi")
