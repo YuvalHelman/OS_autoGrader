@@ -199,7 +199,7 @@ def load_module(file_path_to_exe, log_fd):
     # TODO: start from here. others work!
     try:
         #  load the last message of "dmesg" into a MajorNum_file.
-        p = sp.Popen(args=['dmesg >', dmesg_file_name],
+        p = sp.Popen(args=['sudo', 'dmesg >', dmesg_file_name],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
@@ -208,7 +208,7 @@ def load_module(file_path_to_exe, log_fd):
         print("4: ", e)
         return 1, -1
     try:
-        p = sp.Popen(args=['tail -1', dmesg_file_name, '>', MajorNum_file],
+        p = sp.Popen(args=['sudo', 'tail -1', dmesg_file_name, '>', MajorNum_file],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
