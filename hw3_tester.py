@@ -154,13 +154,14 @@ def load_module(file_path_to_exe, log_fd):
     majorNumber = 0
     try:
         # Copy bash scripts from /src to file_path_to_exe
-        p = sp.Popen(args=['sudo cp -p', './src/bash_insmod', file_path_to_exe],
+        p = sp.Popen(args=['cp',  '-p', './src/bash_insmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
         if (p.returncode == 1):
             print("copy insmod failed for user: %s", file_path_to_exe)
             return 1, -1
+
     except OSError as e:
         print("OSError : ", e)
         print("1")
@@ -178,6 +179,8 @@ def load_module(file_path_to_exe, log_fd):
         print("OSError : ", e)
         print("2:")
         return 1, -1
+
+    chmod_everything()
 
     try:
         p = sp.Popen(args=['./bash_insmod'],
