@@ -401,6 +401,6 @@ def iterate_students_directories():
     general_log.close()
 
 
-if __name__ == '__main__':
+
     iterate_students_directories()
     print("hi")
