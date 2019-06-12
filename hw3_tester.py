@@ -149,7 +149,7 @@ def remove_char_device(file_path_to_exe, log_fd, dev_name):
 
 
 def load_module(file_path_to_exe, log_fd):
-    dmesg_file_name = 'dmesg_file.txt'
+    dmesg_file_path = file_path_to_exe + 'dmesg_file.txt'
     MajorNum_file = file_path_to_exe + 'dmesg_file.txt'
     majorNumber = 0
     try:
@@ -197,27 +197,38 @@ def load_module(file_path_to_exe, log_fd):
         return 1, -1
 
     # TODO: start from here. others work!
-    try:
-         # TODO: start here
-        #  load the last message of "dmesg" into a MajorNum_file.
-        p = sp.Popen(args=['/var/log/kern.log', dmesg_file_name],
-                     cwd=file_path_to_exe,
-                     stdout=log_fd, stderr=log_fd
-                     )
-        p.wait()
-    except OSError as e:
-        print("4: ", e)
-        return 1, -1
-    try:
-        p = sp.Popen(args=['tail -1', dmesg_file_name, '>', MajorNum_file],
-                     cwd=file_path_to_exe,
-                     stdout=log_fd, stderr=log_fd
-                     )
-        p.wait()
-        # read the file into a string and fetch the MajorNumber
-    except OSError as e:
-        print("5: ", e)
-        return 1, -1
+    with open(dmesg_file_path, 'r') as dmesg_log:
+        try:
+             # TODO: start here
+            #  load the last message of "dmesg" into a MajorNum_file.
+            # p = sp.Popen(args=['sudo', '/var/log/kern.log', dmesg_file_name],
+                p = sp.Popen(args=['dmesg'],
+                             cwd=file_path_to_exe,
+                             stdout=dmesg_log, stderr=log_fd
+                             )
+                p.wait()
+        except OSError as e:
+            print("4: ", e)
+            return 1, -1
+        try:
+                # TODO: start here. change the "tail" command with a python implementation.
+                log_lines_list = o_log.readlines()
+                if (log_lines_list):
+                    last_line = log_lines_list[len(log_lines_list) - 1]
+                    if (last_line.endswith('\n') == False):  # add only if there isn't a newline already
+                        with open(output_log_path, 'a') as o_log:
+                            o_log.write('\n')
+
+            #
+            # p = sp.Popen(args=['tail -1', dmesg_log, '>', MajorNum_file],
+            #              cwd=file_path_to_exe,
+            #              stdout=log_fd, stderr=log_fd
+            #              )
+            # p.wait()
+            # read the file into a string and fetch the MajorNumber
+        except OSError as e:
+            print("5: ", e)
+            return 1, -1
     try:
         with open(MajorNum_file, 'r') as o_log:
             majorNumber = int(o_log.readlines()[0].split(' ')[7])
