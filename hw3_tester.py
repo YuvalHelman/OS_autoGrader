@@ -196,6 +196,7 @@ def load_module(file_path_to_exe, log_fd):
         print("3:")
         return 1, -1
 
+    # TODO: start from here. others work!
     try:
         #  load the last message of "dmesg" into a MajorNum_file.
         p = sp.Popen(args=['dmesg >', dmesg_file],
