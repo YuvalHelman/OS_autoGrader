@@ -168,7 +168,7 @@ def load_module(file_path_to_exe, log_fd):
         return 1, -1
 
     try:
-        p = sp.Popen(args=['sudo cp -p', './src/bash_rmmod', file_path_to_exe],
+        p = sp.Popen(args=['cp',  '-p', './src/bash_rmmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
