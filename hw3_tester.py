@@ -195,7 +195,7 @@ def load_module(file_path_to_exe, log_fd):
     # TODO: start from here. others work!
     try:
         with open(dmesg_file_path, 'r') as dmesg_log:
-            p = sp.Popen(args=['dmesg'],
+            p = sp.Popen(args=['cat /var/log/syslog'],
                          cwd=file_path_to_exe,
                          stdout=dmesg_log, stderr=log_fd
                          )
