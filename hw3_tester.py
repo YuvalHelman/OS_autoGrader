@@ -199,47 +199,15 @@ def load_module(file_path_to_exe, log_fd):
             log_lines_list = dmesg_log.readlines()
             if (log_lines_list):
                 last_line = log_lines_list[len(log_lines_list) - 1]
-                print(last_line)
+                # Split the message that the student wrote, then fetch the first number with regex
                 studentKernLogMessage = last_line.split(']')[1]
-                print(studentKernLogMessage)
-                num_list = re.findall(r'\d+', studentKernLogMessage)
-                print(num_list)  # DEBUG
-                #majorNumber = int(majorNumberStr)
-            # p = sp.Popen(args=['cat /var/log/syslog'],
-            #              cwd=file_path_to_exe,
-            #              stdout=dmesg_log, stderr=log_fd
-            #              )
-            # p.wait()
-        #  load the last message of "dmesg" into a MajorNum_file.
-        # p = sp.Popen(args=['sudo', '/var/log/kern.log', dmesg_file_name],
-    except OSError as e:
-        print("4: ", e) # DEBUG
-        return 1, -1
+                majorNumber = (re.findall(r'\d+', studentKernLogMessage)[0])
     except:
-        print("5: ") # DEBUG
+        print("Fetching MajorNumber Failed") # DEBUG
         return 1, -1
 
-    # try:
-    #     # Remove the files created.
-    #     p = sp.Popen(args=['rm -f ', MajorNum_file_path],
-    #                  cwd=file_path_to_exe,
-    #                  stdout=log_fd, stderr=log_fd
-    #                  )
-    #     p.wait()
-    # except OSError as e:
-    #     print("7: ", e)# DEBUG
-    #     return 1, -1
-    # try:
-    #     p = sp.Popen(args=['rm -f ', dmesg_file_path],
-    #                  cwd=file_path_to_exe,
-    #                  stdout=log_fd, stderr=log_fd)
-    #     p.wait()
-    # except ValueError as e:
-    #     print("parsed major number error. %s", e)
-    #     return 1, -1
-    # except OSError as e:
-    #     print("OSError load_module: ", e)
-    #     return 1, -1
+    # Remove the files created if needed # TODO mabye?
+    #os.remove("'dmesg_file.txt'")
 
     print("load module success")  # DEBUG
     return 0, majorNumber
