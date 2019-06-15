@@ -230,27 +230,27 @@ def load_module(file_path_to_exe, log_fd):
         return 1, -1
     except:
         print("Dead here 2") # DEBUG
-    try:
-        # Remove the files created.
-        p = sp.Popen(args=['rm -f ', MajorNum_file_path],
-                     cwd=file_path_to_exe,
-                     stdout=log_fd, stderr=log_fd
-                     )
-        p.wait()
-    except OSError as e:
-        print("7: ", e)# DEBUG
-        return 1, -1
-    try:
-        p = sp.Popen(args=['rm -f ', dmesg_file_path],
-                     cwd=file_path_to_exe,
-                     stdout=log_fd, stderr=log_fd)
-        p.wait()
-    except ValueError as e:
-        print("parsed major number error. %s", e)
-        return 1, -1
-    except OSError as e:
-        print("OSError load_module: ", e)
-        return 1, -1
+    # try:
+    #     # Remove the files created.
+    #     p = sp.Popen(args=['rm -f ', MajorNum_file_path],
+    #                  cwd=file_path_to_exe,
+    #                  stdout=log_fd, stderr=log_fd
+    #                  )
+    #     p.wait()
+    # except OSError as e:
+    #     print("7: ", e)# DEBUG
+    #     return 1, -1
+    # try:
+    #     p = sp.Popen(args=['rm -f ', dmesg_file_path],
+    #                  cwd=file_path_to_exe,
+    #                  stdout=log_fd, stderr=log_fd)
+    #     p.wait()
+    # except ValueError as e:
+    #     print("parsed major number error. %s", e)
+    #     return 1, -1
+    # except OSError as e:
+    #     print("OSError load_module: ", e)
+    #     return 1, -1
 
     print("load module success")  # DEBUG
     return 0, majorNumber
