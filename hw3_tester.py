@@ -222,8 +222,9 @@ def load_module(file_path_to_exe, log_fd):
     #     return 1, -1
     try:
         with open(MajorNum_file_path, 'r') as o_log:
-            majorNumber = int(last_line.split(' ')[12])
-            print(majorNumber) # DEBUG
+            majorNumberStr = last_line.split(' ')[12]
+            print(majorNumberStr) # DEBUG
+            majorNumber = int(majorNumberStr)
     except OSError as e:
         print("6: ", e) # DEBUG
         return 1, -1
