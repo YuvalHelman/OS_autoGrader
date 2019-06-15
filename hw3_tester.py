@@ -199,8 +199,8 @@ def load_module(file_path_to_exe, log_fd):
             if (log_lines_list):
                 last_line = log_lines_list[len(log_lines_list) - 1]
                 print(last_line)
-                majorNumberStr = last_line.split(']')[1]
-                print(majorNumberStr)  # DEBUG
+                studentKernLogMessage = last_line.split(']')[1]
+                print([int(s) for s in str.split() if s.isdigit()][0])  # DEBUG
                 #majorNumber = int(majorNumberStr)
             # p = sp.Popen(args=['cat /var/log/syslog'],
             #              cwd=file_path_to_exe,
