@@ -199,9 +199,9 @@ def load_module(file_path_to_exe, log_fd):
             if (log_lines_list):
                 last_line = log_lines_list[len(log_lines_list) - 1]
                 print(last_line)
-                majorNumberStr = last_line.split(' ')[12]
+                majorNumberStr = last_line.split(']')[1]
                 print(majorNumberStr)  # DEBUG
-                majorNumber = int(majorNumberStr)
+                #majorNumber = int(majorNumberStr)
             # p = sp.Popen(args=['cat /var/log/syslog'],
             #              cwd=file_path_to_exe,
             #              stdout=dmesg_log, stderr=log_fd
