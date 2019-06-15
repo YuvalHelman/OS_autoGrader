@@ -161,8 +161,7 @@ def load_module(file_path_to_exe, log_fd):
         if (p.returncode == 1):
             print("copy insmod failed for user: %s", file_path_to_exe)
             return 1, -1
-    except OSError as e:
-        print("OSError : ", e)
+    except:
         print("1")
         return 1, -1
 
@@ -174,8 +173,7 @@ def load_module(file_path_to_exe, log_fd):
         if (p.returncode == 1):
             print("copy rmmod failed for user: %s", file_path_to_exe)
             return 1, -1
-    except OSError as e:
-        print("OSError : ", e)
+    except:
         print("2:")
         return 1, -1
 
@@ -190,8 +188,7 @@ def load_module(file_path_to_exe, log_fd):
         if (p.returncode == 1):
             print("insmod failed for user: %s", file_path_to_exe)
             return 1, -1
-    except OSError as e:
-        print("OSError : ", e)
+    except:
         print("3:")
         return 1, -1
 
@@ -206,8 +203,8 @@ def load_module(file_path_to_exe, log_fd):
         # TODO: start here
         #  load the last message of "dmesg" into a MajorNum_file.
         # p = sp.Popen(args=['sudo', '/var/log/kern.log', dmesg_file_name],
-    except OSError as e:
-        print("4: ", e)
+    except:
+        print("4: ")
         return 1, -1
 
     last_line = 0  # DEBUG: erase and merge 5 and 6
@@ -217,11 +214,9 @@ def load_module(file_path_to_exe, log_fd):
             if (log_lines_list):
                 last_line = log_lines_list[len(log_lines_list) - 1]
                 print(last_line)
-    except OSError as e:
-        print("5: ", e)# DEBUG
-        return 1, -1
     except:
         print("Dead here 1") # DEBUG
+        return 1, -1
     try:
         with open(MajorNum_file_path, 'r') as o_log:
             majorNumber = int(last_line.split(' ')[7])
