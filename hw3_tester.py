@@ -210,28 +210,26 @@ def load_module(file_path_to_exe, log_fd):
         print("4: ", e)
         return 1, -1
 
+    last_line = 0  # DEBUG: erase and merge 5 and 6
     try:
-        last_line = 0 # DEBUG: erase and merge 5 and 6
         with open(dmesg_file_path, 'r') as dmesg_log: # TODO: start here. change the "tail" command with a python implementation.
             log_lines_list = dmesg_log.readlines()
             if (log_lines_list):
                 last_line = log_lines_list[len(log_lines_list) - 1]
-            # p = sp.Popen(args=['tail -1', dmesg_log, '>', MajorNum_file],
-            #              cwd=file_path_to_exe,
-            #              stdout=log_fd, stderr=log_fd
-            #              )
-            # p.wait()
-            # read the file into a string and fetch the MajorNumber
     except OSError as e:
-        print("5: ", e)
+        print("5: ", e)# DEBUG
         return 1, -1
+    except:
+        print("Dead here 1") # DEBUG
     try:
         with open(MajorNum_file_path, 'r') as o_log:
             majorNumber = int(last_line.split(' ')[7])
-            print(majorNumber)
+            print(majorNumber) # DEBUG
     except OSError as e:
-        print("6: ", e)
+        print("6: ", e) # DEBUG
         return 1, -1
+    except:
+        print("Dead here 2") # DEBUG
     try:
         # Remove the files created.
         p = sp.Popen(args=['rm -f ', MajorNum_file_path],
@@ -240,7 +238,7 @@ def load_module(file_path_to_exe, log_fd):
                      )
         p.wait()
     except OSError as e:
-        print("7: ", e)
+        print("7: ", e)# DEBUG
         return 1, -1
     try:
         p = sp.Popen(args=['rm -f ', dmesg_file_path],
@@ -315,7 +313,7 @@ def run_tests(file_path_to_exe, o_log):
         print("OSError22: ", e)
     except:
         if (majorNumber <= 0):
-            print("debug here majNum <0 ") # DEBUG
+            print("debug here majNum <0. error is: ", sys.exc_info()[0]) # DEBUG
             return 100, True
 
     minor_num = 34
