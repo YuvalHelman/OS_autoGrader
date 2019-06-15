@@ -161,7 +161,6 @@ def load_module(file_path_to_exe, log_fd):
         if (p.returncode == 1):
             print("copy insmod failed for user: %s", file_path_to_exe)
             return 1, -1
-
     except OSError as e:
         print("OSError : ", e)
         print("1")
@@ -229,6 +228,7 @@ def load_module(file_path_to_exe, log_fd):
     try:
         with open(MajorNum_file_path, 'r') as o_log:
             majorNumber = int(last_line.split(' ')[7])
+            print(majorNumber)
     except OSError as e:
         print("6: ", e)
         return 1, -1
@@ -310,12 +310,12 @@ def run_tests(file_path_to_exe, o_log):
     majorNumber = 0
 
     try:
-        # addStudentDirToPath(file_path_to_exe)
         ret, majorNumber = load_module(file_path_to_exe, o_log)
     except OSError as e:
         print("OSError22: ", e)
     except:
         if (majorNumber <= 0):
+            print("debug here majNum <0 ") # DEBUG
             return 100, True
 
     minor_num = 34
@@ -325,7 +325,7 @@ def run_tests(file_path_to_exe, o_log):
     except OSError as e:
         print("OSError First One: ", e)
 
-    arguments = [  # debug: (dev_name, chID, msgSTR, minor_num, overwrite/append_mode)
+    arguments = [ # debug: (dev_name, chID, msgSTR, minor_num, overwrite/append_mode)
         (dev_name, 1, "MessageString", minor_num, overwrite_mode),
     ]
 
@@ -345,15 +345,6 @@ def run_tests(file_path_to_exe, o_log):
             print("Read message failed on test ", args_test_num)
 
         test_log.close()
-        # Add a "newline" to the output of the student because some students do a newline to make me work harder :(
-        # with open(output_log_path, 'r') as o_log:
-        #     log_lines_list = o_log.readlines()
-        #     if (log_lines_list):
-        #         last_line = log_lines_list[len(log_lines_list) - 1]
-        #         if (last_line.endswith('\n') == False):  # add only if there isn't a newline already
-        #             with open(output_log_path, 'a') as o_log:
-        #                 o_log.write('\n')
-
         # # Run diff with the expected test
         # path = "./input_files/"
         # try:
@@ -415,11 +406,10 @@ def iterate_students_directories():
                 else:  # tests
                     print("student {} ".format(student_name), "compilation successful")
                     points_to_reduct, test_errors_str = run_tests(stud_dir_path, output_log)
+
                     student_GRADE -= points_to_reduct
                     print("students grade: ", student_GRADE)
                     # write_to_csv(student_name, student_id, student_GRADE, test_errors_str)
-                    output_log.close()
-
         except OSError as e:
             print("OSError1: ", e)
         except ValueError as e2:
