@@ -199,6 +199,9 @@ def load_module(file_path_to_exe, log_fd):
             if (log_lines_list):
                 last_line = log_lines_list[len(log_lines_list) - 1]
                 print(last_line)
+                majorNumberStr = last_line.split(' ')[12]
+                print(majorNumberStr)  # DEBUG
+                majorNumber = int(majorNumberStr)
             # p = sp.Popen(args=['cat /var/log/syslog'],
             #              cwd=file_path_to_exe,
             #              stdout=dmesg_log, stderr=log_fd
@@ -206,30 +209,13 @@ def load_module(file_path_to_exe, log_fd):
             # p.wait()
         #  load the last message of "dmesg" into a MajorNum_file.
         # p = sp.Popen(args=['sudo', '/var/log/kern.log', dmesg_file_name],
+    except OSError as e:
+        print("4: ", e) # DEBUG
+        return 1, -1
     except:
-        print("4: ") # DEBUG
+        print("5: ") # DEBUG
         return 1, -1
 
-    # last_line = 0  # DEBUG: erase and merge 5 and 6
-    # try:
-    #     with open(dmesg_file_path, 'r') as dmesg_log: # TODO: start here. change the "tail" command with a python implementation.
-    #         log_lines_list = dmesg_log.readlines()
-    #         if (log_lines_list):
-    #             last_line = log_lines_list[len(log_lines_list) - 1]
-    #             print(last_line)
-    # except:
-    #     print("Dead here 1") # DEBUG
-    #     return 1, -1
-    try:
-        with open(MajorNum_file_path, 'r') as o_log:
-            majorNumberStr = last_line.split(' ')[12]
-            print(majorNumberStr) # DEBUG
-            majorNumber = int(majorNumberStr)
-    except OSError as e:
-        print("6: ", e) # DEBUG
-        return 1, -1
-    except:
-        print("Dead here 2") # DEBUG
     # try:
     #     # Remove the files created.
     #     p = sp.Popen(args=['rm -f ', MajorNum_file_path],
