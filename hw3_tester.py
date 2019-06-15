@@ -192,31 +192,34 @@ def load_module(file_path_to_exe, log_fd):
         print("3:")
         return 1, -1
 
-    # TODO: start from here. others work!
-    try:
-        with open(dmesg_file_path, 'r') as dmesg_log:
-            p = sp.Popen(args=['cat /var/log/syslog'],
-                         cwd=file_path_to_exe,
-                         stdout=dmesg_log, stderr=log_fd
-                         )
-            p.wait()
-        # TODO: start here
-        #  load the last message of "dmesg" into a MajorNum_file.
-        # p = sp.Popen(args=['sudo', '/var/log/kern.log', dmesg_file_name],
-    except:
-        print("4: ")
-        return 1, -1
-
     last_line = 0  # DEBUG: erase and merge 5 and 6
     try:
-        with open(dmesg_file_path, 'r') as dmesg_log: # TODO: start here. change the "tail" command with a python implementation.
+        with open("/var/log/syslog", 'r') as dmesg_log:
             log_lines_list = dmesg_log.readlines()
             if (log_lines_list):
                 last_line = log_lines_list[len(log_lines_list) - 1]
                 print(last_line)
+            # p = sp.Popen(args=['cat /var/log/syslog'],
+            #              cwd=file_path_to_exe,
+            #              stdout=dmesg_log, stderr=log_fd
+            #              )
+            # p.wait()
+        #  load the last message of "dmesg" into a MajorNum_file.
+        # p = sp.Popen(args=['sudo', '/var/log/kern.log', dmesg_file_name],
     except:
-        print("Dead here 1") # DEBUG
+        print("4: ") # DEBUG
         return 1, -1
+
+    # last_line = 0  # DEBUG: erase and merge 5 and 6
+    # try:
+    #     with open(dmesg_file_path, 'r') as dmesg_log: # TODO: start here. change the "tail" command with a python implementation.
+    #         log_lines_list = dmesg_log.readlines()
+    #         if (log_lines_list):
+    #             last_line = log_lines_list[len(log_lines_list) - 1]
+    #             print(last_line)
+    # except:
+    #     print("Dead here 1") # DEBUG
+    #     return 1, -1
     try:
         with open(MajorNum_file_path, 'r') as o_log:
             majorNumber = int(last_line.split(' ')[7])
