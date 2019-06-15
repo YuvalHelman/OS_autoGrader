@@ -215,8 +215,8 @@ def load_module(file_path_to_exe, log_fd):
         with open(dmesg_file_path, 'r') as dmesg_log: # TODO: start here. change the "tail" command with a python implementation.
             log_lines_list = dmesg_log.readlines()
             if (log_lines_list):
-                print(last_line)
                 last_line = log_lines_list[len(log_lines_list) - 1]
+                print(last_line)
     except OSError as e:
         print("5: ", e)# DEBUG
         return 1, -1
