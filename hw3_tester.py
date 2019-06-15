@@ -199,7 +199,7 @@ def load_module(file_path_to_exe, log_fd):
             log_lines_list = dmesg_log.readlines()
             if (log_lines_list):
                 last_line = log_lines_list[len(log_lines_list) - 1]
-
+                print(last_line)
                 studentKernLogMessage = last_line.split(']')[1]
                 print(studentKernLogMessage)
                 num_list = re.findall(r'\d+', studentKernLogMessage)
