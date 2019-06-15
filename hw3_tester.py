@@ -2,6 +2,7 @@ import os
 import subprocess as sp
 import sys
 from pathlib import Path
+import re
 
 # import kmod
 import utils
@@ -201,7 +202,8 @@ def load_module(file_path_to_exe, log_fd):
 
                 studentKernLogMessage = last_line.split(']')[1]
                 print(studentKernLogMessage)
-                print([int(s) for s in studentKernLogMessage.split(' ') if s.isdigit()][0])  # DEBUG
+                num_list = re.findall(r'\d+', studentKernLogMessage)
+                print(num_list)  # DEBUG
                 #majorNumber = int(majorNumberStr)
             # p = sp.Popen(args=['cat /var/log/syslog'],
             #              cwd=file_path_to_exe,
