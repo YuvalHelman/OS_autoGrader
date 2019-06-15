@@ -315,6 +315,7 @@ def run_tests(file_path_to_exe, o_log):
     except:
         if (majorNumber <= 0):
             print("debug here majNum <0. error is: ", sys.exc_info()[0]) # DEBUG
+            print(majorNumber)
             return 100, True
 
     minor_num = 34
@@ -369,7 +370,7 @@ def run_tests(file_path_to_exe, o_log):
         print("OSError First One: ", e)
 
     remove_char_device(file_path_to_exe, o_log, "test_char")
-    
+
     print(points_to_reduct, test_errors_str)
 
     return points_to_reduct, test_errors_str
