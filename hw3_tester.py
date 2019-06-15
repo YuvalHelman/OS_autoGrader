@@ -308,6 +308,7 @@ def run_tests(file_path_to_exe, o_log):
     majorNumber = 0
 
     try:
+        remove_module(file_path_to_exe, o_log)
         ret, majorNumber = load_module(file_path_to_exe, o_log)
     except OSError as e:
         print("OSError22: ", e)
@@ -368,9 +369,7 @@ def run_tests(file_path_to_exe, o_log):
         print("OSError First One: ", e)
 
     remove_char_device(file_path_to_exe, o_log, "test_char")
-
-    remove_module(file_path_to_exe, o_log)
-
+    
     print(points_to_reduct, test_errors_str)
 
     return points_to_reduct, test_errors_str
