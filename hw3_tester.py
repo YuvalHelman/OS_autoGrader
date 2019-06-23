@@ -69,7 +69,7 @@ def compile_files(exe_files_path, output_log):
 '''
 
 
-def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputFilePath):
+def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_fd):
     relative_device_path = "./{}".format(dev_name)
     print("device_path: ", relative_device_path) # DEBUG
     src_path = "./src/"
@@ -80,16 +80,15 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputF
             # Using the user's "Message reader"
             p = sp.Popen(args=['./message_reader', relative_device_path, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
-                         cwd=file_path_to_exe, # needed for device_path
-                         stdout=log_fd, stderr=log_fd) # TODO: read to the outputFilePath
+                         cwd=file_path_to_exe,  # needed for device_path
+                         stdout=output_fd, stderr=log_fd) # TODO: read to the outputFilePath
             p.wait()
         else:
             p = sp.Popen(args=[perfect_reader_path, relative_device_path, str(chID)],
-                         cwd=file_path_to_exe, # needed for device_path
-                         stdout=log_fd, stderr=log_fd) # TODO: read to the outputFilePath
+                         cwd=file_path_to_exe,  # needed for device_path
+                         stdout=output_fd, stderr=log_fd) # TODO: read to the outputFilePath
             p.wait()
         if (p.returncode != 0):
-            print("message_reader failed", file_path_to_exe)
             return 1
     except OSError as e:
         print("OSError read_message: ", e)
@@ -301,36 +300,37 @@ def run_tests(file_path_to_exe, o_log):
         print("Major number: ", majorNumber)  # DEBUG
     except OSError as e:
         print("OSError22: ", e)
+        return 100, "Major Number Parsing from Syslog failed. "
     except:
         if (majorNumber <= 0):
             print("debug here majNum <0. error is: ", sys.exc_info()[0])  # DEBUG
-            return 100, True
+            return 100, "Major Number Parsing from Syslog failed. "
 
-    minor_num = 34
-    dev_name = "test_char"
+    minor_num = 134
+    dev_name = "charDevice"
     try:
         create_char_device(file_path_to_exe, o_log, majorNumber, minor_num, dev_name)
     except OSError as e:
         print("OSError create_char_device: ", e)
 
+    # Testing the device!
     arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
-        (dev_name, 1, "MessageString", minor_num, overwrite_mode),
+        (dev_name, 10, "MessageString", minor_num, overwrite_mode),
+
     ]
 
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
         test_log = open(test_output_name, 'w')  # ./assignments/Yuval_Checker_999999999/output1.txt
 
-        # TODO: add different char_devices to this
-
         if send_message(file_path_to_exe, o_log, test_tuple[0], overwrite_mode, test_tuple[1], test_tuple[2]) == 1:
             test_errors_str += "message_sender doesn't work, "
             points_to_reduct += points_to_reduct_for_test
-            print("write message failed on test ", args_test_num)
+            print("Send message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
             continue
         # Read with my message_reader
         if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_log) == 1:
-            print("Read message failed on test ", args_test_num)
+            print("Read message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
 
         test_log.close()
         # # Run diff with the expected test
