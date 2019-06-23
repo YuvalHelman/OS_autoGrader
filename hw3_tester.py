@@ -70,20 +70,22 @@ def compile_files(exe_files_path, output_log):
 
 
 def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputFilePath):
-    device_path = "/dev/{}".format(dev_name)
-    print("device_path: ", device_path) # DEBUG
-    directory_src = "./src/"
+    relative_device_path = "./{}".format(dev_name)
+    print("device_path: ", relative_device_path) # DEBUG
+    src_path = "./src/"
+    perfect_reader_path = '/home/yuval/Downloads/OS_autoGrader/src/message_reader'
+
     try:
         if is_user_file == True:
             # Using the user's "Message reader"
-            p = sp.Popen(args=['./message_reader', device_path, str(chID)],
+            p = sp.Popen(args=['./message_reader', relative_device_path, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
-                         cwd=file_path_to_exe,
+                         cwd=file_path_to_exe, # needed for device_path
                          stdout=log_fd, stderr=log_fd) # TODO: read to the outputFilePath
             p.wait()
         else:
-            p = sp.Popen(args=['./src/message_reader', device_path, str(chID)],
-                         cwd=directory_src,  # set to the src directory where my message_reader is at
+            p = sp.Popen(args=[perfect_reader_path, relative_device_path, str(chID)],
+                         cwd=file_path_to_exe, # needed for device_path
                          stdout=log_fd, stderr=log_fd) # TODO: read to the outputFilePath
             p.wait()
         if (p.returncode != 0):
@@ -97,11 +99,11 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputF
 
 
 def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
-    device_path = "/dev/{}".format(dev_name)
+    device_path = "./{}".format(dev_name)
     try:
         # Using the user's "Message Sender"
         p = sp.Popen(args=['./message_sender', device_path, str(write_mode), str(chID), msgStr],
-                     cwd=file_path_to_exe,
+                     cwd=file_path_to_exe, # needed for device_path
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
@@ -116,11 +118,11 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
 
 
 def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_name):
-    device_path = "/dev/{}".format(dev_name)
+    device_path = "./{}".format(dev_name)
 
     try:
         p = sp.Popen(args=['./bash_mknod', device_path, str(majorNumber), str(minorNumber)],
-                     cwd=file_path_to_exe,
+                     cwd=file_path_to_exe, # needed for device_path
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
@@ -143,10 +145,11 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
     return 0
 
 
-def remove_char_device(log_fd, dev_name):
-    device_path = '/dev/{}'.format(dev_name)
+def remove_char_device(file_path_to_exe, log_fd, dev_name):
+    device_path = './{}'.format(dev_name)
     try:
         p = sp.Popen(args=['sudo rm -f {}'.format(device_path)],
+                     cwd=file_path_to_exe,  # needed for device_path
                      stdout=log_fd, stderr=log_fd)
         p.wait()
     except OSError as e:
@@ -354,7 +357,7 @@ def run_tests(file_path_to_exe, o_log):
     # except OSError as e:
     #     print("OSError First One: ", e)
 
-    remove_char_device(o_log, dev_name)
+    remove_char_device(file_path_to_exe, o_log, dev_name)
     remove_module(file_path_to_exe, o_log)
 
     print(points_to_reduct, test_errors_str)
