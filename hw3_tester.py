@@ -347,7 +347,7 @@ def run_tests(file_path_to_exe, o_log):
             if(true_string != output_string):
                 points_to_reduct += 3
                 test_errors_str += "test {} failed. ".format(args_test_num)
-                o_log.append("test {} failed".format(args_test_num))
+                o_log.write("test {} failed".format(args_test_num))
             else:
                 o_log.append("test {} succeeded".format(args_test_num))
 
@@ -405,7 +405,7 @@ def iterate_students_directories():
         log_name_path = stud_dir_path + 'opLog.txt'
         print("Running tests for: " + stud_dir_path)
         try:
-            with open(log_name_path, 'w') as output_log:  # a file to throw logs for debugging
+            with open(log_name_path, 'a+') as output_log:  # a file to throw logs for debugging
                 compiledRet = compile_files(stud_dir_path, output_log)
                 if (compiledRet != 0):
                     print("{}".format(student_name), " Compilation Failed")
