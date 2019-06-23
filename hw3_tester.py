@@ -68,7 +68,7 @@ def compile_files(exe_files_path, output_log):
 
 
 def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputFilePath):
-    device_path = "/dev/%s".format(dev_name)
+    device_path = "/dev/{}".format(dev_name)
     directory_src = "./src/"
     try:
         if is_user_file == True:
@@ -94,7 +94,7 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputF
 
 
 def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
-    device_path = "/dev/%s".format(dev_name)
+    device_path = "/dev/{}".format(dev_name)
     try:
         # Using the user's "Message Sender"
         p = sp.Popen(args=['./message_sender', device_path, str(write_mode), str(chID), msgStr],
@@ -113,23 +113,20 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
 
 
 def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_name):
-    try:
-        # Use mknod
-        p = sp.Popen(args=['sudo mknod', '-m 777' ,'/dev/{}'.format(dev_name), 'c', str(majorNumber), str(minorNumber)],
-                     cwd=file_path_to_exe,
-                     stdout=log_fd, stderr=log_fd)
-        p.wait()
-        if (p.returncode != 0):
-            print("mknod failed", file_path_to_exe)
-            return 1
-        # # change the created file's permissions
-        # p = sp.Popen(args=['chmod 777 /dev/{}'.format(dev_name)],
-        #              cwd=file_path_to_exe,
-        #              stdout=log_fd, stderr=log_fd)
-        # p.wait()
-    except OSError as e:
-        print("OSError create_char: ", e)
+    device_path = "/dev/{}".format(dev_name)
+
+    p = sp.Popen(args=['sudo mknod', '-m 777', device_path, 'c', str(majorNumber), str(minorNumber)],
+                 cwd=file_path_to_exe,
+                 stdout=log_fd, stderr=log_fd)
+    p.wait()
+    if (p.returncode != 0):
+        print("mknod failed", file_path_to_exe)
         return 1
+    # # change the created file's permissions
+    # p = sp.Popen(args=['chmod 777 /dev/{}'.format(dev_name)],
+    #              cwd=file_path_to_exe,
+    #              stdout=log_fd, stderr=log_fd)
+    # p.wait()
 
     print("create char device success")  # DEBUG
     return 0
@@ -137,7 +134,7 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
 
 def remove_char_device(file_path_to_exe, log_fd, dev_name):
     try:
-        p = sp.Popen(args=['rm -f /dev/%s'.format(dev_name)],
+        p = sp.Popen(args=['rm -f /dev/{}'.format(dev_name)],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd)
         p.wait()
@@ -157,7 +154,7 @@ def copyScriptsToUser(file_path_to_exe, log_fd):
                      )
         p.wait()
         if (p.returncode == 1):
-            print("copy insmod failed for user: %s", file_path_to_exe)
+            print("copy insmod failed for user: ", file_path_to_exe)
             return 1, -1
     except:
         print("1")
@@ -169,7 +166,7 @@ def copyScriptsToUser(file_path_to_exe, log_fd):
                      )
         p.wait()
         if (p.returncode == 1):
-            print("copy rmmod failed for user: %s", file_path_to_exe)
+            print("copy rmmod failed for user: ", file_path_to_exe)
             return 1, -1
     except:
         print("2:")
@@ -188,7 +185,7 @@ def load_module(file_path_to_exe, log_fd):
                      )
         p.wait()
         if (p.returncode == 1):
-            print("insmod failed for user: %s", file_path_to_exe)
+            print("insmod failed for user: ", file_path_to_exe)
             return 1, -1
     except:
         print("3:")
@@ -204,7 +201,7 @@ def load_module(file_path_to_exe, log_fd):
                 studentKernLogMessage = last_line.split(']')[1]
                 majorNumber = (re.findall(r'\d+', studentKernLogMessage)[0])
     except OSError as e:
-        print("Fetching MajorNumber Failed: " ,e)  # DEBUG
+        print("Fetching MajorNumber Failed: ", e)  # DEBUG
         return 1, -1
     except:
         print("4;")  # DEBUG
@@ -271,12 +268,12 @@ def run_tests(file_path_to_exe, o_log):
     try:
         copyScriptsToUser(file_path_to_exe, o_log)
         ret, majorNumber = load_module(file_path_to_exe, o_log)
+        print(majorNumber)  # DEBUG
     except OSError as e:
         print("OSError22: ", e)
     except:
         if (majorNumber <= 0):
             print("debug here majNum <0. error is: ", sys.exc_info()[0])  # DEBUG
-            print(majorNumber)
             return 100, True
 
     minor_num = 34
@@ -286,7 +283,7 @@ def run_tests(file_path_to_exe, o_log):
     except OSError as e:
         print("OSError First One: ", e)
 
-    arguments = [  # debug: (dev_name, chID, msgSTR, minor_num, overwrite/append_mode)
+    arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
         (dev_name, 1, "MessageString", minor_num, overwrite_mode),
     ]
 
