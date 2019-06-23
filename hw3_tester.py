@@ -3,6 +3,8 @@ import re
 import subprocess as sp
 import sys
 from pathlib import Path
+from time import sleep
+
 
 # import kmod
 import utils
@@ -210,6 +212,8 @@ def load_module(file_path_to_exe, log_fd):
     except:
         print("3:")
         return 1, -1
+
+    sleep(1)  # DEBUG. wait for kprint to finish before reading the majorNumber
 
     last_line = 0  # DEBUG: erase and merge 5 and 6
     try:
