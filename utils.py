@@ -24,21 +24,23 @@ def write_to_csv(name, id, grade, comment_string):
 def zip_out_folders():
     directory_str = "./zip_files/"
 
-    for file in os.listdir(directory_str):
-        splitted_filename = file.split("_")
-        print(file)  # DEBUG
-        # Get FirstName_LastName_ID string
-        full_stud_name = splitted_filename[0].split(" ")[0] + "_" +\
-                         splitted_filename[0].split(" ")[1] + "_" + splitted_filename[4]
-        print(full_stud_name)  # DEBUG
+    try:
+        for file in os.listdir(directory_str):
+            splitted_filename = file.split("_")
+            print(file)  # DEBUG
+            # Get FirstName_LastName_ID string
+            full_stud_name = splitted_filename[0].split(" ")[0] + "_" +\
+                             splitted_filename[0].split(" ")[1] + "_" + splitted_filename[4]
 
-        # Create a new folder with the students name_ID
-        directory_to_extract_to = "./assignments/" + full_stud_name
-        os.mkdir(directory_to_extract_to, 0o755)  # linux - mkdir , windows - md
-        # Zip the files into the student directory
-        zip_ref = zip.ZipFile("./zip_files/" + file, 'r')
-        zip_ref.extractall(directory_to_extract_to)
-        zip_ref.close()
+            # Create a new folder with the students name_ID
+            directory_to_extract_to = "./assignments/" + full_stud_name
+            os.mkdir(directory_to_extract_to, 0o755)  # linux - mkdir , windows - md
+            # Zip the files into the student directory
+            zip_ref = zip.ZipFile("./zip_files/" + file, 'r')
+            zip_ref.extractall(directory_to_extract_to)
+            zip_ref.close()
+    except OSError as e:
+        print("Error zipping files. changes not reverted")
 
 
 def build_comments(is_mem_leak, is_test_errors):
@@ -58,4 +60,5 @@ if __name__ == '__main__':
         argStr = sys.argv[1]
         if argStr == "zip":
             zip_out_folders()
+            print("zipping completed")
 

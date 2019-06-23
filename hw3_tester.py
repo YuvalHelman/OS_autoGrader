@@ -1,8 +1,8 @@
 import os
+import re
 import subprocess as sp
 import sys
 from pathlib import Path
-import re
 
 # import kmod
 import utils
@@ -149,13 +149,10 @@ def remove_char_device(file_path_to_exe, log_fd, dev_name):
     return 0
 
 
-def load_module(file_path_to_exe, log_fd):
-    dmesg_file_path = file_path_to_exe + 'dmesg_file.txt'
-    MajorNum_file_path = file_path_to_exe + 'dmesg_file.txt'
-    majorNumber = 0
+def copyScriptsToUser(file_path_to_exe, log_fd):
     try:
         # Copy bash scripts from /src to file_path_to_exe
-        p = sp.Popen(args=['cp',  '-p', './src/bash_insmod', file_path_to_exe],
+        p = sp.Popen(args=['cp', '-p', './src/bash_insmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
@@ -167,7 +164,7 @@ def load_module(file_path_to_exe, log_fd):
         return 1, -1
 
     try:
-        p = sp.Popen(args=['cp',  '-p', './src/bash_rmmod', file_path_to_exe],
+        p = sp.Popen(args=['cp', '-p', './src/bash_rmmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
@@ -178,7 +175,11 @@ def load_module(file_path_to_exe, log_fd):
         print("2:")
         return 1, -1
 
-    # chmod_everything()
+
+def load_module(file_path_to_exe, log_fd):
+    dmesg_file_path = file_path_to_exe + 'dmesg_file.txt'
+    MajorNum_file_path = file_path_to_exe + 'dmesg_file.txt'
+    majorNumber = 0
 
     try:
         p = sp.Popen(args=['./bash_insmod'],
@@ -203,11 +204,11 @@ def load_module(file_path_to_exe, log_fd):
                 studentKernLogMessage = last_line.split(']')[1]
                 majorNumber = (re.findall(r'\d+', studentKernLogMessage)[0])
     except:
-        print("Fetching MajorNumber Failed") # DEBUG
+        print("Fetching MajorNumber Failed")  # DEBUG
         return 1, -1
 
     # Remove the files created if needed # TODO mabye?
-    #os.remove("'dmesg_file.txt'")
+    # os.remove("'dmesg_file.txt'")
 
     print("load module success")  # DEBUG
     return 0, majorNumber
@@ -265,13 +266,14 @@ def run_tests(file_path_to_exe, o_log):
     majorNumber = 0
 
     try:
+        copyScriptsToUser(file_path_to_exe, o_log)
         remove_module(file_path_to_exe, o_log)
         ret, majorNumber = load_module(file_path_to_exe, o_log)
     except OSError as e:
         print("OSError22: ", e)
     except:
         if (majorNumber <= 0):
-            print("debug here majNum <0. error is: ", sys.exc_info()[0]) # DEBUG
+            print("debug here majNum <0. error is: ", sys.exc_info()[0])  # DEBUG
             print(majorNumber)
             return 100, True
 
@@ -282,7 +284,7 @@ def run_tests(file_path_to_exe, o_log):
     except OSError as e:
         print("OSError First One: ", e)
 
-    arguments = [ # debug: (dev_name, chID, msgSTR, minor_num, overwrite/append_mode)
+    arguments = [  # debug: (dev_name, chID, msgSTR, minor_num, overwrite/append_mode)
         (dev_name, 1, "MessageString", minor_num, overwrite_mode),
     ]
 
@@ -361,7 +363,6 @@ def iterate_students_directories():
                 else:  # tests
                     print("student {} ".format(student_name), "compilation successful")
                     points_to_reduct, test_errors_str = run_tests(stud_dir_path, output_log)
-
                     student_GRADE -= points_to_reduct
                     print("students grade: ", student_GRADE)
                     # write_to_csv(student_name, student_id, student_GRADE, test_errors_str)
@@ -371,6 +372,7 @@ def iterate_students_directories():
             print("ValueError1: ", e2)
 
     general_log.close()
+
 
 def chmod_everything():
     try:
@@ -383,7 +385,8 @@ def chmod_everything():
         return 1
     return 0
 
+
 if __name__ == '__main__':
-    #chmod_everything()
+    # chmod_everything()
     iterate_students_directories()
     print("hi")
