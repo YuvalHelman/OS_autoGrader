@@ -1,8 +1,5 @@
 #!/bin/bash
 
-echo $PWD
 cd "${0%/*}"
-echo $PWD
 # sudo insmod /home/yuval/Downloads/OS_autoGrader/assignments/Yoav_Halperin_313431009/message_slot.ko
 sudo insmod ./message_slot.ko
-echo $PWD

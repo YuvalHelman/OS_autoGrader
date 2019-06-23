@@ -115,6 +115,23 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
 def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_name):
     device_path = "/dev/{}".format(dev_name)
 
+    ####################################
+    try:
+        p = sp.Popen(args=['./bash_mknod', device_path, 'c', str(majorNumber), str(minorNumber)],
+                     cwd=file_path_to_exe,
+                     stdout=log_fd, stderr=log_fd
+                     )
+        p.wait()
+        if (p.returncode == 1):
+            print("insmod failed for user: ", file_path_to_exe)
+            return 1, -1
+    except:
+        print("3:")
+        return 1, -1
+
+    #############################
+
+
     p = sp.Popen(args=['sudo mknod', '-m 777', device_path, 'c', str(majorNumber), str(minorNumber)],
                  cwd=file_path_to_exe,
                  stdout=log_fd, stderr=log_fd)
@@ -157,7 +174,7 @@ def copyScriptsToUser(file_path_to_exe, log_fd):
             print("copy insmod failed for user: ", file_path_to_exe)
             return 1, -1
     except:
-        print("1")
+        print("copy bash_insmod failed")
         return 1, -1
 
     try:
@@ -169,7 +186,19 @@ def copyScriptsToUser(file_path_to_exe, log_fd):
             print("copy rmmod failed for user: ", file_path_to_exe)
             return 1, -1
     except:
-        print("2:")
+        print("copy bash_rmmod failed")
+        return 1, -1
+
+    try:
+        p = sp.Popen(args=['cp', '-p', './src/bash_mknod', file_path_to_exe],
+                     stdout=log_fd, stderr=log_fd
+                     )
+        p.wait()
+        if (p.returncode == 1):
+            print("copy mknod failed for user: ", file_path_to_exe)
+            return 1, -1
+    except:
+        print("copy bash_mknod failed")
         return 1, -1
 
 
@@ -199,7 +228,6 @@ def load_module(file_path_to_exe, log_fd):
                 last_line = log_lines_list[len(log_lines_list) - 1]
                 # Split the message that the student wrote, then fetch the first number with regex
                 studentKernLogMessage = last_line.split(']')[1]
-                print(re.findall(r'\d+', studentKernLogMessage)) # debug
                 majorNumber = (re.findall(r'\d+', studentKernLogMessage)[0])
 
     except OSError as e:
@@ -270,7 +298,7 @@ def run_tests(file_path_to_exe, o_log):
     try:
         copyScriptsToUser(file_path_to_exe, o_log)
         ret, majorNumber = load_module(file_path_to_exe, o_log)
-        print(majorNumber)  # DEBUG
+        print("Major number: ", majorNumber)  # DEBUG
     except OSError as e:
         print("OSError22: ", e)
     except:
@@ -283,7 +311,7 @@ def run_tests(file_path_to_exe, o_log):
     try:
         create_char_device(file_path_to_exe, o_log, majorNumber, minor_num, dev_name)
     except OSError as e:
-        print("OSError First One: ", e)
+        print("OSError create_char_device: ", e)
 
     arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
         (dev_name, 1, "MessageString", minor_num, overwrite_mode),
