@@ -314,7 +314,8 @@ def run_tests(file_path_to_exe, o_log):
 
     # Testing the device!
     arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
-        (dev_name, 10, "MessageString", minor_num, overwrite_mode), # ./tests/output0.txt
+        (dev_name, 10, "Hello ", minor_num, overwrite_mode), # ./tests/output0.txt
+        (dev_name, 10, "World", minor_num, append_mode),  # ./tests/output1.txt
 
     ]
 
@@ -342,10 +343,13 @@ def run_tests(file_path_to_exe, o_log):
         output_string = test_log.readline()
 
         if (output_string and true_string):
-            print('user string: ', output_string)
+            print('user string: {}'.format(output_string))
             if(true_string != output_string):
                 points_to_reduct += 3
                 test_errors_str += "test {} failed. ".format(args_test_num)
+                o_log.append("test {} failed".format(args_test_num))
+            else:
+                o_log.append("test {} succeeded".format(args_test_num))
 
         true_log.close()
         test_log.close()
