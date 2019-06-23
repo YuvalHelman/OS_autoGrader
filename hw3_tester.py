@@ -115,7 +115,7 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
 def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_name):
     try:
         # Use mknod
-        p = sp.Popen(args=['mknod /dev/%s'.format(dev_name), 'c', str(majorNumber), str(minorNumber)],
+        p = sp.Popen(args=['mknod /dev/{}'.format(dev_name), 'c', str(majorNumber), str(minorNumber)],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd)
         p.wait()
@@ -123,7 +123,7 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
             print("mknod failed", file_path_to_exe)
             return 1
         # change the created file's permissions
-        p = sp.Popen(args=['chmod 777 /dev/%s'.format(dev_name)],
+        p = sp.Popen(args=['chmod 777 /dev/{}'.format(dev_name)],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd)
         p.wait()
@@ -205,6 +205,9 @@ def load_module(file_path_to_exe, log_fd):
                 majorNumber = (re.findall(r'\d+', studentKernLogMessage)[0])
     except OSError as e:
         print("Fetching MajorNumber Failed: " ,e)  # DEBUG
+        return 1, -1
+    except:
+        print("4;")  # DEBUG
         return 1, -1
 
     # Remove the files created if needed # TODO mabye?
