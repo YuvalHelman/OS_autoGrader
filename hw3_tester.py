@@ -117,16 +117,16 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
 
     ####################################
     try:
-        p = sp.Popen(args=['./bash_mknod', device_path, 'c', str(majorNumber), str(minorNumber)],
+        p = sp.Popen(args=['./bash_mknod', device_path, str(majorNumber), str(minorNumber)],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
         if (p.returncode == 1):
-            print("insmod failed for user: ", file_path_to_exe)
+            print("mknod failed for user: ", file_path_to_exe)
             return 1, -1
-    except:
-        print("3:")
+    except OSError as e:
+        print("mknod exception: ", e)
         return 1, -1
 
     #############################
