@@ -71,7 +71,7 @@ def compile_files(exe_files_path, output_log):
 
 def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_fd):
     relative_device_path = "./{}".format(dev_name)
-    print("device_path: ", relative_device_path) # DEBUG
+    #print("device_path: ", relative_device_path) # DEBUG
     src_path = "./src/"
     perfect_reader_path = '/home/yuval/Downloads/OS_autoGrader/src/message_reader'
 
@@ -276,45 +276,19 @@ def remove_module(file_path_to_exe, log_fd):
     return 0
 
 
-'''
-Checks the tests on 1 student
-Returns the number of points needed to reduct from the student
-@param file_path_to_exe: 
-@param myParam2:
-@return: (Points_to_deduct, test_errors_str) == (100>=int>=0, String)
-'''
+
 points_to_reduct_for_test = 3  # TODO: change this to whatever would work with the tests
 points_to_reduct_mem_leak = 1  # TODO: change this to whatever would work with the tests
 overwrite_mode, append_mode = 0, 1  # overwrite mode = 0, append_mode = 1
 
 
-def run_tests(file_path_to_exe, o_log):
+def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
     points_to_reduct = 0
     test_errors_str = ""
-    majorNumber = 0
-
-    try:
-        copyScriptsToUser(file_path_to_exe, o_log)
-        ret, majorNumber = load_module(file_path_to_exe, o_log)
-        print("Major number: ", majorNumber)  # DEBUG
-    except OSError as e:
-        print("OSError22: ", e)
-        return 100, "Major Number Parsing from Syslog failed. "
-    except:
-        if (majorNumber <= 0):
-            print("debug here majNum <0. error is: ", sys.exc_info()[0])  # DEBUG
-            return 100, "Major Number Parsing from Syslog failed. "
-
-    minor_num = 134
-    dev_name = "charDevice"
-    try:
-        create_char_device(file_path_to_exe, o_log, majorNumber, minor_num, dev_name)
-    except OSError as e:
-        print("OSError create_char_device: ", e)
 
     # Testing the device!
     arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
-        (dev_name, 10, "Hello ", minor_num, overwrite_mode), # ./tests/output0.txt
+        (dev_name, 10, "Hello ", minor_num, overwrite_mode),  # ./tests/output0.txt
         (dev_name, 10, "World", minor_num, append_mode),  # ./tests/output1.txt
 
     ]
@@ -322,7 +296,7 @@ def run_tests(file_path_to_exe, o_log):
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
         true_test_name = './tests/output{}.txt'.format(args_test_num)
-        with open(test_output_name, 'w') as test_log: # ./assignments/Yuval_Checker_999999999/output1.txt
+        with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval_Checker_999999999/output1.txt
             if send_message(file_path_to_exe, o_log, test_tuple[0], test_tuple[4], test_tuple[1], test_tuple[2]) == 1:
                 test_errors_str += "message_sender doesn't work. "
                 points_to_reduct += points_to_reduct_for_test
@@ -345,7 +319,7 @@ def run_tests(file_path_to_exe, o_log):
         if (output_string and true_string):
             print('user string: {}.'.format(output_string))
             print('true string: {}.'.format(true_string))
-            if(true_string != output_string):
+            if (true_string != output_string):
                 points_to_reduct += 3
                 test_errors_str += "test {} failed. ".format(args_test_num)
                 o_log.write("test {} failed".format(args_test_num))
@@ -354,15 +328,6 @@ def run_tests(file_path_to_exe, o_log):
 
         true_log.close()
         test_log.close()
-        # # Run diff with the expected test
-        # path = "./input_files/"
-        # try:
-        #     p = sp.Popen(
-        #         args=['diff', output_log_path, "./input_files/expected_{}_{}".format(env_test_num, args_test_num)],
-        #         stdout=output_log, stderr=output_log)
-        #     p.wait()
-        # except OSError as e:
-        #     print("OSError3: ", e)
 
     # try: # DEBUG: get this back online later
     #     test_output_name = file_path_to_exe + 'outputUserReader.txt'
@@ -378,7 +343,41 @@ def run_tests(file_path_to_exe, o_log):
     # except OSError as e:
     #     print("OSError First One: ", e)
 
-    #remove_char_device(file_path_to_exe, o_log, dev_name)
+    # remove_char_device(file_path_to_exe, o_log, dev_name)
+
+    return points_to_reduct, test_errors_str
+
+def build_tests(file_path_to_exe, o_log):
+    '''
+    Checks the tests on 1 student
+    Returns the number of points needed to reduct from the student
+    @param file_path_to_exe:
+    @param myParam2:
+    @return: (Points_to_deduct, test_errors_str) == (100>=int>=0, String)
+    '''
+    majorNumber = 0
+
+    try:
+        copyScriptsToUser(file_path_to_exe, o_log)
+        ret, majorNumber = load_module(file_path_to_exe, o_log)
+        print("Major number: ", majorNumber)  # DEBUG
+    except OSError as e:
+        print("OSError22: ", e)
+        return 50, "Major Number Parsing from Syslog failed. "
+    except:
+        if (majorNumber <= 0):
+            print("debug here majNum <0. error is: ", sys.exc_info()[0])  # DEBUG
+        return 50, "Major Number Parsing from Syslog failed. "
+
+    minor_num = 134
+    dev_name = "charDevice"
+    try:
+        create_char_device(file_path_to_exe, o_log, majorNumber, minor_num, dev_name)
+    except OSError as e:
+        print("OSError create_char_device: ", e)
+
+    points_to_reduct, test_errors_str = run_tests(o_log, file_path_to_exe, dev_name, minor_num)
+
     remove_module(file_path_to_exe, o_log)
 
     print(points_to_reduct, test_errors_str)
@@ -413,7 +412,7 @@ def iterate_students_directories():
                     # write_to_csv(student_name, student_id, 0, 'Compilation error')
                 else:  # tests
                     print("student {} ".format(student_name), "compilation successful")
-                    points_to_reduct, test_errors_str = run_tests(stud_dir_path, output_log)
+                    points_to_reduct, test_errors_str = build_tests(stud_dir_path, output_log)
                     student_GRADE -= points_to_reduct
                     print("students grade: ", student_GRADE)
                     # write_to_csv(student_name, student_id, student_GRADE, test_errors_str)
