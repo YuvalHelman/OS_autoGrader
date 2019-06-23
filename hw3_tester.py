@@ -71,6 +71,7 @@ def compile_files(exe_files_path, output_log):
 
 def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputFilePath):
     device_path = "/dev/{}".format(dev_name)
+    print("device_path: ", device_path) # DEBUG
     directory_src = "./src/"
     try:
         if is_user_file == True:
@@ -142,11 +143,10 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
     return 0
 
 
-def remove_char_device(file_path_to_exe, log_fd, dev_name):
+def remove_char_device(log_fd, dev_name):
     device_path = '/dev/{}'.format(dev_name)
     try:
-        p = sp.Popen(args=['sudo rm -f', device_path],
-                     cwd=file_path_to_exe,
+        p = sp.Popen(args=['sudo rm -f {}'.format(device_path)],
                      stdout=log_fd, stderr=log_fd)
         p.wait()
     except OSError as e:
@@ -340,21 +340,21 @@ def run_tests(file_path_to_exe, o_log):
         # except OSError as e:
         #     print("OSError3: ", e)
 
-    try:
-        test_output_name = file_path_to_exe + 'outputUserReader.txt'
-        with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval Checker_999999999/output1.txt
-            # Check If the user's message_reader is valid (Most of them aren't...) :(
-            if send_message(file_path_to_exe, o_log, dev_name, overwrite_mode, 1, "messageToBeRead") == 1:
-                test_errors_str += "message_sender doesn't work, "
-            # Read with user's message_reader
-            if read_message(True, file_path_to_exe, o_log, dev_name, 1, test_log) == 1:
-                test_errors_str += "message_reader output not as requested, "
-                points_to_reduct += 3
+    # try: # DEBUG: get this back online later
+    #     test_output_name = file_path_to_exe + 'outputUserReader.txt'
+    #     with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval Checker_999999999/output1.txt
+    #         # Check If the user's message_reader is valid (Most of them aren't...) :(
+    #         if send_message(file_path_to_exe, o_log, dev_name, overwrite_mode, 1, "messageToBeRead") == 1:
+    #             test_errors_str += "message_sender doesn't work, "
+    #         # Read with user's message_reader
+    #         if read_message(True, file_path_to_exe, o_log, dev_name, 1, test_log) == 1:
+    #             test_errors_str += "message_reader output not as requested, "
+    #             points_to_reduct += 3
+    #
+    # except OSError as e:
+    #     print("OSError First One: ", e)
 
-    except OSError as e:
-        print("OSError First One: ", e)
-
-    remove_char_device(file_path_to_exe, o_log, dev_name)
+    remove_char_device(o_log, dev_name)
     remove_module(file_path_to_exe, o_log)
 
     print(points_to_reduct, test_errors_str)
