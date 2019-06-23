@@ -1,10 +1,10 @@
-import os, sys, stat
+import os
 import re
+import stat
 import subprocess as sp
 import sys
 from pathlib import Path
 from time import sleep
-
 
 # import kmod
 import utils
@@ -21,7 +21,7 @@ def compile_files(exe_files_path, output_log):
                      )
         p.wait()
         os.chmod("{}{}".format(exe_files_path, 'message_reader'),
-                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU) # DEBUG: testing this
+                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
         if p.returncode != 0:  # check if compilation works
             print("reader compile failed")  # DEBUG
             return 1
@@ -71,7 +71,7 @@ def compile_files(exe_files_path, output_log):
 
 def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_fd):
     relative_device_path = "./{}".format(dev_name)
-    #print("device_path: ", relative_device_path) # DEBUG
+    # print("device_path: ", relative_device_path) # DEBUG
     src_path = "./src/"
     perfect_reader_path = '/home/yuval/Downloads/OS_autoGrader/src/message_reader'
 
@@ -81,12 +81,12 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_
             p = sp.Popen(args=['./message_reader', relative_device_path, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,  # needed for device_path
-                         stdout=output_fd, stderr=log_fd) # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=log_fd)  # TODO: read to the outputFilePath
             p.wait()
         else:
             p = sp.Popen(args=[perfect_reader_path, relative_device_path, str(chID)],
                          cwd=file_path_to_exe,  # needed for device_path
-                         stdout=output_fd, stderr=log_fd) # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=log_fd)  # TODO: read to the outputFilePath
             p.wait()
         if (p.returncode != 0):
             return 1
@@ -102,7 +102,7 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
     try:
         # Using the user's "Message Sender"
         p = sp.Popen(args=['./message_sender', device_path, str(write_mode), str(chID), msgStr],
-                     cwd=file_path_to_exe, # needed for device_path
+                     cwd=file_path_to_exe,  # needed for device_path
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
@@ -120,7 +120,7 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
 
     try:
         p = sp.Popen(args=['./bash_mknod', device_path, str(majorNumber), str(minorNumber)],
-                     cwd=file_path_to_exe, # needed for device_path
+                     cwd=file_path_to_exe,  # needed for device_path
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
@@ -225,7 +225,7 @@ def load_module(file_path_to_exe, log_fd):
                 last_line = log_lines_list[len(log_lines_list) - 1]
                 # Split the message that the student wrote, then fetch the first number with regex
                 studentKernLogMessage = last_line.split(']')[1]
-                print(re.findall(r'\d+', studentKernLogMessage)) # debug
+                print(re.findall(r'\d+', studentKernLogMessage))  # debug
                 majorNumber = (re.findall(r'\d+', studentKernLogMessage)[0])
 
     except OSError as e:
@@ -276,9 +276,8 @@ def remove_module(file_path_to_exe, log_fd):
     return 0
 
 
-
 points_to_reduct_for_test = 3  # TODO: change this to whatever would work with the tests
-points_to_reduct_mem_leak = 1  # TODO: change this to whatever would work with the tests
+points_to_reduct_bug = 5  # TODO: change this to whatever would work with the tests
 overwrite_mode, append_mode = 0, 1  # overwrite mode = 0, append_mode = 1
 
 
@@ -290,24 +289,21 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
     arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
         (dev_name, 10, "Hello ", minor_num, overwrite_mode),  # ./tests/output0.txt
         (dev_name, 10, "World", minor_num, append_mode),  # ./tests/output1.txt
-
+        (dev_name, 10, "Overwritten", minor_num, append_mode),  # ./tests/output2.txt
     ]
-
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
         true_test_name = './tests/output{}.txt'.format(args_test_num)
         with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval_Checker_999999999/output1.txt
             if send_message(file_path_to_exe, o_log, test_tuple[0], test_tuple[4], test_tuple[1], test_tuple[2]) == 1:
-                test_errors_str += "message_sender doesn't work. "
-                points_to_reduct += points_to_reduct_for_test
                 print("Send message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
-                points_to_reduct += 3
+                points_to_reduct += points_to_reduct_for_test
                 test_errors_str += "message_sender failed. "
                 continue
             # Read with my message_reader
             if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_log) == 1:
                 print("Read message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
-                points_to_reduct += 3
+                points_to_reduct += points_to_reduct_bug
                 test_errors_str += "message_reader failed. "
                 continue
         # Test output file
@@ -320,7 +316,7 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
             print('user string: {}.'.format(output_string))
             print('true string: {}.'.format(true_string))
             if (true_string != output_string):
-                points_to_reduct += 3
+                points_to_reduct += points_to_reduct_for_test
                 test_errors_str += "test {} failed. ".format(args_test_num)
                 o_log.write("test {} failed".format(args_test_num))
             else:
@@ -329,21 +325,28 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
         true_log.close()
         test_log.close()
 
-    # try: # DEBUG: get this back online later
-    #     test_output_name = file_path_to_exe + 'outputUserReader.txt'
-    #     with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval Checker_999999999/output1.txt
-    #         # Check If the user's message_reader is valid (Most of them aren't...) :(
-    #         if send_message(file_path_to_exe, o_log, dev_name, overwrite_mode, 1, "messageToBeRead") == 1:
-    #             test_errors_str += "message_sender doesn't work, "
-    #         # Read with user's message_reader
-    #         if read_message(True, file_path_to_exe, o_log, dev_name, 1, test_log) == 1:
-    #             test_errors_str += "message_reader output not as requested, "
-    #             points_to_reduct += 3
-    #
-    # except OSError as e:
-    #     print("OSError First One: ", e)
 
-    # remove_char_device(file_path_to_exe, o_log, dev_name)
+    remove_char_device(file_path_to_exe, o_log, dev_name)
+
+    return points_to_reduct, test_errors_str
+
+def test_messageReader_text(o_log, file_path_to_exe, dev_name):
+    test_errors_str = ""
+    points_to_reduct = 0
+    minor_num = 250
+    try:
+        test_output_name = file_path_to_exe + 'outputUserReader.txt'
+        with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval Checker_999999999/output1.txt
+            # Check If the user's message_reader is valid (Most of them aren't...) :(
+            if send_message(file_path_to_exe, o_log, dev_name, overwrite_mode, minor_num , "messageToBeRead") == 1:
+                test_errors_str += "message_sender doesn't work. "
+                points_to_reduct += points_to_reduct_for_test
+            # Read with user's message_reader
+            if read_message(True, file_path_to_exe, o_log, dev_name, 1, test_log) == 1:
+                test_errors_str += "message_reader output not as requested. "
+                points_to_reduct += points_to_reduct_for_test
+    except OSError as e:
+        print("OSError First One: ", e)
 
     return points_to_reduct, test_errors_str
 
@@ -377,6 +380,12 @@ def build_tests(file_path_to_exe, o_log):
         print("OSError create_char_device: ", e)
 
     points_to_reduct, test_errors_str = run_tests(o_log, file_path_to_exe, dev_name, minor_num)
+
+    # Run message_reader with the user's file. see if text is similar
+    # points_to_reduct_text, test_errors_str_text = test_messageReader_text(o_log, file_path_to_exe, dev_name) # debug: forgot why i did this lel
+
+    # points_to_reduct += points_to_reduct_text
+    # test_errors_str +=test_errors_str_text
 
     remove_module(file_path_to_exe, o_log)
 
@@ -422,18 +431,6 @@ def iterate_students_directories():
             print("ValueError1: ", e2)
 
     general_log.close()
-
-
-def chmod_everything():
-    try:
-        p = sp.Popen(args=['chmod -R 777 ./'])
-        p.wait()
-        if (p.returncode != 0):
-            return 1
-    except OSError as e:
-        print("OSError: ", e)
-        return 1
-    return 0
 
 
 if __name__ == '__main__':
