@@ -203,8 +203,8 @@ def load_module(file_path_to_exe, log_fd):
                 # Split the message that the student wrote, then fetch the first number with regex
                 studentKernLogMessage = last_line.split(']')[1]
                 majorNumber = (re.findall(r'\d+', studentKernLogMessage)[0])
-    except:
-        print("Fetching MajorNumber Failed")  # DEBUG
+    except OSError as e:
+        print("Fetching MajorNumber Failed: " ,e)  # DEBUG
         return 1, -1
 
     # Remove the files created if needed # TODO mabye?
@@ -238,7 +238,7 @@ def remove_module(file_path_to_exe, log_fd):
                      )
         p.wait()
         if (p.returncode == 1):
-            print("rmmod failed for user: %s", file_path_to_exe)
+            print("rmmod failed for user:", file_path_to_exe)
             sys.exit()  # DEBUG: if I cant remove the Module, I shouldn't run the other directories until its off
     except OSError as e:
         print("OSError remove_module: ", e)
@@ -267,7 +267,6 @@ def run_tests(file_path_to_exe, o_log):
 
     try:
         copyScriptsToUser(file_path_to_exe, o_log)
-        remove_module(file_path_to_exe, o_log)
         ret, majorNumber = load_module(file_path_to_exe, o_log)
     except OSError as e:
         print("OSError22: ", e)
@@ -329,6 +328,7 @@ def run_tests(file_path_to_exe, o_log):
         print("OSError First One: ", e)
 
     remove_char_device(file_path_to_exe, o_log, "test_char")
+    remove_module(file_path_to_exe, o_log)
 
     print(points_to_reduct, test_errors_str)
 
