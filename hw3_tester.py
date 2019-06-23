@@ -357,7 +357,7 @@ def run_tests(file_path_to_exe, o_log):
     # except OSError as e:
     #     print("OSError First One: ", e)
 
-    remove_char_device(file_path_to_exe, o_log, dev_name)
+    #remove_char_device(file_path_to_exe, o_log, dev_name)
     remove_module(file_path_to_exe, o_log)
 
     print(points_to_reduct, test_errors_str)
