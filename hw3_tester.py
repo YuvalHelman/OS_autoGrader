@@ -136,7 +136,7 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
 
 
 def remove_char_device(file_path_to_exe, log_fd, dev_name):
-    try:3
+    try:
         p = sp.Popen(args=['rm -f /dev/%s'.format(dev_name)],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd)
