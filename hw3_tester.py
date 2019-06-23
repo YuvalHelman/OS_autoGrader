@@ -323,7 +323,7 @@ def run_tests(file_path_to_exe, o_log):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
         true_test_name = './tests/output{}.txt'.format(args_test_num)
         with open(test_output_name, 'w') as test_log: # ./assignments/Yuval_Checker_999999999/output1.txt
-            if send_message(file_path_to_exe, o_log, test_tuple[0], overwrite_mode, test_tuple[1], test_tuple[2]) == 1:
+            if send_message(file_path_to_exe, o_log, test_tuple[0], test_tuple[4], test_tuple[1], test_tuple[2]) == 1:
                 test_errors_str += "message_sender doesn't work. "
                 points_to_reduct += points_to_reduct_for_test
                 print("Send message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
