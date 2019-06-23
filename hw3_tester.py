@@ -343,7 +343,8 @@ def run_tests(file_path_to_exe, o_log):
         output_string = test_log.readline()
 
         if (output_string and true_string):
-            print('user string: {}'.format(output_string))
+            print('user string: {}.'.format(output_string))
+            print('true string: {}.'.format(true_string))
             if(true_string != output_string):
                 points_to_reduct += 3
                 test_errors_str += "test {} failed. ".format(args_test_num)
