@@ -115,7 +115,6 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
 def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_name):
     device_path = "/dev/{}".format(dev_name)
 
-    ####################################
     try:
         p = sp.Popen(args=['./bash_mknod', device_path, str(majorNumber), str(minorNumber)],
                      cwd=file_path_to_exe,
@@ -129,21 +128,13 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
         print("mknod exception: ", e)
         return 1, -1
 
-    #############################
-
-
-    p = sp.Popen(args=['sudo mknod', '-m 777', device_path, 'c', str(majorNumber), str(minorNumber)],
-                 cwd=file_path_to_exe,
-                 stdout=log_fd, stderr=log_fd)
-    p.wait()
-    if (p.returncode != 0):
-        print("mknod failed", file_path_to_exe)
-        return 1
-    # # change the created file's permissions
-    # p = sp.Popen(args=['chmod 777 /dev/{}'.format(dev_name)],
+    # p = sp.Popen(args=['sudo mknod', '-m 777', device_path, 'c', str(majorNumber), str(minorNumber)],
     #              cwd=file_path_to_exe,
     #              stdout=log_fd, stderr=log_fd)
     # p.wait()
+    # if (p.returncode != 0):
+    #     print("mknod failed", file_path_to_exe)
+    #     return 1
 
     print("create char device success")  # DEBUG
     return 0
