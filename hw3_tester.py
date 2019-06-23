@@ -326,7 +326,7 @@ def run_tests(file_path_to_exe, o_log):
             print("write message failed on test ", args_test_num)
             continue
         # Read with my message_reader
-        if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_output_name) == 1:
+        if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_log) == 1:
             print("Read message failed on test ", args_test_num)
 
         test_log.close()
@@ -347,7 +347,7 @@ def run_tests(file_path_to_exe, o_log):
             if send_message(file_path_to_exe, o_log, dev_name, overwrite_mode, 1, "messageToBeRead") == 1:
                 test_errors_str += "message_sender doesn't work, "
             # Read with user's message_reader
-            if read_message(True, file_path_to_exe, o_log, dev_name, 1, test_output_name) == 1:
+            if read_message(True, file_path_to_exe, o_log, dev_name, 1, test_log) == 1:
                 test_errors_str += "message_reader output not as requested, "
                 points_to_reduct += 3
 
