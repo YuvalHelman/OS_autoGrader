@@ -1,4 +1,4 @@
-import os
+import os, sys, stat
 import re
 import subprocess as sp
 import sys
@@ -13,10 +13,6 @@ p = Path(__file__).resolve()
 
 
 def compile_files(exe_files_path, output_log):
-    # p = sp.Popen(args=['pwd'], #debug
-    #              cwd=exe_files_path,
-    #              stdout=output_log, stderr=output_log
-    #              )
     try:
         p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
             , "-o", "message_reader"],
@@ -24,6 +20,8 @@ def compile_files(exe_files_path, output_log):
                      stdout=output_log, stderr=output_log
                      )
         p.wait()
+        os.chmod("{}{}".format(exe_files_path, 'message_reader'),
+                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU) # DEBUG: testing this
         if p.returncode != 0:  # check if compilation works
             print("reader compile failed")  # DEBUG
             return 1
@@ -33,6 +31,8 @@ def compile_files(exe_files_path, output_log):
                      stdout=output_log, stderr=output_log
                      )
         p.wait()
+        os.chmod("{}{}".format(exe_files_path, 'message_sender'),
+                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
         if p.returncode != 0:  # check if compilation works
             print("sender compile failed")  # DEBUG
             return 1
@@ -75,15 +75,15 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputF
     try:
         if is_user_file == True:
             # Using the user's "Message reader"
-            p = sp.Popen(args=['./message_reader', device_path, str(chID), ">", outputFilePath],
+            p = sp.Popen(args=['./message_reader', device_path, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,
-                         stdout=log_fd, stderr=log_fd)
+                         stdout=outputFilePath, stderr=log_fd)
             p.wait()
         else:
-            p = sp.Popen(args=['./message_reader', device_path, ">", outputFilePath],
+            p = sp.Popen(args=['./src/message_reader', device_path, str(chID)],
                          cwd=directory_src,  # set to the src directory where my message_reader is at
-                         stdout=log_fd, stderr=log_fd)
+                         stdout=outputFilePath, stderr=log_fd)
             p.wait()
         if (p.returncode != 0):
             print("message_reader failed", file_path_to_exe)
@@ -143,8 +143,9 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
 
 
 def remove_char_device(file_path_to_exe, log_fd, dev_name):
+    device_path = '/dev/{}'.format(dev_name)
     try:
-        p = sp.Popen(args=['rm -f /dev/{}'.format(dev_name)],
+        p = sp.Popen(args=['sudo rm -f', device_path],
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd)
         p.wait()
@@ -353,7 +354,7 @@ def run_tests(file_path_to_exe, o_log):
     except OSError as e:
         print("OSError First One: ", e)
 
-    remove_char_device(file_path_to_exe, o_log, "test_char")
+    remove_char_device(file_path_to_exe, o_log, dev_name)
     remove_module(file_path_to_exe, o_log)
 
     print(points_to_reduct, test_errors_str)
