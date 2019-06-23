@@ -228,6 +228,7 @@ def load_module(file_path_to_exe, log_fd):
                 last_line = log_lines_list[len(log_lines_list) - 1]
                 # Split the message that the student wrote, then fetch the first number with regex
                 studentKernLogMessage = last_line.split(']')[1]
+                print(re.findall(r'\d+', studentKernLogMessage)) # debug
                 majorNumber = (re.findall(r'\d+', studentKernLogMessage)[0])
 
     except OSError as e:
