@@ -91,7 +91,7 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_
         if (p.returncode != 0):
             return 1
     except OSError as e:
-        print("OSError read_message: ", e)
+        print("read_message failed: ", e)
         return 1
 
     return 0
@@ -107,10 +107,9 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
                      )
         p.wait()
         if (p.returncode != 0):
-            print("message_sender failed", file_path_to_exe)
             return 1
     except OSError as e:
-        print("OSError send_message: ", e)
+        print("send_message failed: ", e)
         return 1
 
     return 0
@@ -315,23 +314,40 @@ def run_tests(file_path_to_exe, o_log):
 
     # Testing the device!
     arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
-        (dev_name, 10, "MessageString", minor_num, overwrite_mode),
+        (dev_name, 10, "MessageString", minor_num, overwrite_mode), # ./tests/output0.txt
 
     ]
 
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
-        test_log = open(test_output_name, 'w')  # ./assignments/Yuval_Checker_999999999/output1.txt
+        true_test_name = './tests/output{}.txt'.format(args_test_num)
+        with open(test_output_name, 'w') as test_log: # ./assignments/Yuval_Checker_999999999/output1.txt
+            if send_message(file_path_to_exe, o_log, test_tuple[0], overwrite_mode, test_tuple[1], test_tuple[2]) == 1:
+                test_errors_str += "message_sender doesn't work. "
+                points_to_reduct += points_to_reduct_for_test
+                print("Send message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
+                points_to_reduct += 3
+                test_errors_str += "message_sender failed. "
+                continue
+            # Read with my message_reader
+            if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_log) == 1:
+                print("Read message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
+                points_to_reduct += 3
+                test_errors_str += "message_reader failed. "
+                continue
+        # Test output file
+        true_log = open(true_test_name, 'r')
+        test_log = open(test_output_name, 'r')
+        true_string = true_log.readline()
+        output_string = test_log.readline()
 
-        if send_message(file_path_to_exe, o_log, test_tuple[0], overwrite_mode, test_tuple[1], test_tuple[2]) == 1:
-            test_errors_str += "message_sender doesn't work, "
-            points_to_reduct += points_to_reduct_for_test
-            print("Send message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
-            continue
-        # Read with my message_reader
-        if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_log) == 1:
-            print("Read message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
+        if (output_string and true_string):
+            print('user string: ', output_string)
+            if(true_string != output_string):
+                points_to_reduct += 3
+                test_errors_str += "test {} failed. ".format(args_test_num)
 
+        true_log.close()
         test_log.close()
         # # Run diff with the expected test
         # path = "./input_files/"
