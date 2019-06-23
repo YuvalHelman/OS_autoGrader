@@ -79,12 +79,12 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, outputF
             p = sp.Popen(args=['./message_reader', device_path, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,
-                         stdout=outputFilePath, stderr=log_fd)
+                         stdout=log_fd, stderr=log_fd) # TODO: read to the outputFilePath
             p.wait()
         else:
             p = sp.Popen(args=['./src/message_reader', device_path, str(chID)],
                          cwd=directory_src,  # set to the src directory where my message_reader is at
-                         stdout=outputFilePath, stderr=log_fd)
+                         stdout=log_fd, stderr=log_fd) # TODO: read to the outputFilePath
             p.wait()
         if (p.returncode != 0):
             print("message_reader failed", file_path_to_exe)
