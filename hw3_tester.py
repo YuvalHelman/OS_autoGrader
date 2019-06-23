@@ -349,7 +349,7 @@ def run_tests(file_path_to_exe, o_log):
                 test_errors_str += "test {} failed. ".format(args_test_num)
                 o_log.write("test {} failed".format(args_test_num))
             else:
-                o_log.append("test {} succeeded".format(args_test_num))
+                o_log.write("test {} succeeded".format(args_test_num))
 
         true_log.close()
         test_log.close()
