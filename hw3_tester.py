@@ -289,7 +289,7 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
     arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
         (dev_name, 10, "Hello ", minor_num, overwrite_mode),  # ./tests/output0.txt
         (dev_name, 10, "World", minor_num, append_mode),  # ./tests/output1.txt
-        (dev_name, 10, "Overwritten", minor_num, append_mode),  # ./tests/output2.txt
+        (dev_name, 10, "Overwritten", minor_num, overwrite_mode),  # ./tests/output2.txt
     ]
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
