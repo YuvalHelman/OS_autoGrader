@@ -320,7 +320,7 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
                 test_errors_str += "message_sender failed. "
                 continue
             # Read with my message_reader
-            if read_message(True, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_log) == 1:
+            if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_log) == 1:
                 # DEBUG : change True\False for users\mine message_reader exe
                 print("Read message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
                 points_to_reduct += points_to_reduct_bug
