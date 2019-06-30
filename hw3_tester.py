@@ -20,11 +20,11 @@ def compile_static_files(gen_log):
                      stdout=gen_log, stderr=gen_log
                      )
         p.wait()
-        os.chmod("{}{}".format(files_path, 'message_reader'),
-                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
         if p.returncode != 0:  # check if compilation works
             print("reader compile failed")  # DEBUG
             return 1
+        os.chmod("{}{}".format(files_path, 'message_reader'),
+                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
     except OSError as e:
         print("OSError compile_files: ", e)
         return 1
