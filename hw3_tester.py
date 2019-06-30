@@ -11,6 +11,25 @@ import utils
 
 p = Path(__file__).resolve()
 
+def compile_static_files(gen_log):
+    files_path = "./src/"
+    try:
+        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
+            , "-o", "message_reader"],
+                     cwd=files_path,
+                     stdout=gen_log, stderr=gen_log
+                     )
+        p.wait()
+        os.chmod("{}{}".format(files_path, 'message_reader'),
+                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
+        if p.returncode != 0:  # check if compilation works
+            print("reader compile failed")  # DEBUG
+            return 1
+    except OSError as e:
+        print("OSError compile_files: ", e)
+        return 1
+
+    return 0
 
 def compile_files(exe_files_path, output_log):
     try:
@@ -403,6 +422,8 @@ def iterate_students_directories():
     with open('compilation_log.txt', 'w') as general_log:
         general_log.write('.\n')
     general_log = open('compilation_log.txt', 'a')
+
+    compile_static_files(general_log)
 
     for student_dir in os.listdir(directory_str):  # iterate on all student folders!
         general_log.write("Starting on: {}\n".format(student_dir))
