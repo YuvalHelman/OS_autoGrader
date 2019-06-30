@@ -15,7 +15,7 @@ def compile_static_files(gen_log):
     files_path = "./src/"
     try:
         p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
-            , "-o", "message_reader"],
+            , "-o", "message_reader_true"],
                      cwd=files_path,
                      stdout=gen_log, stderr=gen_log
                      )
@@ -23,7 +23,7 @@ def compile_static_files(gen_log):
         if p.returncode != 0:  # check if compilation works
             print("reader compile failed")  # DEBUG
             return 1
-        os.chmod("{}{}".format(files_path, 'message_reader'),
+        os.chmod("{}{}".format(files_path, 'message_reader_true'),
                  stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
     except OSError as e:
         print("OSError compile_files: ", e)
@@ -32,18 +32,18 @@ def compile_static_files(gen_log):
     return 0
 
 def compile_files(exe_files_path, output_log):
-    try:
-        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
-            , "-o", "message_reader"],
-                     cwd=exe_files_path,
-                     stdout=output_log, stderr=output_log
-                     )
-        p.wait()
-        os.chmod("{}{}".format(exe_files_path, 'message_reader'),
-                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
-        if p.returncode != 0:  # check if compilation works
-            print("reader compile failed")  # DEBUG
-            return 1
+    # try:
+    #     p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
+    #         , "-o", "message_reader"],
+    #                  cwd=exe_files_path,
+    #                  stdout=output_log, stderr=output_log
+    #                  )
+    #     p.wait()
+    #     os.chmod("{}{}".format(exe_files_path, 'message_reader'),
+    #              stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
+    #     if p.returncode != 0:  # check if compilation works
+    #         print("reader compile failed")  # DEBUG
+    #         return 1 # TODO: see if reader should be even checked..
         p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_sender.c"
             , "-o", "message_sender"],
                      cwd=exe_files_path,
@@ -103,7 +103,7 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_
                          stdout=output_fd, stderr=output_fd)  # TODO: read to the outputFilePath
             p.wait()
         else:
-            p = sp.Popen(args=[perfect_reader_path, relative_device_path, str(chID)],
+            p = sp.Popen(args=['./message_reader_true', relative_device_path, str(chID)],
                          cwd=file_path_to_exe,  # needed for device_path
                          stdout=output_fd, stderr=output_fd)  # TODO: read to the outputFilePath
             p.wait()
@@ -205,6 +205,17 @@ def copyScriptsToUser(file_path_to_exe, log_fd):
 
     try:
         p = sp.Popen(args=['cp', '-p', './src/bash_mknod', file_path_to_exe],
+                     stdout=log_fd, stderr=log_fd
+                     )
+        p.wait()
+        if (p.returncode == 1):
+            print("copy mknod failed for user: ", file_path_to_exe)
+            return 1, -1
+    except:
+        print("copy bash_mknod failed")
+        return 1, -1
+    try:
+        p = sp.Popen(args=['cp', '-p', './src/message_reader_true', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
