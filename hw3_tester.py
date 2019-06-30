@@ -324,14 +324,14 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
         true_test_name = './tests/output{}.txt'.format(args_test_num)
-        with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval_Checker_999999999/output1.txt
+        with open(test_output_name, 'r+') as testOutputFd:  # ./assignments/Yuval_Checker_999999999/output1.txt
             if send_message(file_path_to_exe, o_log, test_tuple[0], test_tuple[4], test_tuple[1], test_tuple[2]) == 1:
                 print("Send message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
                 points_to_reduct += points_to_reduct_for_test
                 test_errors_str += "message_sender failed. "
                 continue
             # Read with my message_reader
-            if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_log) == 1:
+            if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], testOutputFd) == 1:
                 # DEBUG : change True\False for users\mine message_reader exe
                 print("Read message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
                 points_to_reduct += points_to_reduct_bug
@@ -339,9 +339,9 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
                 continue
         # Test output file
         true_log = open(true_test_name, 'r')
-        test_log = open(test_output_name, 'r')
+        testOutputFd = open(test_output_name, 'r')
         true_string = true_log.readline()
-        output_string = test_log.readline()
+        output_string = testOutputFd.readline()
 
         if (output_string and true_string):
             print('user string: {}.'.format(output_string))
@@ -354,7 +354,7 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
                 o_log.write("test {} succeeded".format(args_test_num))
 
         true_log.close()
-        test_log.close()
+        testOutputFd.close()
 
 
     remove_char_device(file_path_to_exe, o_log, dev_name)
