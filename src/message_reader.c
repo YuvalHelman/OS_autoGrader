@@ -5,44 +5,41 @@
 #include <sys/ioctl.h>  /* ioctl */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
-#define ARGS_COUNT 3
-#define BUFF_SIZE 129
+int main(int argc, char *argv[]) {
+	if (argc < 3) {
+		printf("Bad params!\n");
+		exit(EXIT_FAILURE);
+	}
+	char* messageSlotFilePath = argv[1];
+	char *ptr;
+	unsigned int channelId = strtoul(argv[2], &ptr, 10);
+	char* msg = (char *) malloc(BUF_LEN);
 
-int main(int argc, const char* argv[]){
-  int file_desc;
-  int ret_val;
-  char buff[BUFF_SIZE];
+	int file_desc;
+	int ret_val;
 
-  if (argc != ARGS_COUNT){
-    printf("Invalid number of args, should be %d received %d\n", ARGS_COUNT, argc);
-    return -1;
-  }
+	file_desc = open(messageSlotFilePath, O_RDWR);
+	if (file_desc < 0) {
+		printf("Can't open device file: %s\n", messageSlotFilePath);
+		exit(-1);
+	}
 
-  file_desc = open( argv[1], O_RDONLY );
-  if( file_desc < 0 )
-  {
-    printf("Can't open device file: %s\n", argv[1]);
-    return -1;
-  }
+	ret_val = ioctl(file_desc, MSG_SLOT_CHANNEL, channelId);
+	if (ret_val) {
+		printf("Could not change channel. %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
-  ret_val = ioctl( file_desc, MSG_SLOT_CHANNEL, atoi(argv[2]));
-  if (ret_val < 0){
-    perror("Failed to ioctl\n");
+	ret_val = read(file_desc, msg, BUF_LEN);
+	if (ret_val <= 0) {
+		printf("Could not read from channel. %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	printf("%s", msg);
 	close(file_desc);
-    return -1;
-  }
-
-  ret_val = read( file_desc, buff, BUFF_SIZE);
-  if (ret_val < 0){
-    perror("Failed to read\n");
-	close(file_desc);
-    return -1;
-  }
-  close(file_desc);
-
-  buff[ret_val] = '\0';
-  printf("%s", buff);
-
-  return 0;
+	return ret_val;
 }
