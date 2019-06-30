@@ -32,7 +32,7 @@ def compile_static_files(gen_log):
     return 0
 
 def compile_files(exe_files_path, output_log):
-    # try:
+    try:
     #     p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
     #         , "-o", "message_reader"],
     #                  cwd=exe_files_path,
