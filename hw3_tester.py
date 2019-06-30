@@ -81,12 +81,12 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_
             p = sp.Popen(args=['./message_reader', relative_device_path, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,  # needed for device_path
-                         stdout=output_fd, stderr=log_fd)  # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=output_fd)  # TODO: read to the outputFilePath
             p.wait()
         else:
             p = sp.Popen(args=[perfect_reader_path, relative_device_path, str(chID)],
                          cwd=file_path_to_exe,  # needed for device_path
-                         stdout=output_fd, stderr=log_fd)  # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=output_fd)  # TODO: read to the outputFilePath
             p.wait()
         if (p.returncode != 0):
             return 1
@@ -301,7 +301,8 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
                 test_errors_str += "message_sender failed. "
                 continue
             # Read with my message_reader
-            if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_log) == 1:
+            if read_message(True, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], test_log) == 1:
+                # DEBUG : change True\False for users\mine message_reader exe
                 print("Read message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
                 points_to_reduct += points_to_reduct_bug
                 test_errors_str += "message_reader failed. "
