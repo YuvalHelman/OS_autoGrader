@@ -135,10 +135,10 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
 
 
 def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_name):
-    device_path = "./{}".format(dev_name)
-
+    device_path_in_userFolder = "./{}".format(dev_name)
+    device_path_relative ="{}{}".format(file_path_to_exe, dev_name)
     try:
-        p = sp.Popen(args=['./bash_mknod', device_path, str(majorNumber), str(minorNumber)],
+        p = sp.Popen(args=['./bash_mknod', device_path_in_userFolder, str(majorNumber), str(minorNumber)],
                      cwd=file_path_to_exe,  # needed for device_path
                      stdout=log_fd, stderr=log_fd
                      )
@@ -146,6 +146,8 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
         if (p.returncode == 1):
             print("mknod failed for user: ", file_path_to_exe)
             return 1, -1
+        os.chmod("{}{}".format(device_path_relative, 'message_reader_true'),
+                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
     except OSError as e:
         print("mknod exception: ", e)
         return 1, -1
