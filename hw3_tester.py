@@ -21,9 +21,21 @@ def compile_static_files(gen_log):
                      )
         p.wait()
         if p.returncode != 0:  # check if compilation works
-            print("reader compile failed")  # DEBUG
+            print("Reader compile failed")  # DEBUG
             return 1
         os.chmod("{}{}".format(files_path, 'message_reader_true'),
+                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
+
+        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_sender_true.c"
+            , "-o", "message_sender_true"],
+                     cwd=files_path,
+                     stdout=gen_log, stderr=gen_log
+                     )
+        p.wait()
+        if p.returncode != 0:  # check if compilation works
+            print("Sender compile failed")  # DEBUG
+            return 1
+        os.chmod("{}{}".format(files_path, 'message_sender_true'),
                  stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
     except OSError as e:
         print("OSError compile_files: ", e)
@@ -95,12 +107,12 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
             p = sp.Popen(args=['./message_reader', device_path_Name, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,
-                         stdout=output_fd, stderr=log_fd)  # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=log_fd)
             p.wait()
         else:
             p = sp.Popen(args=['./message_reader_true', device_path_Name, str(chID)],
                          cwd=file_path_to_exe,
-                         stdout=output_fd, stderr=log_fd) # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=log_fd) 
             p.wait()
       #  if (p.returncode != 0):
        #     return 1
@@ -111,15 +123,21 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
     return 0
 
 
-def send_message(file_path_to_exe, log_fd, device_path_Name, write_mode, chID, msgStr):
+def send_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, write_mode, chID, msgStr):
     try:
-        # Using the user's "Message Sender"
-        p = sp.Popen(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
-                     cwd=file_path_to_exe,
-                     stdout=log_fd, stderr=log_fd)
-        p.wait()
-        # if (p.returncode != 0):
-        #     return 1
+        if is_user_file == True:
+            # Using the user's "Message Sender"
+            p = sp.Popen(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
+                         cwd=file_path_to_exe,
+                         stdout=log_fd, stderr=log_fd)
+            p.wait()
+            # if (p.returncode != 0):
+            #     return 1
+        else:
+            p = sp.Popen(args=['./message_sender_true', device_path_Name, str(write_mode), str(chID), msgStr],
+                         cwd=file_path_to_exe,
+                         stdout=log_fd, stderr=log_fd)
+            p.wait()
     except OSError as e:
         print("send_message failed: ", e)
         return 1
@@ -310,7 +328,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
         true_test_name = './tests/output{}.txt'.format(args_test_num)
-        if send_message(file_path_to_exe, o_log,
+        if send_message(False, file_path_to_exe, o_log,
                         test_tuple[0], test_tuple[4], test_tuple[1], test_tuple[2]) == 1:
             print("Send message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
             points_to_reduct += points_to_reduct_for_test
@@ -333,12 +351,15 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
         if (output_string and true_string):
             print('user string: {}.'.format(output_string))
             print('true string: {}.'.format(true_string))
-            if (not output_string or true_string != output_string):
+            if (true_string != output_string):
                 points_to_reduct += points_to_reduct_for_test
                 test_errors_str += "test {} failed. ".format(args_test_num)
                 o_log.write("test {} failed".format(args_test_num))
             else:
                 o_log.write("test {} succeeded".format(args_test_num))
+        else:
+            points_to_reduct += points_to_reduct_for_test
+            test_errors_str += "test {} failed. ".format(args_test_num)
 
         true_log.close()
         testOutputFd.close()
