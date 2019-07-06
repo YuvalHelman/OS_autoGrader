@@ -156,10 +156,11 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
     return 0
 
 
-def remove_char_device(log_fd, dev_name):
-    device_path = '/dev/{}'.format(dev_name)
+def remove_char_device(file_path_to_exe, log_fd, dev_name):
+    deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]  # Student Name
+    device_path_Name = "/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
     try:
-        p = sp.Popen(args=['sudo rm -f {}'.format(device_path)],
+        p = sp.Popen(args=['sudo rm -f {}'.format(device_path_Name)],
                      # cwd=file_path_to_exe,  # needed for device_path
                      stdout=log_fd, stderr=log_fd)
         p.wait()
@@ -402,8 +403,7 @@ def build_tests(file_path_to_exe, o_log):
 
     points_to_reduct, test_errors_str = run_tests(o_log, file_path_to_exe, dev_name, minor_num)
 
-    deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]  # Student Name
-    remove_char_device(o_log, "{}{}".format(dev_name, deviceUniqueIdentifer))
+    remove_char_device(file_path_to_exe, o_log, dev_name)
 
 
     # Run message_reader with the user's file. see if text is similar
