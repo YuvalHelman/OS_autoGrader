@@ -95,14 +95,12 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
             p = sp.Popen(args=['./message_reader', device_path_Name, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,
-                         stdout=output_fd, stderr=output_fd,  # TODO: read to the outputFilePath
-                         shell=True)
+                         stdout=output_fd, stderr=output_fd)  # TODO: read to the outputFilePath
             p.wait()
         else:
             p = sp.Popen(args=['./message_reader_true', device_path_Name, str(chID)],
                          cwd=file_path_to_exe,
-                         stdout=output_fd, stderr=output_fd, # TODO: read to the outputFilePath
-                         shell=True)
+                         stdout=output_fd, stderr=log_fd) # TODO: read to the outputFilePath
             p.wait()
         if (p.returncode != 0):
             return 1
@@ -323,8 +321,8 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
             points_to_reduct += points_to_reduct_for_test
             test_errors_str += "message_sender failed. "
             continue
-            # Read with my message_reader
-        with open(test_output_name, 'w+') as testOutputFd: # ./assignments/Yuval_Checker_999999999/output1.txt
+        # Read with my message_reader and write to: testOutputFd
+        with open(test_output_name, 'w+') as testOutputFd:
             if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], testOutputFd) == 1:
                 # DEBUG : change True\False for users\mine message_reader exe
                 print("Read message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
