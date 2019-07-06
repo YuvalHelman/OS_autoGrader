@@ -14,7 +14,7 @@ p = Path(__file__).resolve()
 def compile_static_files(gen_log):
     files_path = "./src/"
     try:
-        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader_works.c"
+        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader_true.c"
             , "-o", "message_reader_true"],
                      cwd=files_path,
                      stdout=gen_log, stderr=gen_log
