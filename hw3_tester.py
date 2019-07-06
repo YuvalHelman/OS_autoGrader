@@ -333,7 +333,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
         if (output_string and true_string):
             print('user string: {}.'.format(output_string))
             print('true string: {}.'.format(true_string))
-            if (true_string != output_string):
+            if (not output_string or true_string != output_string):
                 points_to_reduct += points_to_reduct_for_test
                 test_errors_str += "test {} failed. ".format(args_test_num)
                 o_log.write("test {} failed".format(args_test_num))
