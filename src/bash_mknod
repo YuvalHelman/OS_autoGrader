@@ -4,7 +4,7 @@
 # $3 -> minorNumber
 
 devPath="/dev/charDevice"
-devicePath=${devPath}${$1}
+devicePath="${devPath}${$1}"
 
 # sudo rm -f ${1}
 sudo mknod -m 777 ${devicePath} c ${2} ${3}
