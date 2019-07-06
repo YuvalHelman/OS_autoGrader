@@ -395,16 +395,11 @@ def build_tests(file_path_to_exe, o_log):
     '''
     majorNumber = 0
 
-    try:
-        copyScriptsToUser(file_path_to_exe, o_log)
-        ret, majorNumber = load_module(file_path_to_exe, o_log)
-        print("Major number: ", majorNumber)  # DEBUG
-    except OSError as e:
-        print("OSError22: ", e)
-        return 50, "Major Number Parsing from Syslog failed. "
-    except:
-        if (majorNumber <= 0):
-            print("debug here majNum <0. error is: ", sys.exc_info()[0])  # DEBUG
+    copyScriptsToUser(file_path_to_exe, o_log)
+    ret, majorNumber = load_module(file_path_to_exe, o_log)
+    print("Major number: ", majorNumber)  # DEBUG
+    if (majorNumber <= 0):
+        print("debug here majNum <0. error is: ", sys.exc_info()[0])  # DEBUG
         return 50, "Major Number Parsing from Syslog failed. "
 
     minor_num = 134
@@ -416,16 +411,15 @@ def build_tests(file_path_to_exe, o_log):
 
     points_to_reduct, test_errors_str = run_tests(o_log, file_path_to_exe, device_path_Name, minor_num)
 
-    remove_char_device(file_path_to_exe, o_log, device_path_Name)
-
+    #remove_char_device(file_path_to_exe, o_log, device_path_Name) # DEBUG: get it back online
 
     # Run message_reader with the user's file. see if text is similar
-    # points_to_reduct_text, test_errors_str_text = test_messageReader_text(o_log, file_path_to_exe, dev_name) # debug: forgot why i did this lel
-
+    # points_to_reduct_text, test_errors_str_text = test_messageReader_text(o_log, file_path_to_exe, dev_name)
+    #  debug: forgot why i did this lel
     # points_to_reduct += points_to_reduct_text
     # test_errors_str +=test_errors_str_text
 
-    remove_module(file_path_to_exe, o_log)
+    #remove_module(file_path_to_exe, o_log) # DEBUG: get it back online
 
     print(points_to_reduct, test_errors_str)
 
