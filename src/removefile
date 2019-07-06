@@ -1,7 +1,6 @@
 #!/bin/bash
-
 # $1 -> device path
 # $2 -> majorNumber
 # $3 -> minorNumber
 
-sudo mknod -m 777 ${1} c ${2} ${3}
+sudo rm -f ${1}
