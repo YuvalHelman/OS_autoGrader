@@ -142,7 +142,7 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
     print(deviceUniqueIdentifer)
     # print(device_path_relative)
     try:
-        p = sp.Popen(args=['./bash_mknod', deviceUniqueIdentifer, str(majorNumber), str(minorNumber)],
+        p = sp.Popen(args=['./src/bash_mknod', deviceUniqueIdentifer, str(majorNumber), str(minorNumber)],
                      # cwd='/dev/',  # needed for device_path DEBUG: erase later?
                      stdout=log_fd, stderr=log_fd
                      )
