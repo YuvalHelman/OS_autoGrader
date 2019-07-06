@@ -147,8 +147,8 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
         if (p.returncode == 1):
             print("mknod failed for user: ", file_path_to_exe)
             return 1, -1
-        os.chmod("{}{}".format(device_path_relative, 'message_reader_true'),
-                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
+        os.chmod("{}".format(device_path_relative),
+                  stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
     except OSError as e:
         print("mknod exception: ", e)
         return 1, -1
