@@ -318,7 +318,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
             continue
         # Read with my message_reader and write to: testOutputFd
         with open(test_output_name, 'w+') as testOutputFd:
-            if read_message(True, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], testOutputFd) == 1:
+            if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], testOutputFd) == 1:
                 # DEBUG : change True\False for users\mine message_reader exe
                 print("Read message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
                 points_to_reduct += points_to_reduct_bug
