@@ -158,10 +158,20 @@ def remove_char_device(file_path_to_exe, log_fd, device_path_Name):
     # deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]  # Student Name
     # device_path_Name = "/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
     #print(device_path_Name) # DEBUG
+    # try:
+    #     p = sp.Popen(args=['./src/removefile', device_path_Name],
+    #                  #cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
+    #                  stdout=log_fd, stderr=log_fd
+    #                  )
+    #     p.wait()
+    # except OSError as e:
+    #     print("OSError on remove_char_device: ", e)
+    #     return 1
+
     try:
-        p = sp.Popen(args=['./src/removefile', device_path_Name],
+        p = sp.Popen(args=['sudo rm -f {}'.format(device_path_Name)],
                      #cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
-                     stdout=log_fd, stderr=log_fd
+                     stdout=log_fd, stderr=log_fd, shell=True
                      )
         p.wait()
     except OSError as e:
