@@ -135,15 +135,13 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
 
 # TODO: this doesn't work well. device doesn't open after creation
 def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_name):
-    device_path_in_userFolder = "./{}".format(dev_name) # DEBUG: erase?
-    # device_path_relative ="{}{}".format(file_path_to_exe, dev_name) # DEBUG: erase?
-    # Name of student as uniqueIdentifer for device name
-    deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]
-    print(deviceUniqueIdentifer)
-    # print(device_path_relative)
+    deviceUniqueIdentifer = file_path_to_exe.split("/")[-2] # Student Name
+    device_path_Name ="/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
+    print(device_path_Name) # DEBUG
+
     try:
-        p = sp.Popen(args=['./src/bash_mknod', deviceUniqueIdentifer, str(majorNumber), str(minorNumber)],
-                     # cwd='/dev/',  # needed for device_path DEBUG: erase later?
+        p = sp.Popen(args=['./bash_mknod', device_path_Name, str(majorNumber), str(minorNumber)],
+                     cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
