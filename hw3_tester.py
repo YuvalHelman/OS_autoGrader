@@ -89,25 +89,20 @@ def compile_files(exe_files_path, output_log):
 
 
 def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID, output_fd):
-
-    # print("device_path: ", relative_device_path) # DEBUG
-    src_path = "./src/"
-    perfect_reader_path = '/home/yuval/Downloads/OS_autoGrader/src/message_reader'
-
     try:
         if is_user_file == True:
             # Using the user's "Message reader"
             p = sp.Popen(args=['./message_reader', device_path_Name, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
-                         cwd=file_path_to_exe,  # needed for device_path
-                         stdout=output_fd, stderr=log_fd,
-                         shell=True)  # TODO: read to the outputFilePath
+                         cwd=file_path_to_exe,
+                         stdout=output_fd, stderr=output_fd,  # TODO: read to the outputFilePath
+                         shell=True)
             p.wait()
         else:
             p = sp.Popen(args=['./message_reader_true', device_path_Name, str(chID)],
-                         cwd=file_path_to_exe,  # needed for device_path
-                         stdout=output_fd, stderr=log_fd,
-                         shell=True) # TODO: read to the outputFilePath
+                         cwd=file_path_to_exe,
+                         stdout=output_fd, stderr=output_fd, # TODO: read to the outputFilePath
+                         shell=True)
             p.wait()
         if (p.returncode != 0):
             return 1
@@ -128,7 +123,7 @@ def send_message(file_path_to_exe, log_fd, device_path_Name, write_mode, chID, m
         # if (p.returncode != 0):
         #     return 1
 
-        p = sp.Popen(args=['pwd'],
+        p = sp.Popen(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
                       cwd=file_path_to_exe,  # needed for device_path
                       stdout=log_fd, stderr=log_fd,
                       shell=True)
