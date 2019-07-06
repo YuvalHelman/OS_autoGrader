@@ -402,7 +402,8 @@ def build_tests(file_path_to_exe, o_log):
 
     points_to_reduct, test_errors_str = run_tests(o_log, file_path_to_exe, dev_name, minor_num)
 
-    remove_char_device(o_log, dev_name)
+    deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]  # Student Name
+    remove_char_device(o_log, "{}{}".format(dev_name, deviceUniqueIdentifer))
 
 
     # Run message_reader with the user's file. see if text is similar
