@@ -112,7 +112,7 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
         else:
             p = sp.Popen(args=['./message_reader_true', device_path_Name, str(chID)],
                          cwd=file_path_to_exe,
-                         stdout=output_fd, stderr=log_fd) 
+                         stdout=output_fd, stderr=log_fd)
             p.wait()
       #  if (p.returncode != 0):
        #     return 1
@@ -223,8 +223,12 @@ def copyScriptsToUser(file_path_to_exe, log_fd):
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
+        p = sp.Popen(args=['cp', '-p', './src/message_sender_true', file_path_to_exe],
+                     stdout=log_fd, stderr=log_fd
+                     )
+        p.wait()
         if (p.returncode == 1):
-            print("copy mknod failed for user: ", file_path_to_exe)
+            print("copy reader or sender failed for user: ", file_path_to_exe)
             return 1, -1
     except:
         print("copy bash_mknod failed")
