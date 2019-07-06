@@ -117,7 +117,7 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_
 
 
 def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
-    device_path = "./{}".format(dev_name)
+    device_path = "./note{}".format(dev_name)
     try:
         # Using the user's "Message Sender"
         p = sp.Popen(args=['./message_sender', device_path, str(write_mode), str(chID), msgStr],
@@ -133,14 +133,16 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
 
     return 0
 
-
+# TODO: this doesn't work well. device doesn't open after creation
 def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_name):
-    device_path_in_userFolder = "./{}".format(dev_name)
-    device_path_relative ="{}{}".format(file_path_to_exe, dev_name)
-    print(device_path_relative)
-    try: # TODO: start here. buggy as fk
-        p = sp.Popen(args=['./bash_mknod', device_path_in_userFolder, str(majorNumber), str(minorNumber)],
-                     cwd=file_path_to_exe,  # needed for device_path
+    device_path_in_userFolder = "./{}".format(dev_name) # DEBUG: erase?
+    # device_path_relative ="{}{}".format(file_path_to_exe, dev_name) # DEBUG: erase?
+    # Name of student as uniqueIdentifer for device name
+    deviceUniqueIdentifer = file_path_to_exe.split("/")[-1]
+    # print(device_path_relative)
+    try:
+        p = sp.Popen(args=['./bash_mknod', deviceUniqueIdentifer, str(majorNumber), str(minorNumber)],
+                     cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
@@ -328,7 +330,8 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
         true_test_name = './tests/output{}.txt'.format(args_test_num)
         with open(test_output_name, 'w+') as testOutputFd:  # ./assignments/Yuval_Checker_999999999/output1.txt
-            if send_message(file_path_to_exe, o_log, test_tuple[0], test_tuple[4], test_tuple[1], test_tuple[2]) == 1:
+            if send_message(file_path_to_exe, o_log,
+                            test_tuple[0], test_tuple[4], test_tuple[1], test_tuple[2]) == 1:
                 print("Send message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
                 points_to_reduct += points_to_reduct_for_test
                 test_errors_str += "message_sender failed. "

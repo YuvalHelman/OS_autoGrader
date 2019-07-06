@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# $1 -> device path
+# $1 -> device name
 # $2 -> majorNumber
 # $3 -> minorNumber
-
+devPath="/dev/charDevice"
+devicePath=${devPath}${$1}
 cd "${0%/*}"
-
-sudo mknod -m 777 ${1} c ${2} ${3}
+sudo rm -f ${1}
+sudo mknod -m 777 devicePath c ${2} ${3}
