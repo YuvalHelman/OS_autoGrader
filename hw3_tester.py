@@ -100,12 +100,14 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
             p = sp.Popen(args=['./message_reader', device_path_Name, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,  # needed for device_path
-                         stdout=output_fd, stderr=output_fd)  # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=log_fd,
+                         shell=True)  # TODO: read to the outputFilePath
             p.wait()
         else:
             p = sp.Popen(args=['./message_reader_true', device_path_Name, str(chID)],
                          cwd=file_path_to_exe,  # needed for device_path
-                         stdout=output_fd, stderr=output_fd)  # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=log_fd,
+                         shell = True) # TODO: read to the outputFilePath
             p.wait()
         if (p.returncode != 0):
             return 1
@@ -121,8 +123,8 @@ def send_message(file_path_to_exe, log_fd, device_path_Name, write_mode, chID, m
         # Using the user's "Message Sender"
         p = sp.Popen(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
                      cwd=file_path_to_exe,  # needed for device_path
-                     stdout=log_fd, stderr=log_fd
-                     )
+                     stdout=log_fd, stderr=log_fd,
+                     shell = True)
         p.wait()
         if (p.returncode != 0):
             return 1
@@ -155,19 +157,6 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, devic
 
 
 def remove_char_device(file_path_to_exe, log_fd, device_path_Name):
-    # deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]  # Student Name
-    # device_path_Name = "/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
-    #print(device_path_Name) # DEBUG
-    # try:
-    #     p = sp.Popen(args=['./src/removefile', device_path_Name],
-    #                  #cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
-    #                  stdout=log_fd, stderr=log_fd
-    #                  )
-    #     p.wait()
-    # except OSError as e:
-    #     print("OSError on remove_char_device: ", e)
-    #     return 1
-
     try:
         p = sp.Popen(args=['sudo rm -f {}'.format(device_path_Name)],
                      #cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
@@ -324,7 +313,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
     arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
         (device_path_Name, 10, "Hello ", minor_num, overwrite_mode),  # ./tests/output0.txt
         (device_path_Name, 10, "World", minor_num, append_mode),  # ./tests/output1.txt
-        (device_path_Name, 10, "Overwritten", minor_num, overwrite_mode),  # ./tests/output2.txt
+        (device_path_Name, 10, "Overwritten###", minor_num, overwrite_mode),  # ./tests/output2.txt
     ]
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
@@ -411,7 +400,7 @@ def build_tests(file_path_to_exe, o_log):
 
     points_to_reduct, test_errors_str = run_tests(o_log, file_path_to_exe, device_path_Name, minor_num)
 
-    #remove_char_device(file_path_to_exe, o_log, device_path_Name) # DEBUG: get it back online
+    remove_char_device(file_path_to_exe, o_log, device_path_Name)
 
     # Run message_reader with the user's file. see if text is similar
     # points_to_reduct_text, test_errors_str_text = test_messageReader_text(o_log, file_path_to_exe, dev_name)
@@ -419,7 +408,7 @@ def build_tests(file_path_to_exe, o_log):
     # points_to_reduct += points_to_reduct_text
     # test_errors_str +=test_errors_str_text
 
-    #remove_module(file_path_to_exe, o_log) # DEBUG: get it back online
+    remove_module(file_path_to_exe, o_log)
 
     print(points_to_reduct, test_errors_str)
 
