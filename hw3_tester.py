@@ -88,8 +88,8 @@ def compile_files(exe_files_path, output_log):
 '''
 
 
-def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_fd):
-    relative_device_path = "./{}".format(dev_name)
+def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID, output_fd):
+
     # print("device_path: ", relative_device_path) # DEBUG
     src_path = "./src/"
     perfect_reader_path = '/home/yuval/Downloads/OS_autoGrader/src/message_reader'
@@ -97,13 +97,13 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_
     try:
         if is_user_file == True:
             # Using the user's "Message reader"
-            p = sp.Popen(args=['./message_reader', relative_device_path, str(chID)],
+            p = sp.Popen(args=['./message_reader', device_path_Name, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,  # needed for device_path
                          stdout=output_fd, stderr=output_fd)  # TODO: read to the outputFilePath
             p.wait()
         else:
-            p = sp.Popen(args=['./message_reader_true', relative_device_path, str(chID)],
+            p = sp.Popen(args=['./message_reader_true', device_path_Name, str(chID)],
                          cwd=file_path_to_exe,  # needed for device_path
                          stdout=output_fd, stderr=output_fd)  # TODO: read to the outputFilePath
             p.wait()
@@ -116,11 +116,10 @@ def read_message(is_user_file, file_path_to_exe, log_fd, dev_name, chID, output_
     return 0
 
 
-def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
-    device_path = "./note{}".format(dev_name)
+def send_message(file_path_to_exe, log_fd, device_path_Name, write_mode, chID, msgStr):
     try:
         # Using the user's "Message Sender"
-        p = sp.Popen(args=['./message_sender', device_path, str(write_mode), str(chID), msgStr],
+        p = sp.Popen(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
                      cwd=file_path_to_exe,  # needed for device_path
                      stdout=log_fd, stderr=log_fd
                      )
@@ -134,12 +133,10 @@ def send_message(file_path_to_exe, log_fd, dev_name, write_mode, chID, msgStr):
     return 0
 
 # TODO: this doesn't work well. device doesn't open after creation
-def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_name):
-
-    deviceUniqueIdentifer = file_path_to_exe.split("/")[-2] # Student Name
-    device_path_Name ="/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
-    print(device_path_Name) # DEBUG
-
+def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, device_path_Name):
+    # deviceUniqueIdentifer = file_path_to_exe.split("/")[-2] # Student Name
+    # device_path_Name ="/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
+    # print(device_path_Name) # DEBUG
     try:
         p = sp.Popen(args=['./bash_mknod', device_path_Name, str(majorNumber), str(minorNumber)],
                      cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
@@ -157,10 +154,10 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
     return 0
 
 
-def remove_char_device(file_path_to_exe, log_fd, dev_name):
-    deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]  # Student Name
-    device_path_Name = "/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
-    print(device_path_Name) # DEBUG
+def remove_char_device(file_path_to_exe, log_fd, device_path_Name):
+    # deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]  # Student Name
+    # device_path_Name = "/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
+    #print(device_path_Name) # DEBUG
     try:
         p = sp.Popen(args=['./src/removefile', device_path_Name],
                      #cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
@@ -309,15 +306,15 @@ points_to_reduct_bug = 5  # TODO: change this to whatever would work with the te
 overwrite_mode, append_mode = 0, 1  # overwrite mode = 0, append_mode = 1
 
 
-def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
+def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
     points_to_reduct = 0
     test_errors_str = ""
 
     # Testing the device!
     arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
-        (dev_name, 10, "Hello ", minor_num, overwrite_mode),  # ./tests/output0.txt
-        (dev_name, 10, "World", minor_num, append_mode),  # ./tests/output1.txt
-        (dev_name, 10, "Overwritten", minor_num, overwrite_mode),  # ./tests/output2.txt
+        (device_path_Name, 10, "Hello ", minor_num, overwrite_mode),  # ./tests/output0.txt
+        (device_path_Name, 10, "World", minor_num, append_mode),  # ./tests/output1.txt
+        (device_path_Name, 10, "Overwritten", minor_num, overwrite_mode),  # ./tests/output2.txt
     ]
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
@@ -402,11 +399,14 @@ def build_tests(file_path_to_exe, o_log):
 
     minor_num = 134
     dev_name = "charDevice"
-    create_char_device(file_path_to_exe, o_log, majorNumber, minor_num, dev_name)
+    deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]  # Student Name
+    device_path_Name = "/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
 
-    points_to_reduct, test_errors_str = run_tests(o_log, file_path_to_exe, dev_name, minor_num)
+    create_char_device(file_path_to_exe, o_log, majorNumber, minor_num, device_path_Name)
 
-    remove_char_device(file_path_to_exe, o_log, dev_name)
+    points_to_reduct, test_errors_str = run_tests(o_log, file_path_to_exe, device_path_Name, minor_num)
+
+    remove_char_device(file_path_to_exe, o_log, device_path_Name)
 
 
     # Run message_reader with the user's file. see if text is similar
