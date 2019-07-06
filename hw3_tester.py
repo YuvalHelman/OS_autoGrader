@@ -14,7 +14,7 @@ p = Path(__file__).resolve()
 def compile_static_files(gen_log):
     files_path = "./src/"
     try:
-        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
+        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader_works.c"
             , "-o", "message_reader_true"],
                      cwd=files_path,
                      stdout=gen_log, stderr=gen_log
@@ -33,17 +33,17 @@ def compile_static_files(gen_log):
 
 def compile_files(exe_files_path, output_log):
     try:
-    #     p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
-    #         , "-o", "message_reader"],
-    #                  cwd=exe_files_path,
-    #                  stdout=output_log, stderr=output_log
-    #                  )
-    #     p.wait()
-    #     os.chmod("{}{}".format(exe_files_path, 'message_reader'),
-    #              stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
-    #     if p.returncode != 0:  # check if compilation works
-    #         print("reader compile failed")  # DEBUG
-    #         return 1 # TODO: see if reader should be even checked..
+        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
+            , "-o", "message_reader"],
+                     cwd=exe_files_path,
+                     stdout=output_log, stderr=output_log
+                     )
+        p.wait()
+        os.chmod("{}{}".format(exe_files_path, 'message_reader'),
+                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
+        if p.returncode != 0:  # check if compilation works
+            print("reader compile failed")  # DEBUG
+            return 1 # TODO: see if reader should be even checked..
         p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_sender.c"
             , "-o", "message_sender"],
                      cwd=exe_files_path,
@@ -95,7 +95,7 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
             p = sp.Popen(args=['./message_reader', device_path_Name, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,
-                         stdout=output_fd, stderr=output_fd)  # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=log_fd)  # TODO: read to the outputFilePath
             p.wait()
         else:
             p = sp.Popen(args=['./message_reader_true', device_path_Name, str(chID)],
@@ -318,7 +318,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
             continue
         # Read with my message_reader and write to: testOutputFd
         with open(test_output_name, 'w+') as testOutputFd:
-            if read_message(False, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], testOutputFd) == 1:
+            if read_message(True, file_path_to_exe, o_log, test_tuple[0], test_tuple[1], testOutputFd) == 1:
                 # DEBUG : change True\False for users\mine message_reader exe
                 print("Read message failed on test {} and user {}".format(args_test_num, file_path_to_exe))
                 points_to_reduct += points_to_reduct_bug
