@@ -100,12 +100,14 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
             p = sp.Popen(args=['./message_reader', device_path_Name, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,  # needed for device_path
-                         stdout=output_fd, stderr=log_fd)  # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=log_fd,
+                         shell=True)  # TODO: read to the outputFilePath
             p.wait()
         else:
             p = sp.Popen(args=['./message_reader_true', device_path_Name, str(chID)],
                          cwd=file_path_to_exe,  # needed for device_path
-                         stdout=output_fd, stderr=log_fd) # TODO: read to the outputFilePath
+                         stdout=output_fd, stderr=log_fd,
+                         shell=True) # TODO: read to the outputFilePath
             p.wait()
         if (p.returncode != 0):
             return 1
@@ -119,12 +121,17 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
 def send_message(file_path_to_exe, log_fd, device_path_Name, write_mode, chID, msgStr):
     try:
         # Using the user's "Message Sender"
+        # p = sp.Popen(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
+        #              cwd=file_path_to_exe,  # needed for device_path
+        #              stdout=log_fd, stderr=log_fd)
+        # p.wait()
+        # if (p.returncode != 0):
+        #     return 1
+
         p = sp.Popen(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
-                     cwd=file_path_to_exe,  # needed for device_path
-                     stdout=log_fd, stderr=log_fd)
-        p.wait()
-        if (p.returncode != 0):
-            return 1
+                      cwd=file_path_to_exe,  # needed for device_path
+                      stdout=log_fd, stderr=log_fd,
+                     shell=True)
     except OSError as e:
         print("send_message failed: ", e)
         return 1
