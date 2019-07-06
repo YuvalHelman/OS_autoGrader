@@ -102,8 +102,8 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
                          cwd=file_path_to_exe,
                          stdout=output_fd, stderr=log_fd) # TODO: read to the outputFilePath
             p.wait()
-        if (p.returncode != 0):
-            return 1
+      #  if (p.returncode != 0):
+       #     return 1
     except OSError as e:
         print("read_message failed: ", e)
         return 1
@@ -118,8 +118,8 @@ def send_message(file_path_to_exe, log_fd, device_path_Name, write_mode, chID, m
                      cwd=file_path_to_exe,
                      stdout=log_fd, stderr=log_fd)
         p.wait()
-        if (p.returncode != 0):
-            return 1
+        # if (p.returncode != 0):
+        #     return 1
     except OSError as e:
         print("send_message failed: ", e)
         return 1
