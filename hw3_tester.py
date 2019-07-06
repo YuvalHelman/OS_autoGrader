@@ -142,15 +142,13 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
     # print(device_path_relative)
     try:
         p = sp.Popen(args=['./bash_mknod', deviceUniqueIdentifer, str(majorNumber), str(minorNumber)],
-                     cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
+                     # cwd='/dev/',  # needed for device_path DEBUG: erase later?
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
         if (p.returncode == 1):
             print("mknod failed for user: ", file_path_to_exe)
             return 1, -1
-        # os.chmod("{}".format(device_path_relative),
-        #           stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
     except OSError as e:
         print("mknod exception: ", e)
         return 1, -1
