@@ -139,6 +139,7 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
     # device_path_relative ="{}{}".format(file_path_to_exe, dev_name) # DEBUG: erase?
     # Name of student as uniqueIdentifer for device name
     deviceUniqueIdentifer = file_path_to_exe.split("/")[-1]
+    print(deviceUniqueIdentifer)
     # print(device_path_relative)
     try:
         p = sp.Popen(args=['./bash_mknod', deviceUniqueIdentifer, str(majorNumber), str(minorNumber)],
