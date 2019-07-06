@@ -159,6 +159,7 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
 def remove_char_device(file_path_to_exe, log_fd, dev_name):
     deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]  # Student Name
     device_path_Name = "/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
+    print(device_path_Name) # DEBUG
     try:
         p = sp.Popen(args=['sudo rm -f {}'.format(device_path_Name)],
                      # cwd=file_path_to_exe,  # needed for device_path
