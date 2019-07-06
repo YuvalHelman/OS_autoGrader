@@ -147,28 +147,20 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, dev_n
         p.wait()
         if (p.returncode == 1):
             print("mknod failed for user: ", file_path_to_exe)
-            return 1, -1
+            return 1
     except OSError as e:
         print("mknod exception: ", e)
-        return 1, -1
-
-    # p = sp.Popen(args=['sudo mknod', '-m 777', device_path, 'c', str(majorNumber), str(minorNumber)],
-    #              cwd=file_path_to_exe,
-    #              stdout=log_fd, stderr=log_fd)
-    # p.wait()
-    # if (p.returncode != 0):
-    #     print("mknod failed", file_path_to_exe)
-    #     return 1
+        return 1
 
     print("create char device success")  # DEBUG
     return 0
 
 
-def remove_char_device(file_path_to_exe, log_fd, dev_name):
-    device_path = './{}'.format(dev_name)
+def remove_char_device(log_fd, dev_name):
+    device_path = '/dev/{}'.format(dev_name)
     try:
         p = sp.Popen(args=['sudo rm -f {}'.format(device_path)],
-                     cwd=file_path_to_exe,  # needed for device_path
+                     # cwd=file_path_to_exe,  # needed for device_path
                      stdout=log_fd, stderr=log_fd)
         p.wait()
     except OSError as e:
@@ -360,9 +352,6 @@ def run_tests(o_log, file_path_to_exe, dev_name, minor_num):
         true_log.close()
         testOutputFd.close()
 
-
-    remove_char_device(file_path_to_exe, o_log, dev_name)
-
     return points_to_reduct, test_errors_str
 
 def test_messageReader_text(o_log, file_path_to_exe, dev_name):
@@ -409,12 +398,12 @@ def build_tests(file_path_to_exe, o_log):
 
     minor_num = 134
     dev_name = "charDevice"
-    try:
-        create_char_device(file_path_to_exe, o_log, majorNumber, minor_num, dev_name)
-    except OSError as e:
-        print("OSError create_char_device: ", e)
+    create_char_device(file_path_to_exe, o_log, majorNumber, minor_num, dev_name)
 
     points_to_reduct, test_errors_str = run_tests(o_log, file_path_to_exe, dev_name, minor_num)
+
+    remove_char_device(o_log, dev_name)
+
 
     # Run message_reader with the user's file. see if text is similar
     # points_to_reduct_text, test_errors_str_text = test_messageReader_text(o_log, file_path_to_exe, dev_name) # debug: forgot why i did this lel
