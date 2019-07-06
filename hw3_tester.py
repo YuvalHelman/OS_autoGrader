@@ -128,10 +128,10 @@ def send_message(file_path_to_exe, log_fd, device_path_Name, write_mode, chID, m
         # if (p.returncode != 0):
         #     return 1
 
-        p = sp.Popen(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
+        p = sp.Popen(args=['pwd'],
                       cwd=file_path_to_exe,  # needed for device_path
                       stdout=log_fd, stderr=log_fd,
-                     shell=True)
+                      shell=True)
     except OSError as e:
         print("send_message failed: ", e)
         return 1
