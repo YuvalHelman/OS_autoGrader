@@ -26,19 +26,20 @@ def zip_out_folders():
     full_stud_name = ""
     try:
         for file in os.listdir(directory_str):
-            splitted_filename = file.split("_")
-            print(file)  # DEBUG
-            # Get FirstName_LastName_ID string
-            full_stud_name = splitted_filename[0].split(" ")[0] + "_" +\
-                             splitted_filename[0].split(" ")[1] + "_" + splitted_filename[4]
+            if (file is not ".gitignore"):
+                splitted_filename = file.split("_")
+                print(file)  # DEBUG
+                # Get FirstName_LastName_ID string
+                full_stud_name = splitted_filename[0].split(" ")[0] + "_" +\
+                                 splitted_filename[0].split(" ")[1] + "_" + splitted_filename[4]
 
-            # Create a new folder with the students name_ID
-            directory_to_extract_to = "./assignments/" + full_stud_name
-            os.mkdir(directory_to_extract_to, 0o755)  # linux - mkdir , windows - md
-            # Zip the files into the student directory
-            zip_ref = zip.ZipFile("./zip_folders/" + file, 'r')
-            zip_ref.extractall(directory_to_extract_to)
-            zip_ref.close()
+                # Create a new folder with the students name_ID
+                directory_to_extract_to = "./assignments/" + full_stud_name
+                os.mkdir(directory_to_extract_to, 0o755)  # linux - mkdir , windows - md
+                # Zip the files into the student directory
+                zip_ref = zip.ZipFile("./zip_folders/" + file, 'r')
+                zip_ref.extractall(directory_to_extract_to)
+                zip_ref.close()
     except OSError as e:
         print("Error zipping files. changes not reverted")
     except:
