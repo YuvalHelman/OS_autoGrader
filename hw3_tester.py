@@ -11,6 +11,7 @@ import utils
 
 p = Path(__file__).resolve()
 
+
 def compile_static_files(gen_log):
     files_path = "./src/"
     try:
@@ -43,6 +44,7 @@ def compile_static_files(gen_log):
 
     return 0
 
+
 def compile_files(exe_files_path, output_log):
     try:
         p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
@@ -55,7 +57,7 @@ def compile_files(exe_files_path, output_log):
                  stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
         if p.returncode != 0:  # check if compilation works
             print("reader compile failed")  # DEBUG
-            return 1 # TODO: see if reader should be even checked..
+            return 1
         p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_sender.c"
             , "-o", "message_sender"],
                      cwd=exe_files_path,
@@ -114,8 +116,8 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
                          cwd=file_path_to_exe,
                          stdout=output_fd, stderr=log_fd)
             p.wait()
-      #  if (p.returncode != 0):
-       #     return 1
+    #  if (p.returncode != 0):
+    #     return 1
     except OSError as e:
         print("read_message failed: ", e)
         return 1
@@ -144,7 +146,7 @@ def send_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, write
 
     return 0
 
-# TODO: this doesn't work well. device doesn't open after creation
+
 def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, device_path_Name):
     # deviceUniqueIdentifer = file_path_to_exe.split("/")[-2] # Student Name
     # device_path_Name ="/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
@@ -169,7 +171,7 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, devic
 def remove_char_device(file_path_to_exe, log_fd, device_path_Name):
     try:
         p = sp.Popen(args=['sudo rm -f {}'.format(device_path_Name)],
-                     #cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
+                     # cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
                      stdout=log_fd, stderr=log_fd, shell=True
                      )
         p.wait()
@@ -273,9 +275,6 @@ def load_module(file_path_to_exe, log_fd):
         print("4;")  # DEBUG
         return 1, -1
 
-    # Remove the files created if needed # TODO mabye?
-    # os.remove("'dmesg_file.txt'")
-
     print("load module success")  # DEBUG
     return 0, majorNumber
 
@@ -330,7 +329,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
         (device_path_Name, 10, "Overwritten", minor_num, overwrite_mode),  # ./tests/output2.txt
         (device_path_Name, 20, "##new123", minor_num, append_mode),  # ./tests/output3.txt
         (device_path_Name, 20, "##appended##", minor_num, append_mode),  # ./tests/output4.txt
-        (device_path_Name, 10, "Overwritten", minor_num, overwrite_mode),  # ./tests/output5.txt
+        (device_path_Name, 10, "123ow#", minor_num, overwrite_mode),  # ./tests/output5.txt
     ]
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
@@ -353,14 +352,14 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
         true_fd = open(true_test_name, 'r')
         testOutputFd = open(test_output_name, 'r')
         true_string = true_fd.readline()
-        output_string = testOutputFd.readlines() # This is a list!
+        output_string = testOutputFd.readlines()  # This is a list!
 
         if true_string:
             if (output_string):
-                print('user string: {}\ntrue string: {}'.format(output_string, true_string)) # DEBUG
+                print('user string: {}\ntrue string: {}'.format(output_string, true_string))  # DEBUG
                 OKflag = False
                 for line_str in output_string:
-                    print("{} ## {}".format(line_str, true_string)) # Debug
+                    print("{} ## {}".format(line_str, true_string))  # Debug
                     if (true_string in line_str):
                         OKflag = True
                 if OKflag is False:
@@ -378,6 +377,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
 
     return points_to_reduct, test_errors_str
 
+
 def test_messageReader_text(o_log, file_path_to_exe, dev_name):
     test_errors_str = ""
     points_to_reduct = 0
@@ -386,7 +386,7 @@ def test_messageReader_text(o_log, file_path_to_exe, dev_name):
         test_output_name = file_path_to_exe + 'outputUserReader.txt'
         with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval Checker_999999999/output1.txt
             # Check If the user's message_reader is valid (Most of them aren't...) :(
-            if send_message(file_path_to_exe, o_log, dev_name, overwrite_mode, minor_num , "messageToBeRead") == 1:
+            if send_message(file_path_to_exe, o_log, dev_name, overwrite_mode, minor_num, "messageToBeRead") == 1:
                 test_errors_str += "message_sender doesn't work. "
                 points_to_reduct += points_to_reduct_for_test
             # Read with user's message_reader
@@ -397,6 +397,7 @@ def test_messageReader_text(o_log, file_path_to_exe, dev_name):
         print("OSError First One: ", e)
 
     return points_to_reduct, test_errors_str
+
 
 def build_tests(file_path_to_exe, o_log):
     '''
@@ -446,6 +447,8 @@ def iterate_students_directories():
 
     for student_dir in os.listdir(directory_str):  # iterate on all student folders!
         general_log.write("Starting on: {}\n".format(student_dir))
+        if (student_dir == ".gitignore"):
+            continue
         splitted_filename = student_dir.split("_")
         student_name = splitted_filename[0] + " " + splitted_filename[1]
         student_id = splitted_filename[2]
