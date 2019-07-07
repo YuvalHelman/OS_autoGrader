@@ -1,7 +1,8 @@
 import csv
 import os
-import zipfile as zip
 import sys
+import zipfile as zip
+
 
 def open_names_csv():
     # Open a new names.csv for writing the results.
@@ -10,7 +11,6 @@ def open_names_csv():
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writerow({'name': 'FULL NAME', 'id': 'ID', 'grade': 'GRADE', 'comment': 'COMMENT'})
-
 
 
 def write_to_csv(name, id, grade, comment_string):
@@ -24,13 +24,14 @@ def write_to_csv(name, id, grade, comment_string):
 def zip_out_folders():
     directory_str = "./zip_folders/"
     full_stud_name = ""
+    count = 0
     try:
         for file in os.listdir(directory_str):
             splitted_filename = file.split("_")
             if (splitted_filename[0] != ".gitignore"):
                 print(file)  # DEBUG
                 # Get FirstName_LastName_ID string
-                full_stud_name = splitted_filename[0].split(" ")[0] + "_" +\
+                full_stud_name = splitted_filename[0].split(" ")[0] + "_" + \
                                  splitted_filename[0].split(" ")[1] + "_" + splitted_filename[4]
 
                 # Create a new folder with the students name_ID
@@ -40,6 +41,8 @@ def zip_out_folders():
                 zip_ref = zip.ZipFile("./zip_folders/" + file, 'r')
                 zip_ref.extractall(directory_to_extract_to)
                 zip_ref.close()
+                count += 1
+        print("num of zips: {}".format(count))
     except OSError as e:
         print("Error zipping files. changes not reverted")
     except:
@@ -58,10 +61,10 @@ def build_comments(is_mem_leak, is_test_errors):
 
     return student_comment
 
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         argStr = sys.argv[1]
         if argStr == "zip":
             zip_out_folders()
             print("zipping completed")
-

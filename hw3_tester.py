@@ -359,7 +359,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
                 print('user string: {}\ntrue string: {}'.format(output_string, true_string))  # DEBUG
                 OKflag = False
                 for line_str in output_string:
-                    print("{} ## {}".format(line_str, true_string))  # Debug
+                    #print("{} ## {}".format(line_str, true_string))  # Debug
                     if (true_string in line_str):
                         OKflag = True
                 if OKflag is False:
