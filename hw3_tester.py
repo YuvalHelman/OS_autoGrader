@@ -305,10 +305,10 @@ def remove_module(file_path_to_exe, log_fd):
         p.wait()
         if (p.returncode == 1):
             print("rmmod failed for user:", file_path_to_exe)
-            sys.exit()  # DEBUG: if I cant remove the Module, I shouldn't run the other directories until its off
+            return 1  # DEBUG: if I cant remove the Module, I shouldn't run the other directories until its off
     except OSError as e:
         print("OSError remove_module: ", e)
-        sys.exit()  # DEBUG: if I cant remove the Module, I shouldn't run the other directories until its off
+        return 1  # DEBUG: if I cant remove the Module, I shouldn't run the other directories until its off
 
     print("remove module success")  # DEBUG
     return 0
