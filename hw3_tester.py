@@ -347,25 +347,29 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
                 test_errors_str += "message_reader failed. "
                 continue
         # Test output file
-        true_log = open(true_test_name, 'r')
+        true_fd = open(true_test_name, 'r')
         testOutputFd = open(test_output_name, 'r')
-        true_string = true_log.readline()
-        output_string = testOutputFd.readline()
+        true_string = true_fd.readline()
+        output_string = testOutputFd.readlines() # This is a list!
 
-        if (output_string and true_string):
-            print('user string: {}.'.format(output_string))
-            print('true string: {}.'.format(true_string))
-            if true_string.find(output_string) == -1:
+        if true_string:
+            if (output_string):
+                print('user string: {}\n true string: {}'.format(output_string, true_string)) # DEBUG
+                OKflag = False
+                for line_str in output_string:
+                    print(line_str) # DEBUG
+                    OKflag = True if (true_string in line_str) else False
+                if OKflag is False:
+                    points_to_reduct += points_to_reduct_for_test
+                    test_errors_str += "test {} failed. ".format(args_test_num)
+                    o_log.write("test {} failed\n".format(args_test_num))
+                else:
+                    o_log.write("test {} succeeded\n".format(args_test_num))
+            else:
                 points_to_reduct += points_to_reduct_for_test
                 test_errors_str += "test {} failed. ".format(args_test_num)
-                o_log.write("test {} failed".format(args_test_num))
-            else:
-                o_log.write("test {} succeeded".format(args_test_num))
-        else:
-            points_to_reduct += points_to_reduct_for_test
-            test_errors_str += "test {} failed. ".format(args_test_num)
 
-        true_log.close()
+        true_fd.close()
         testOutputFd.close()
 
     return points_to_reduct, test_errors_str
