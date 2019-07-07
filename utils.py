@@ -26,8 +26,8 @@ def zip_out_folders():
     full_stud_name = ""
     try:
         for file in os.listdir(directory_str):
-            if (file is not ".gitignore"):
-                splitted_filename = file.split("_")
+            splitted_filename = file.split("_")
+            if (splitted_filename[0] != ".gitignore"):
                 print(file)  # DEBUG
                 # Get FirstName_LastName_ID string
                 full_stud_name = splitted_filename[0].split(" ")[0] + "_" +\
