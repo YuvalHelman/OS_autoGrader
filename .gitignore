@@ -1,6 +1,4 @@
 .idea/
-zip_files/**
-assignments/**
 hw3/
 names.csv
 **/__pycache__/
