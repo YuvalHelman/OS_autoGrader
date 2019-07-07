@@ -46,7 +46,7 @@ def zip_out_folders():
     except OSError as e:
         print("Error zipping files. changes not reverted")
     except:
-        print(full_stud_name)
+        print("zipping got stuck on: ", full_stud_name)
 
 
 def build_comments(is_mem_leak, is_test_errors):
