@@ -354,10 +354,9 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
 
         if true_string:
             if (output_string):
-                print('user string: {}\n true string: {}'.format(output_string, true_string)) # DEBUG
+                print('user string: {}\ntrue string: {}'.format(output_string, true_string)) # DEBUG
                 OKflag = False
                 for line_str in output_string:
-                    print(line_str) # DEBUG
                     OKflag = True if (true_string in line_str) else False
                 if OKflag is False:
                     points_to_reduct += points_to_reduct_for_test
