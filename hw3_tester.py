@@ -314,7 +314,7 @@ def remove_module(file_path_to_exe, log_fd):
     return 0
 
 
-points_to_reduct_for_test = 3  # TODO: change this to whatever would work with the tests
+points_to_reduct_for_test = 2  # TODO: change this to whatever would work with the tests
 points_to_reduct_bug = 5  # TODO: change this to whatever would work with the tests
 overwrite_mode, append_mode = 0, 1  # overwrite mode = 0, append_mode = 1
 
@@ -328,6 +328,9 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
         (device_path_Name, 10, "Hello ", minor_num, overwrite_mode),  # ./tests/output0.txt
         (device_path_Name, 10, "World", minor_num, append_mode),  # ./tests/output1.txt
         (device_path_Name, 10, "Overwritten", minor_num, overwrite_mode),  # ./tests/output2.txt
+        (device_path_Name, 20, "##new123", minor_num, append_mode),  # ./tests/output3.txt
+        (device_path_Name, 20, "##appended##", minor_num, append_mode),  # ./tests/output4.txt
+        (device_path_Name, 10, "Overwritten", minor_num, overwrite_mode),  # ./tests/output5.txt
     ]
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
@@ -411,9 +414,9 @@ def build_tests(file_path_to_exe, o_log):
     if (majorNumber <= 0):
         print("debug here majNum <0. error is: ", sys.exc_info()[0])  # DEBUG
         remove_module(file_path_to_exe, o_log)
-        return 50, "Major Number Parsing from Syslog failed. "
+        return 40, "Major Number Parsing from Syslog failed. "
 
-    minor_num = 134
+    minor_num = 20
     dev_name = "charDevice"
     deviceUniqueIdentifer = file_path_to_exe.split("/")[-2]  # Student Name
     device_path_Name = "/dev/{}{}".format(dev_name, deviceUniqueIdentifer)
