@@ -23,7 +23,7 @@ def write_to_csv(name, id, grade, comment_string):
 
 def zip_out_folders():
     directory_str = "./zip_files/"
-
+    full_stud_name = ""
     try:
         for file in os.listdir(directory_str):
             splitted_filename = file.split("_")
@@ -41,6 +41,8 @@ def zip_out_folders():
             zip_ref.close()
     except OSError as e:
         print("Error zipping files. changes not reverted")
+    except:
+        print(full_stud_name)
 
 
 def build_comments(is_mem_leak, is_test_errors):
