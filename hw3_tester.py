@@ -357,7 +357,9 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
                 print('user string: {}\ntrue string: {}'.format(output_string, true_string)) # DEBUG
                 OKflag = False
                 for line_str in output_string:
-                    OKflag = True if (true_string in line_str) else False
+                    print("{} ## {}".format(line_str, true_string))
+                    if (true_string in line_str):
+                        OKflag = True
                 if OKflag is False:
                     points_to_reduct += points_to_reduct_for_test
                     test_errors_str += "test {} failed. ".format(args_test_num)
