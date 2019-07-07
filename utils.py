@@ -22,7 +22,7 @@ def write_to_csv(name, id, grade, comment_string):
 
 
 def zip_out_folders():
-    directory_str = "./zip_files/"
+    directory_str = "./zip_folders/"
     full_stud_name = ""
     try:
         for file in os.listdir(directory_str):
@@ -36,7 +36,7 @@ def zip_out_folders():
             directory_to_extract_to = "./assignments/" + full_stud_name
             os.mkdir(directory_to_extract_to, 0o755)  # linux - mkdir , windows - md
             # Zip the files into the student directory
-            zip_ref = zip.ZipFile("./zip_files/" + file, 'r')
+            zip_ref = zip.ZipFile("./zip_folders/" + file, 'r')
             zip_ref.extractall(directory_to_extract_to)
             zip_ref.close()
     except OSError as e:
