@@ -357,7 +357,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
                 print('user string: {}\ntrue string: {}'.format(output_string, true_string)) # DEBUG
                 OKflag = False
                 for line_str in output_string:
-                    print("{} ## {}".format(line_str, true_string))
+                    print("{} ## {}".format(line_str, true_string)) # Debug
                     if (true_string in line_str):
                         OKflag = True
                 if OKflag is False:
@@ -425,13 +425,6 @@ def build_tests(file_path_to_exe, o_log):
     remove_char_device(file_path_to_exe, o_log, device_path_Name)
     remove_module(file_path_to_exe, o_log)
 
-    # Run message_reader with the user's file. see if text is similar
-    # points_to_reduct_text, test_errors_str_text = test_messageReader_text(o_log, file_path_to_exe, dev_name)
-    #  debug: forgot why i did this lel
-    # points_to_reduct += points_to_reduct_text
-    # test_errors_str +=test_errors_str_text
-
-
     print(points_to_reduct, test_errors_str)
 
     return points_to_reduct, test_errors_str
@@ -468,7 +461,7 @@ def iterate_students_directories():
                     print("student {} ".format(student_name), "compilation successful")
                     points_to_reduct, test_errors_str = build_tests(stud_dir_path, output_log)
                     student_GRADE -= points_to_reduct
-                    print("students grade: ", student_GRADE)
+                    print("student grade: ", student_GRADE)
                     utils.write_to_csv(student_name, student_id, student_GRADE, test_errors_str)
         except OSError as e:
             print("OSError1: ", e)

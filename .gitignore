@@ -1,8 +1,9 @@
 .idea/
-assignments/
-zip_files/
+zip_files/**
+assignments/**
 hw3/
 names.csv
 **/__pycache__/
 compile_log.txt
 valgrind_log.txt
+BadStudents/
