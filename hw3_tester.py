@@ -463,13 +463,13 @@ def iterate_students_directories():
                 compiledRet = compile_files(stud_dir_path, output_log)
                 if (compiledRet != 0):
                     print("{}".format(student_name), " Compilation Failed")
-                    # write_to_csv(student_name, student_id, 0, 'Compilation error')
+                    utils.write_to_csv(student_name, student_id, 0, 'Compilation error')
                 else:  # tests
                     print("student {} ".format(student_name), "compilation successful")
                     points_to_reduct, test_errors_str = build_tests(stud_dir_path, output_log)
                     student_GRADE -= points_to_reduct
                     print("students grade: ", student_GRADE)
-                    # write_to_csv(student_name, student_id, student_GRADE, test_errors_str)
+                    utils.write_to_csv(student_name, student_id, student_GRADE, test_errors_str)
         except OSError as e:
             print("OSError1: ", e)
         except ValueError as e2:
