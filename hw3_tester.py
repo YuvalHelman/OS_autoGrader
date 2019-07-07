@@ -355,7 +355,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
         if (output_string and true_string):
             print('user string: {}.'.format(output_string))
             print('true string: {}.'.format(true_string))
-            if (true_string != output_string):
+            if true_string.find(output_string) == -1:
                 points_to_reduct += points_to_reduct_for_test
                 test_errors_str += "test {} failed. ".format(args_test_num)
                 o_log.write("test {} failed".format(args_test_num))
@@ -405,6 +405,7 @@ def build_tests(file_path_to_exe, o_log):
     print("Major number: ", majorNumber)  # DEBUG
     if (majorNumber <= 0):
         print("debug here majNum <0. error is: ", sys.exc_info()[0])  # DEBUG
+        remove_module(file_path_to_exe, o_log)
         return 50, "Major Number Parsing from Syslog failed. "
 
     minor_num = 134
