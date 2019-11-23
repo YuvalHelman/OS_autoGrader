@@ -1,0 +1,43 @@
+# ---------------------------------------------
+# a Page size is 4KB, so the first 12 bits specify it
+#
+#           PHYSICAL PAGES INFO:
+# The size of a page table entry is 64 bits. Bit 0 is the
+# valid bit. Bits 1–11 are unused and must be set to zero. (This means that our target CPU does
+# not implement page access rights.) The top 52 bits contain the page frame number that this entry
+# points to,
+#
+#           Virtual Pages Info:
+# The virtual address size of our hardware is 64 bits, of which only the lower 57 bits are
+# used for translation. The top 7 bits are guaranteed to be identical to bit 56, i.e., they
+# are either all ones or all zeroes.
+#
+#                             7     +     (45)            +   12
+#  Virtual Page structure: sign-ext +  5 layers of 9 bits + offset
+#
+# Page Tables maps 'virtual pages' to 'physical pages' ( VPN -> PPN)
+#
+#       Two Functions on OS.c:
+# 1. alloc_page_frame(void) : allocate a physical page and return its physical page number.
+#
+# 2. phys_to_virt(uint64_t phys_addr) : The valid inputs to phys to virt() are addresses that reside in
+# physical pages that were previously returned by alloc page frame(). If it is called with an invalid input,
+# it returns NULL.
+#
+#
+#       Two function to check:
+# 1. void page table update(uint64 t pt, uint64 t vpn, uint64 t ppn):
+#    pt - the physical page number (returned from alloc_page_frame() )
+#    vpn: the virtual page number to map\unmap
+#    ppn: NO_MAPPING means destroy a mapping. otherwise, the physical page number that vpn should be mapped to.
+#   -- This function creates\destroys virtual memory mapping in a page table.
+#
+# 2. uint64 t page table query(uint64 t pt, uint64 t vpn):
+#    This function returns the physical page number that vpn is mapped to, or NO MAPPING if no
+#    mapping exists. The meaning of the pt argument is the same as with page table update().
+#
+#
+#
+#
+# ---------------------------------------------
+
