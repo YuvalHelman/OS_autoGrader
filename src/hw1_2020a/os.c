@@ -21,7 +21,7 @@
 
 /* 2^20 pages ought to be enough for anybody */
 #define NPAGES	(1024*1024)
-#define EXIT_FAILURE 1
+#define EXIT_FAILED -1
 #define EXIT_SUCCESS 0
 
 static void* pages[NPAGES];
@@ -61,131 +61,6 @@ void* phys_to_virt(uint64_t phys_addr)
 }
 
 // TESTS FUNCTIONS
-
-//void assert_equal(uint64_t received, uint64_t expected) {
-//	static int counter = 0;
-//
-//	if (expected != received) {
-//		printf("\n\033[0;31mFailed test!\nExpected \033[0m\033[0;32m%"PRIx64"\033[0m\033[0;31m)"
-//				" and received \033[0m\033[0;33m%"PRIx64"\033[0m\033[0;31m.\033[0m\n", expected, received);
-//
-//		void* callstack[128];
-//  		int i, frames = backtrace(callstack, 128);
-//  		char** strs = backtrace_symbols(callstack, frames);
-//		printf("\033[0;36m(Almost readable) stacktrace\n");
-//  		for (i = 0; i < frames; ++i) {
-//    			printf("%s\n", strs[i]);
-//  		}
-//		printf("\033[0m\n");
-//  		free(strs);
-//
-//		assert(0);
-//	}
-//
-//	if (counter % 500 == 0)
-//		printf("\033[0;32m.\033[0m");
-//	counter++;
-//}
-//
-//uint64_t get_random(uint64_t mask) {
-//	return (uint64_t) rand() & mask;
-//}
-//
-//
-//int in_array(uint64_t *arr, int size, uint64_t value) {
-//	for (int i = 0; i < size; i++)
-//		if (arr[i] == value)
-//			return 1;
-//	return 0;
-//}
-//
-//
-//void get_random_list(uint64_t **out, int size, uint64_t mask) {
-//	*out = calloc(size, sizeof(uint64_t));
-//	uint64_t *arr = *out;
-//	int count = 0;
-//	uint64_t val;
-//
-//	while (count < size) {
-//		val = get_random(mask);
-//
-//		if (!in_array(arr, count, val)) {
-//			arr[count] = val;
-//			count++;
-//		}
-//	}
-//}
-//
-//uint64_t get_random_vpn() {
-//	return (uint64_t) get_random(VPN_MASK);
-//}
-//
-//uint64_t get_random_ppn() {
-//	return (uint64_t) get_random(VPN_MASK);
-//}
-//
-//void update_random_and_check(uint64_t pt) {
-//	uint64_t vpn = get_random_vpn();
-//	uint64_t ppn = get_random_ppn();
-//
-//	if (rand() % 10 < 3)
-//		ppn = NO_MAPPING;
-//
-//	page_table_update(pt, vpn, ppn);
-//	assert_equal(page_table_query(pt, vpn), ppn);
-//}
-//
-//void update_many_with_prefix(uint64_t pt) {
-//	int prefix = (rand() % 45) + 1;
-//	uint64_t mask = pow(2, prefix + 1) - 1;
-//	uint64_t vpn_mask = pow(2, (45 - prefix) + 1) - 1;
-//	int amount = (rand() % 20) + 2;
-//
-//	if (amount > vpn_mask / 2)
-//		amount = vpn_mask / 2;
-//
-//	uint64_t block = get_random(mask) << prefix;
-//	uint64_t* vpn_arr;
-//	uint64_t* ppn_arr = malloc(sizeof(uint64_t) * amount);
-//
-//	get_random_list(&vpn_arr, amount, vpn_mask);
-//	for (int i = 0; i < amount; i++) {
-//		vpn_arr[i] = block + vpn_arr[i];
-//		ppn_arr[i] = get_random_ppn();
-//
-//		page_table_update(pt, vpn_arr[i], ppn_arr[i]);
-//		assert_equal(page_table_query(pt, vpn_arr[i]), ppn_arr[i]);
-//	}
-//
-//	for (int i = 0; i < amount; i++) {
-//		uint64_t value = page_table_query(pt, vpn_arr[i]);
-//		uint64_t expected = ppn_arr[i];
-//		if (value != expected) {
-//			printf("Set values:\n");
-//			for (int j = 0; j < amount; j++)
-//				printf("page_table[%"PRIx64"] = %"PRIx64"\n", vpn_arr[j], ppn_arr[j]);
-//			printf("\nFailed on index %d,\ngot value %"PRIx64" instead of %"PRIx64"\n", i, value, expected);
-//			assert(0);
-//		}
-//	}
-//
-//	free(vpn_arr);
-//	free(ppn_arr);
-//}
-//
-//void perform_random_move(uint64_t pt) {
-//	int option = rand() % 2;
-//
-//	switch (option) {
-//		case 0:
-//			update_random_and_check(pt);
-//			break;
-//		case 1:
-//			update_many_with_prefix(pt);
-//			break;
-//	}
-//
-//}
 
 void tester_update_ppn_mapping(uint64_t* vpn_slicing, uint64_t* new_pt, uint64_t ppn){
     // Helper function for tester_page_table_update()
@@ -268,21 +143,18 @@ uint64_t tester_page_table_query(uint64_t pt, uint64_t vpn){
 
 
 int test_sanity_check(uint64_t pt, uint64_t vpn, uint64_t ppn) {
+    /* Tests the most basic functionality of the functions */
     if(page_table_query(pt, vpn) != NO_MAPPING){
-        printf("basic functionality fails. \n");
-        return 1;
+        return EXIT_FAILED;
     }
     page_table_update(pt, vpn, ppn);
 	if(page_table_query(pt, vpn) != ppn) {
-	    printf("basic functionality fails. \n");
-	    return 1;
+	    return EXIT_FAILED;
 	}
 	page_table_update(pt, vpn, NO_MAPPING);
 	if(page_table_query(pt, vpn) != NO_MAPPING) {
-	    printf("basic functionality fails. \n");
-	    return 1;
+	    return EXIT_FAILED;
 	}
-
 	return 0;
 }
 
@@ -294,12 +166,12 @@ int test_override_mapping(uint64_t pt, uint64_t vpn, uint64_t ppn) {
     page_table_update(pt, vpn, ppn);
 	if(tester_page_table_query(pt, vpn) != ppn) {
 	    printf("basic functionality fails. \n");
-	    return 1;
+	    return EXIT_FAILED;
 	}
 	page_table_update(pt, vpn, different_ppn); // a different ppn
 	if(tester_page_table_query(pt, vpn) != different_ppn) {
 	    printf("test_override_mapping failed. \n");
-	    return 1;
+	    return EXIT_FAILED;
 	}
 
 	return 0;
@@ -318,15 +190,15 @@ int test_override_prefix_similar_vpn(uint64_t pt) {
 
     page_table_update(pt, vpn, ppn); // map a vpn
 	if(tester_page_table_query(pt, vpn) != ppn) {
-	    return 1;
+	    return EXIT_FAILED;
 	}
 	page_table_update(pt, similar_prefix_vpn, different_ppn); // map a vpn with a similar prefix
 	if(tester_page_table_query(pt, similar_prefix_vpn) != different_ppn) {
-	    return 1;
+	    return EXIT_FAILED;
 	}
     if(tester_page_table_query(pt, vpn) != ppn) { // check if first vpn not overridden
     printf("test_override_prefix_similar_vpn failed. \n");
-	    return 1;
+	    return EXIT_FAILED;
 	}
 	return 0;
 }
@@ -340,14 +212,14 @@ int get_leaf_valid_bit(uint64_t pt, uint64_t vpn) {
 
     new_pt = phys_to_virt(pt<<12); // #frame -> PTE fromat
     if(new_pt == NULL) {
-            return EXIT_FAILURE;
+            return EXIT_FAILED;
         }
     int i;
     uint64_t vpn_slice=0;
     for (i=0; i<5; i++){
         vpn_slice = vpn_slicing[i];
         if (new_pt[vpn_slice]%2==0){
-            return EXIT_FAILURE;
+            return EXIT_SUCCESS;
         }
         if(i==4){
             break;
@@ -356,34 +228,85 @@ int get_leaf_valid_bit(uint64_t pt, uint64_t vpn) {
         new_pt_frame_num = new_pt_frame_num << 12;
         new_pt = phys_to_virt(new_pt_frame_num);
         if(new_pt == NULL) {
-            return EXIT_FAILURE;
+            return EXIT_FAILED;
         }
 
     }
-    valid_bit = new_pt[vpn_slice] & 0x1;
-    return valid_bit; // change Valid bit to 0
+    valid_bit = new_pt[vpn_slice] % 2;
+    return valid_bit;
 }
 
 int test_mark_leaf_invalid(uint64_t pt, uint64_t vpn, uint64_t ppn) {
-    /* Tests a mapping that was overriden with another ppn */
+    /* Tests a mapping that was erased is also marked with VALID_BIT=0 */
     page_table_update(pt, vpn, ppn);
 	if(tester_page_table_query(pt, vpn) != ppn) {
 	    printf("basic functionality fails. \n");
-	    return EXIT_FAILURE;
+	    return EXIT_FAILED;
 	}
 	page_table_update(pt, vpn, NO_MAPPING);
 	if(tester_page_table_query(pt, vpn) != NO_MAPPING) {
 	    printf("basic functionality fails. \n");
-	    return EXIT_FAILURE;
+	    return EXIT_FAILED;
 	}
 	// Iterate
-	if(get_leaf_valid_bit(pt, vpn) == 1) { // valid bit wasn't turned off together with NO_MAPPING on #frame.
+	int leaf_valid_bit = get_leaf_valid_bit(pt, vpn);
+	if(leaf_valid_bit == 1 || leaf_valid_bit == EXIT_FAILED) { // valid bit wasn't turned off together with NO_MAPPING on #frame.
 	    printf("test_mark_leaf_invalid failed. \n");
-	    return EXIT_FAILURE;
+	    return EXIT_FAILED;
 	}
 
 	return EXIT_SUCCESS;
 }
+
+
+int test_root_node_not_zero(uint64_t pt, uint64_t vpn, uint64_t ppn) {
+    /* Tests that root PT wasn't assumed to be page 0, but calling sanity_check with a new root PT */
+    uint64_t new_pt = alloc_page_frame();
+
+    if(test_sanity_check(new_pt, vpn, ppn) == EXIT_FAILED) {
+        return EXIT_FAILED;
+    }
+	return EXIT_SUCCESS;
+}
+
+// TESTS FOR page_table_query():
+
+
+
+int test_unmapped_from_each_level(uint64_t pt, uint64_t vpn, uint64_t ppn) {
+    /* Tests that the function returns a "NO_MAPPING" value where there's some valid nodes in the way */
+    uint64_t vpn_slicing [5] = {(vpn>>35) & 0x1ff,(vpn>>27) & 0x1ff,(vpn>>17) & 0x1ff,(vpn>>8) & 0x1ff,vpn & 0x1ff};
+    uint64_t *new_pt=NULL, new_pt_frame_num;
+    int i;
+    // First map some value that can be traversed.
+    tester_page_table_update(pt, vpn, ppn);
+
+    new_pt = phys_to_virt(pt<<12); // #frame -> PTE fromat then take it's address
+    if(new_pt == NULL) {
+            return EXIT_FAILED;
+        }
+    uint64_t vpn_slice=0;
+    for (i=0; i<5; i++){
+        vpn_slice = vpn_slicing[i];
+        new_pt[vpn_slice] =  new_pt[vpn_slice] & 0xe ; // only resets the first LSbit.
+        if(page_table_query(pt, vpn) != NO_MAPPING) { // check that it fails.
+            return EXIT_FAILED;
+        }
+        new_pt[vpn_slice] =  new_pt[vpn_slice] | 0x1 ; // sets first bit to 1 again.
+
+        if(i==4){
+            break;
+        }
+        new_pt_frame_num = new_pt[vpn_slice] >> 12; // need to pass to phys_to_virt() without any offset.
+        new_pt_frame_num = new_pt_frame_num << 12;
+        new_pt = phys_to_virt(new_pt_frame_num);
+        if(new_pt == NULL) {
+            return EXIT_FAILED;
+        }
+    }
+    return EXIT_SUCCESS;
+}
+
 
 
 
@@ -394,20 +317,40 @@ int main(int argc, char **argv)
     uint64_t pt = alloc_page_frame(); // the physical page number of this frame
     int student_grade = 100;
 
-    if(test_sanity_check(pt, 0xcafe, 0xf00d) == EXIT_FAILURE) {
-        return 1;
+    if(test_sanity_check(pt, 0xcafe, 0xf00d) == EXIT_FAILED) {
+        printf("basic functionality fails. \n");
+        return 60;
     }
-    if(test_override_mapping(pt, 0xffff1, 0xaaa) == EXIT_FAILURE) {
+    if(test_override_mapping(pt, 0xfff1, 0xaaa) == EXIT_FAILED) {
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
-    if(test_override_prefix_similar_vpn(pt) == EXIT_FAILURE) {
+    if(test_override_prefix_similar_vpn(pt) == EXIT_FAILED) {
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
-    if(test_mark_leaf_invalid(pt, 0xbfaf1, 0xaaabc) == EXIT_FAILURE) {
+    if(test_mark_leaf_invalid(pt, 0xbfaf1, 0xaaabc) == EXIT_FAILED) {
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
-//    if() {
-//    }
+
+    if(test_root_node_not_zero(pt, 0xbaa1, 0xafabc) == EXIT_FAILED) {
+        printf("test_root_node_not_zero failed. \n");
+        student_grade -= POINTS_DEDUCTION_PER_TEST;
+    }
+
+    // Tests for page_table_query()
+    if(test_unmapped_from_each_level(pt, 0xb5522, 0xa2222) == EXIT_FAILED) {
+        printf("test_unmapped_from_each_level failed. \n");
+        student_grade -= POINTS_DEDUCTION_PER_TEST;
+    }
+
+    // Test that
+    if(page_table_query(pt, 0x10000f) != NO_MAPPING) {
+       printf("test_big_physical_number. \n");
+       student_grade -= POINTS_DEDUCTION_PER_TEST;
+    }
+
+
+
+
 
 
     printf("grade is: %d\n", student_grade);
