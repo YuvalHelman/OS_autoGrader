@@ -332,15 +332,15 @@ int test_override_prefix_similar_vpn(uint64_t pt) {
 }
 
 
-int get_leaf_valid_bit(uint64_t pt, uint64_t vpn, uint64_t ppn) {
-    // iterates on the Page Tables, and returns 
+int get_leaf_valid_bit(uint64_t pt, uint64_t vpn) {
+    // iterates on the Page Tables, and returns the valid bit of the PPN from the given VPN location
     uint64_t vpn_slicing [5] = {(vpn>>35) & 0x1ff,(vpn>>27) & 0x1ff,(vpn>>17) & 0x1ff,(vpn>>8) & 0x1ff,vpn & 0x1ff};
-    uint64_t *new_pt=NULL;
+    uint64_t *new_pt=NULL, new_pt_frame_num;
     int valid_bit;
 
     new_pt = phys_to_virt(pt<<12); // #frame -> PTE fromat
     if(new_pt == NULL) {
-            return EXIT_FAILURE
+            return EXIT_FAILURE;
         }
     int i;
     uint64_t vpn_slice=0;
@@ -356,7 +356,7 @@ int get_leaf_valid_bit(uint64_t pt, uint64_t vpn, uint64_t ppn) {
         new_pt_frame_num = new_pt_frame_num << 12;
         new_pt = phys_to_virt(new_pt_frame_num);
         if(new_pt == NULL) {
-            return EXIT_FAILURE
+            return EXIT_FAILURE;
         }
 
     }
@@ -364,8 +364,25 @@ int get_leaf_valid_bit(uint64_t pt, uint64_t vpn, uint64_t ppn) {
     return valid_bit; // change Valid bit to 0
 }
 
-int test_mark_leaf_invalid() {
+int test_mark_leaf_invalid(uint64_t pt, uint64_t vpn, uint64_t ppn) {
+    /* Tests a mapping that was overriden with another ppn */
+    page_table_update(pt, vpn, ppn);
+	if(tester_page_table_query(pt, vpn) != ppn) {
+	    printf("basic functionality fails. \n");
+	    return EXIT_FAILURE;
+	}
+	page_table_update(pt, vpn, NO_MAPPING);
+	if(tester_page_table_query(pt, vpn) != NO_MAPPING) {
+	    printf("basic functionality fails. \n");
+	    return EXIT_FAILURE;
+	}
+	// Iterate
+	if(get_leaf_valid_bit(pt, vpn) == 1) { // valid bit wasn't turned off together with NO_MAPPING on #frame.
+	    printf("test_mark_leaf_invalid failed. \n");
+	    return EXIT_FAILURE;
+	}
 
+	return EXIT_SUCCESS;
 }
 
 
@@ -376,21 +393,21 @@ int main(int argc, char **argv)
 {
     uint64_t pt = alloc_page_frame(); // the physical page number of this frame
     int student_grade = 100;
-    if(test_sanity_check(pt, 0xcafe, 0xf00d) == 1) {
+
+    if(test_sanity_check(pt, 0xcafe, 0xf00d) == EXIT_FAILURE) {
         return 1;
     }
-
-    if(test_override_mapping(pt, 0xffff1, 0xaaa) == 1) {
+    if(test_override_mapping(pt, 0xffff1, 0xaaa) == EXIT_FAILURE) {
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
-
-    if(test_override_prefix_similar_vpn(pt) == 1) {
+    if(test_override_prefix_similar_vpn(pt) == EXIT_FAILURE) {
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
-
-    if(test_override_prefix_similar_vpn(pt) == 1) {
+    if(test_mark_leaf_invalid(pt, 0xbfaf1, 0xaaabc) == EXIT_FAILURE) {
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
+//    if() {
+//    }
 
 
     printf("grade is: %d\n", student_grade);
