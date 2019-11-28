@@ -3,7 +3,7 @@
 #include "os.h"
 
 
-void _update_ppn_mapping(uint64_t* vpn_slicing, uint64_t* new_pt, uint64_t ppn){
+void tester_update_ppn_mapping(uint64_t* vpn_slicing, uint64_t* new_pt, uint64_t ppn){
     // new_pt - the address in memory of the page table
     int i;
     uint64_t vpn_slice=0, alloc_page, new_pt_frame_num;
@@ -29,7 +29,7 @@ void _update_ppn_mapping(uint64_t* vpn_slicing, uint64_t* new_pt, uint64_t ppn){
 }
 
 
-void _destroy_mapping(uint64_t* vpn_slicing, uint64_t* new_pt){
+void tester_destroy_mapping(uint64_t* vpn_slicing, uint64_t* new_pt){
     int i;
     uint64_t vpn_slice=0;
     for (i=0; i<5; i++){
@@ -49,10 +49,10 @@ void tester_page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn){
     uint64_t *new_pt=NULL;
     new_pt = phys_to_virt(pt<<12); // #frame -> PTE fromat
     if (ppn==NO_MAPPING){
-        _destroy_mapping(vpn_slicing, new_pt);
+        tester_destroy_mapping(vpn_slicing, new_pt);
     }
     else{
-        _update_ppn_mapping(vpn_slicing, new_pt, ppn);
+        tester_update_ppn_mapping(vpn_slicing, new_pt, ppn);
     }
 }
 
@@ -73,6 +73,3 @@ uint64_t tester_page_table_query(uint64_t pt, uint64_t vpn){
     }
     return (new_pt[vpn_slice])>>12;
 }
-
-
-//
