@@ -21,6 +21,8 @@
 
 /* 2^20 pages ought to be enough for anybody */
 #define NPAGES	(1024*1024)
+#define EXIT_FAILURE 1
+#define EXIT_SUCCESS 0
 
 static void* pages[NPAGES];
 
@@ -185,6 +187,85 @@ void* phys_to_virt(uint64_t phys_addr)
 //
 //}
 
+void tester_update_ppn_mapping(uint64_t* vpn_slicing, uint64_t* new_pt, uint64_t ppn){
+    // Helper function for tester_page_table_update()
+    // new_pt - the address in memory of the page table
+    int i;
+    uint64_t vpn_slice=0, alloc_page, new_pt_frame_num;
+    for (i=0; i<5; i++){
+        vpn_slice=vpn_slicing[i];
+        if(new_pt[vpn_slice]%2==0){ // Go to pt and check if it's valid (LSB is 1). if not, allocate
+            if(i!=4){
+                alloc_page = alloc_page_frame();
+                new_pt[vpn_slice] = (alloc_page<<12)+1; // change Valid bit to 1
+            }
+        }
+        if(i==4){
+            break;
+        }
+        // Get the address in the current page table where the current VA subset says, and take the page table in it.
+        new_pt_frame_num = new_pt[vpn_slice] >> 12;
+        new_pt_frame_num = new_pt_frame_num << 12;
+        new_pt = phys_to_virt(new_pt_frame_num);
+//        new_pt = phys_to_virt(new_pt[vpn_slice]-1);
+        // bits 1-11 are always 0! and bit 0 is the VALID thing, which is always 1 in this point, so remove this bit!
+    }
+    new_pt[vpn_slice] = (ppn<<12)+1; // change Valid bit to 1
+}
+
+
+void tester_destroy_mapping(uint64_t* vpn_slicing, uint64_t* new_pt){
+    // Helper function for tester_page_table_update()
+    int i;
+    uint64_t vpn_slice=0;
+    for (i=0; i<5; i++){
+        vpn_slice = vpn_slicing[i];
+        if (new_pt[vpn_slice]%2==0){
+            return;
+        }
+        if(i==4){
+            break;
+        }
+        new_pt = phys_to_virt(new_pt[vpn_slice]-1);
+    }
+    new_pt[vpn_slice]-=1; // change Valid bit to 0
+}
+
+
+void tester_page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn){
+    // An implementation of a working page_table_update() function
+    uint64_t vpn_slicing [5] = {(vpn>>35) & 0x1ff,(vpn>>27) & 0x1ff,(vpn>>17) & 0x1ff,(vpn>>8) & 0x1ff,vpn & 0x1ff};
+    uint64_t *new_pt=NULL;
+    new_pt = phys_to_virt(pt<<12); // #frame -> PTE fromat
+    if (ppn==NO_MAPPING){
+        tester_destroy_mapping(vpn_slicing, new_pt);
+    }
+    else{
+        tester_update_ppn_mapping(vpn_slicing, new_pt, ppn);
+    }
+}
+
+
+uint64_t tester_page_table_query(uint64_t pt, uint64_t vpn){
+    // An implementation of a working page_table_query() function
+    int i;
+    uint64_t vpn_slicing [5] = {(vpn>>35) & 0x1ff,(vpn>>27) & 0x1ff,(vpn>>17) & 0x1ff,(vpn>>8) & 0x1ff,vpn & 0x1ff};
+    uint64_t vpn_slice=0, *new_pt=NULL;
+    new_pt = phys_to_virt(pt<<12);
+    for (i=0; i<5; i++){
+        vpn_slice = vpn_slicing[i];
+        if (new_pt[vpn_slice]%2 == 0){
+            return NO_MAPPING;
+        }
+        if(i==4){
+            break;
+        }
+        new_pt = phys_to_virt(new_pt[vpn_slice]-1); // returns the address in memory
+    }
+    return (new_pt[vpn_slice])>>12;
+}
+
+
 
 int test_sanity_check(uint64_t pt, uint64_t vpn, uint64_t ppn) {
     if(page_table_query(pt, vpn) != NO_MAPPING){
@@ -205,16 +286,18 @@ int test_sanity_check(uint64_t pt, uint64_t vpn, uint64_t ppn) {
 	return 0;
 }
 
+// TESTS FOR page_table_update():
+
 int test_override_mapping(uint64_t pt, uint64_t vpn, uint64_t ppn) {
     /* Tests a mapping that was overriden with another ppn */
     uint64_t different_ppn = 0xabaa1;
     page_table_update(pt, vpn, ppn);
-	if(page_table_query(pt, vpn) != ppn) {
+	if(tester_page_table_query(pt, vpn) != ppn) {
 	    printf("basic functionality fails. \n");
 	    return 1;
 	}
 	page_table_update(pt, vpn, different_ppn); // a different ppn
-	if(page_table_query(pt, vpn) != different_ppn) {
+	if(tester_page_table_query(pt, vpn) != different_ppn) {
 	    printf("test_override_mapping failed. \n");
 	    return 1;
 	}
@@ -225,28 +308,66 @@ int test_override_mapping(uint64_t pt, uint64_t vpn, uint64_t ppn) {
 
 int test_override_prefix_similar_vpn(uint64_t pt) {
     /* Tests a mapping of an address that shares a prefix with a previously mapped address.
-       test if the first vpn is still mapped, in a way that the second didn't overriden its earlier PTE's
+       test if the first vpn is still mapped, in a way that the second didn't overridden its earlier PTE's
     */
     uint64_t ppn = 0xfff;
     uint64_t different_ppn = 0xabaa1;
-    uint64_t vpn_prefix = (0x1111111111111 << 12);
+    uint64_t vpn_prefix = (0x0123456789abc << 12);
     uint64_t vpn = vpn_prefix | 0xabc;
     uint64_t similar_prefix_vpn = vpn_prefix | 0x123;
 
     page_table_update(pt, vpn, ppn); // map a vpn
-	if(page_table_query(pt, vpn) != ppn) {
+	if(tester_page_table_query(pt, vpn) != ppn) {
 	    return 1;
 	}
 	page_table_update(pt, similar_prefix_vpn, different_ppn); // map a vpn with a similar prefix
-	if(page_table_query(pt, similar_prefix_vpn) != different_ppn) {
+	if(tester_page_table_query(pt, similar_prefix_vpn) != different_ppn) {
 	    return 1;
 	}
-    if(page_table_query(pt, vpn) != ppn) {
+    if(tester_page_table_query(pt, vpn) != ppn) { // check if first vpn not overridden
     printf("test_override_prefix_similar_vpn failed. \n");
 	    return 1;
 	}
 	return 0;
 }
+
+
+int get_leaf_valid_bit(uint64_t pt, uint64_t vpn, uint64_t ppn) {
+    // iterates on the Page Tables, and returns 
+    uint64_t vpn_slicing [5] = {(vpn>>35) & 0x1ff,(vpn>>27) & 0x1ff,(vpn>>17) & 0x1ff,(vpn>>8) & 0x1ff,vpn & 0x1ff};
+    uint64_t *new_pt=NULL;
+    int valid_bit;
+
+    new_pt = phys_to_virt(pt<<12); // #frame -> PTE fromat
+    if(new_pt == NULL) {
+            return EXIT_FAILURE
+        }
+    int i;
+    uint64_t vpn_slice=0;
+    for (i=0; i<5; i++){
+        vpn_slice = vpn_slicing[i];
+        if (new_pt[vpn_slice]%2==0){
+            return EXIT_FAILURE;
+        }
+        if(i==4){
+            break;
+        }
+        new_pt_frame_num = new_pt[vpn_slice] >> 12; // need to pass to phys_to_virt() without any offset.
+        new_pt_frame_num = new_pt_frame_num << 12;
+        new_pt = phys_to_virt(new_pt_frame_num);
+        if(new_pt == NULL) {
+            return EXIT_FAILURE
+        }
+
+    }
+    valid_bit = new_pt[vpn_slice] & 0x1;
+    return valid_bit; // change Valid bit to 0
+}
+
+int test_mark_leaf_invalid() {
+
+}
+
 
 
 
@@ -270,6 +391,7 @@ int main(int argc, char **argv)
     if(test_override_prefix_similar_vpn(pt) == 1) {
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
+
 
     printf("grade is: %d\n", student_grade);
 
