@@ -2,7 +2,7 @@ import os
 import subprocess as sp
 import csv
 import utils
-from utils import write_to_csv
+from utils import write_to_grades_csv
 from utils import zip_out_folders
 from utils import build_comments
 
@@ -38,14 +38,14 @@ def compile_files_and_check_tests():
                 student_GRADE = 0
                 student_comment = 'Compilation error'
                 print("{}".format(student_name), " Compilation Failed")
-                write_to_csv(student_name, student_id, student_GRADE, student_comment)
+                write_to_grades_csv(student_name, student_id, student_GRADE, student_comment)
             else:  # tests
                 # print("student {} ".format(student_name), "compilation successful")
                 points_to_reduct, is_mem_leak, is_test_errors = run_tests(exe_files_path)
                 student_GRADE -= points_to_reduct
 
                 student_comment = build_comments(is_mem_leak, is_test_errors)
-                write_to_csv(student_name, student_id, student_GRADE, student_comment)
+                write_to_grades_csv(student_name, student_id, student_GRADE, student_comment)
 
         except OSError as e:
             print("OSError1: ", e)

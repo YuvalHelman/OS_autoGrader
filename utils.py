@@ -7,17 +7,17 @@ from pathlib import Path
 from io import StringIO
 
 
-def open_names_csv():
+def open_names_csv(full_path_dir: str):  # A full path without a '/' in the end!
     # Open a new names.csv for writing the results.
-    with open(r'names.csv', 'w') as csvfile:
+    with open(f'{full_path_dir}/names.csv', 'w') as csvfile:
         fieldnames = ['name', 'id', 'grade', 'comment']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writerow({'name': 'FULL NAME', 'id': 'ID', 'grade': 'GRADE', 'comment': 'COMMENT'})
 
 
-def write_to_csv(name, id, grade, comment_string):
-    with open(r'names.csv', 'a') as csvfile:
+def write_to_grades_csv(full_path_dir, name, id, grade, comment_string):
+    with open(f'{full_path_dir}/names.csv', 'a') as csvfile:
         fieldnames = ['name', 'id', 'grade', 'comment']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 

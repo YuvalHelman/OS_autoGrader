@@ -34,6 +34,7 @@ def build_students_directories():
 
 def compile_students_files():
     assignments_path = Path("/home/user/work/OS_autoGrader/assignments/")
+    utils.open_names_csv("/home/user/work/OS_autoGrader")  # Create the grades Excel
 
     # Create a directory for each student.
     for student_dir in assignments_path.iterdir():  # Example: Yuval Helman_315581819
@@ -54,13 +55,17 @@ def run_test_for_user(student_dir_path: str, student_name, student_id):
         sp = subprocess.run(['./tester'], capture_output=True, shell=True)
         if not isinstance(sp, subprocess.CompletedProcess) or sp.returncode != PROCESS_SUCCESS:
             print(student_name, "FAILED", 0)  # DEBUG
+            print("process returncode = ", sp.returncode)
             # utils.write_to_csv(student_name, student_id, 60, "tests failed. segfault")
         else:  # Tester succeed for this dude
-            student_comments = str(sp.stdout)
-            # student_grade = (sp.stdout).split('\n')[-1]
-            print(student_name, student_comments)  # DEBUG
-
+            tester_output = sp.stdout.decode("utf-8")
+            student_comments = utils.remove_last_line_from_string(tester_output)
+            student_grade = tester_output.split('\n')[-1]
+            print(student_name, student_comments, student_grade)  # DEBUG
+            utils.write_to_grades_csv("/home/user/work/OS_autoGrader",
+                                      student_name, student_id, student_grade, student_comments)
 
 if __name__ == '__main__':
     # build_students_directories()
+
     compile_students_files()
