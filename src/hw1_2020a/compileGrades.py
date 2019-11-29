@@ -34,7 +34,7 @@ def build_students_directories():
 
 def compile_students_files():
     assignments_path = Path("/home/user/work/OS_autoGrader/assignments/")
-    utils.open_names_csv("/home/user/work/OS_autoGrader")  # Create the grades Excel
+    utils.open_names_csv("/home/user/work/OS_autoGrader/names.csv")  # Create the grades Excel
 
     # Create a directory for each student.
     for student_dir in assignments_path.iterdir():  # Example: Yuval Helman_315581819
@@ -45,6 +45,8 @@ def compile_students_files():
             sp = subprocess.run(['gcc', '-o3', '-w', '-Wall', '-std=c11', 'os.c', 'pt.c', "-o", "tester"])
             if sp.returncode != PROCESS_SUCCESS:
                 print("compilation failed for user ", student_name, "_", student_id)
+                utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
+                                          student_name, student_id, 0, "compilation error")
             else:
                 run_test_for_user(student_dir_path, student_name, student_id)
 
@@ -54,18 +56,20 @@ def run_test_for_user(student_dir_path: str, student_name, student_id):
         # with utils.StandardOutput() as stdout:
         sp = subprocess.run(['./tester'], capture_output=True, shell=True)
         if not isinstance(sp, subprocess.CompletedProcess) or sp.returncode != PROCESS_SUCCESS:
-            print(student_name, "FAILED", 0)  # DEBUG
-            print("process returncode = ", sp.returncode)
-            # utils.write_to_csv(student_name, student_id, 60, "tests failed. segfault")
+            utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
+                                      student_name, student_id, 60, f"program failed while tested. returned code {sp.returncode}")
+            # TODO: instead of auto 60, try to run only the "sanity-check" thingy. should be like 75 if it works.
+            #       Can do that with an argument on the ./tester --full_tests/--sanity
         else:  # Tester succeed for this dude
             tester_output = sp.stdout.decode("utf-8")
-            student_comments = utils.remove_last_line_from_string(tester_output)
-            student_grade = tester_output.split('\n')[-1]
-            print(student_name, student_comments, student_grade)  # DEBUG
-            utils.write_to_grades_csv("/home/user/work/OS_autoGrader",
+            student_comments = utils.remove_two_last_lines_from_string(tester_output)
+            student_grade = tester_output.split('\n')[-2]
+            utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
                                       student_name, student_id, student_grade, student_comments)
 
-if __name__ == '__main__':
-    # build_students_directories()
 
+if __name__ == '__main__':
+    ''' Run build_Students_directories() on a directory where all the student's c-files are present.
+        THen run compile_students_files() to compile and generate results csv. '''
+    # build_students_directories()
     compile_students_files()
