@@ -402,8 +402,16 @@ int test_all_tests_combined() {
 
 int main(int argc, char **argv)
 {
-//    if (argv[1] == "all") {
-//    }
-	return test_all_tests_combined();
+    if(argc == 1) { // No arguments - run normally!
+        return test_all_tests_combined();
+    }
+    if(argc == 2) { // do sanity test only
+        uint64_t pt = alloc_page_frame();
+        if(test_sanity_check(pt, 0xcafe, 0xf00d) == EXIT_FAILED) {
+        printf("basic functionality fails. \n");
+        return BASIC_FUNC_FAILED;
+        }
+        return EXIT_SUCCESS;
+    }
 }
 
