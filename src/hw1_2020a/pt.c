@@ -3,7 +3,7 @@
 void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn){
 	uint64_t currentIndex;
 	uint64_t* nextVirtual;
-    int yael;
+
 	// wrap with offset
 	uint64_t nextPageTable = pt << 12;
 

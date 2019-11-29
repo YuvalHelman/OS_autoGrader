@@ -141,21 +141,25 @@ uint64_t tester_page_table_query(uint64_t pt, uint64_t vpn){
 }
 
 
-
 int test_sanity_check(uint64_t pt, uint64_t vpn, uint64_t ppn) {
     /* Tests the most basic functionality of the functions */
     if(page_table_query(pt, vpn) != NO_MAPPING){
+        printf("basic table query failed NO_MAPPING");
         return EXIT_FAILED;
     }
     page_table_update(pt, vpn, ppn);
 	if(page_table_query(pt, vpn) != ppn) {
+	    printf("basic table query failed after table_update");
 	    return EXIT_FAILED;
 	}
+
 	page_table_update(pt, vpn, NO_MAPPING);
 	if(page_table_query(pt, vpn) != NO_MAPPING) {
+	    printf("basic table query failed after NO_MAPPING");
 	    return EXIT_FAILED;
 	}
-	return 0;
+
+	return EXIT_SUCCESS;
 }
 
 // TESTS FOR page_table_update():
@@ -163,14 +167,17 @@ int test_sanity_check(uint64_t pt, uint64_t vpn, uint64_t ppn) {
 int test_override_mapping(uint64_t pt, uint64_t vpn, uint64_t ppn) {
     /* Tests a mapping that was overriden with another ppn */
     uint64_t different_ppn = 0xabaa1;
+
     page_table_update(pt, vpn, ppn);
 	if(tester_page_table_query(pt, vpn) != ppn) {
-	    printf("basic functionality fails. \n");
+	    printf(tester_page_table_query(pt, vpn));  // DEBUG
+	    printf("test_override_mapping failed{1}. \n");
 	    return EXIT_FAILED;
 	}
 	page_table_update(pt, vpn, different_ppn); // a different ppn
 	if(tester_page_table_query(pt, vpn) != different_ppn) {
-	    printf("test_override_mapping failed. \n");
+	    printf(tester_page_table_query(pt, vpn)); // DEBUG
+	    printf("test_override_mapping failed{2}. \n");
 	    return EXIT_FAILED;
 	}
 
@@ -200,7 +207,7 @@ int test_override_prefix_similar_vpn(uint64_t pt) {
     printf("test_override_prefix_similar_vpn failed. \n");
 	    return EXIT_FAILED;
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 
@@ -240,18 +247,18 @@ int test_mark_leaf_invalid(uint64_t pt, uint64_t vpn, uint64_t ppn) {
     /* Tests a mapping that was erased is also marked with VALID_BIT=0 */
     page_table_update(pt, vpn, ppn);
 	if(tester_page_table_query(pt, vpn) != ppn) {
-	    printf("basic functionality fails. \n");
+	    printf("test_mark_leaf_invalid failed{1}. \n");
 	    return EXIT_FAILED;
 	}
 	page_table_update(pt, vpn, NO_MAPPING);
 	if(tester_page_table_query(pt, vpn) != NO_MAPPING) {
-	    printf("basic functionality fails. \n");
+	    printf("test_mark_leaf_invalid failed{2}. \n");
 	    return EXIT_FAILED;
 	}
 	// Iterate
 	int leaf_valid_bit = get_leaf_valid_bit(pt, vpn);
 	if(leaf_valid_bit == 1 || leaf_valid_bit == EXIT_FAILED) { // valid bit wasn't turned off together with NO_MAPPING on #frame.
-	    printf("test_mark_leaf_invalid failed. \n");
+	    printf("test_mark_leaf_invalid failed{3}. \n");
 	    return EXIT_FAILED;
 	}
 
@@ -321,13 +328,13 @@ int main(int argc, char **argv)
         printf("basic functionality fails. \n");
         return 60;
     }
-    if(test_override_mapping(pt, 0xfff1, 0xaaa) == EXIT_FAILED) {
+    if(test_override_mapping(pt, 0xbafb, 0xaa) == EXIT_FAILED) {
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
     if(test_override_prefix_similar_vpn(pt) == EXIT_FAILED) {
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
-    if(test_mark_leaf_invalid(pt, 0xbfaf1, 0xaaabc) == EXIT_FAILED) {
+    if(test_mark_leaf_invalid(pt, 0x1fa1, 0xabc) == EXIT_FAILED) {
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
 

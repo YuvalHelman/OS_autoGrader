@@ -31,9 +31,9 @@ def compile_files():
             print("copying files to student dir failed.")
             print("Im here 2")  # DEBUG
             continue
-        sp = subprocess.run(['gcc', '-o3', '-Wall', '-std=c11', "os.c", "pt.c", "-o", "tester"])
-        if sp.returncode == 1:
-            print("compilation failed for user ", student_name, "_", student_id)
+        # sp = subprocess.run(['gcc', '-o3', '-Wall', '-std=c11', "os.c", "pt.c", "-o", "tester"])
+        # if sp.returncode == 1:
+        #     print("compilation failed for user ", student_name, "_", student_id)
 
 
 if __name__ == '__main__':
