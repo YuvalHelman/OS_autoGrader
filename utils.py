@@ -62,6 +62,14 @@ def build_comments(is_mem_leak, is_test_errors):
     return student_comment
 
 
+def get_student_name_id_from_c_file(file_name: str):
+    """ returns a tuple of (name, id) given a student file_name in hw1's C file.
+        Example: Yuval Helman_24284_assignsubmission_file_207890252_2961_368216201_55409_1  """
+    student_file_name = file_name.split("/")[-1]
+    split_file_name = student_file_name.split("_")
+    return split_file_name[0], split_file_name[4]
+
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         argStr = sys.argv[1]

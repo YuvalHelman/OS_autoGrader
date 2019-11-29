@@ -6,9 +6,8 @@ from utils import write_to_csv
 from utils import zip_out_folders
 from utils import build_comments
 
+
 def compile_files_and_check_tests():
-
-
     directory_str = "./assignments/"
     compile_log = open('compilation_log.txt', 'w')
     compile_log.write('.\n')

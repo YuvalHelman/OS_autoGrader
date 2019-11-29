@@ -348,40 +348,8 @@ int main(int argc, char **argv)
        student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
 
-
-
-
-
-
     printf("grade is: %d\n", student_grade);
 
-
-//    assert(page_table_query(pt, 0x100001) == NO_MAPPING); // address which is bigger then 2^20
-
-
-//	srand(time(NULL));
-//	page_table_update(pt, 0xcafe, 0xf00d);
-//
-//	printf("hi 1\n\n");
-//	assert(page_table_query(pt, 0xcafe) == NO_MAPPING);
-//	printf("\nhi 2\n\n");
-//	page_table_update(pt, 0xcafe, 0xf00d);
-//	printf("\nhi 3\n\n");
-//	assert(page_table_query(pt, 0xcafe) == 0xf00d);
-//	printf("\nhi 4\n\n");
-//	page_table_update(pt, 0xcafe, NO_MAPPING);
-//	printf("\nhi 5\n\n");
-//	assert(page_table_query(pt, 0xcafe) == NO_MAPPING);
-//	printf("\nhi 6\n\n");
-//
-//
-//	for (int i = 0; i < pow(2, 15); i++) {
-////		printf("i = %d\n", i);
-//		perform_random_move(pt);
-//	}
-//	printf("\nAll tests passed!\n");
-//
-//	printf("done\n");
 	return 0;
 }
 
