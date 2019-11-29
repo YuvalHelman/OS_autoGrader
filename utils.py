@@ -2,6 +2,9 @@ import csv
 import os
 import sys
 import zipfile as zip
+import contextlib
+from pathlib import Path
+from io import StringIO
 
 
 def open_names_csv():
@@ -52,22 +55,57 @@ def zip_out_folders():
 def build_comments(is_mem_leak, is_test_errors):
     student_comment = 'No Errors detected'
 
-    if (is_mem_leak is True and is_test_errors is False):
+    if is_mem_leak is True and is_test_errors is False:
         student_comment = 'Some memory leaks detected'
-    if (is_mem_leak is False and is_test_errors is True):
+    if is_mem_leak is False and is_test_errors is True:
         student_comment = 'Not all tests were successful'
-    if (is_mem_leak is True and is_test_errors is True):
+    if is_mem_leak is True and is_test_errors is True:
         student_comment = 'Not all tests were successful + Some memory leaks detected'
 
     return student_comment
 
 
-def get_student_name_id_from_c_file(file_name: str):
+def get_student_name_id_from_file_or_dir(file_name: str, is_dir=False):
     """ returns a tuple of (name, id) given a student file_name in hw1's C file.
-        Example: Yuval Helman_24284_assignsubmission_file_207890252_2961_368216201_55409_1  """
+        Example: Yuval Helman_24284_assignsubmission_file_207890252_2961_368216201_55409_1
+            if is_dir==True, then the path is: fullpath/Yuval Helman__315581819 """
     student_file_name = file_name.split("/")[-1]
     split_file_name = student_file_name.split("_")
-    return split_file_name[0], split_file_name[4]
+    if is_dir is False:
+        return split_file_name[0], split_file_name[4]
+    else:
+        return split_file_name[0], split_file_name[1]
+
+
+@contextlib.contextmanager
+def working_directory(path):
+    """Changes working directory and returns to previous on exit."""
+    prev_cwd = Path.cwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(prev_cwd)
+
+
+class StandardOutput:
+
+    def __enter__(self):
+        self.newstdout = StringIO()
+        sys.stdout = self.newstdout
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout = sys.__stdout__
+
+    @property
+    def value(self):
+        return self.newstdout.getvalue()
+
+
+def remove_last_line_from_string(s):
+    return "\n".join(s.split("\n")[:-1])
+
 
 
 if __name__ == '__main__':

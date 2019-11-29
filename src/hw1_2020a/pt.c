@@ -1,74 +1,36 @@
+
 #include "os.h"
+#include <stdlib.h>
+#include <stdio.h>
 
-void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn){
-	uint64_t currentIndex;
-	uint64_t* nextVirtual;
+#define LEVELS (5)
 
-	// wrap with offset
-	uint64_t nextPageTable = pt << 12;
+void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn) {
+	int i;
+	uint64_t *va = NULL, vpn_addr, pte_tmp = (pt << 12);
 
-	for (int i = 4; i > 0; i--) {
-		// get 9 next bits
-		currentIndex = (vpn >> (9 * i)) & 0x1ff;
-
-		// get next address
-		nextVirtual = (uint64_t*)(phys_to_virt(nextPageTable) + currentIndex * 8);
-
-		// check invalid address
-		if (*nextVirtual % 2 == 0 || *nextVirtual == NO_MAPPING) {
-			// allocate new page and mark as valid
-			nextPageTable = alloc_page_frame() << 12;
-
-			// mark address as valid
-			*nextVirtual = nextPageTable | 0x1;
-
-		} else {
-			nextPageTable = ((*nextVirtual) >> 12) << 12;
+	for (i = 0; i < LEVELS; i++) {
+		va = ((uint64_t *) phys_to_virt(pte_tmp & (~0xfff)));
+		vpn_addr = ((vpn >> (9*(LEVELS - 1 - i))) & 0x1ff);
+		pte_tmp = va[vpn_addr];
+		if (!(pte_tmp & 0x1)) {
+			if (ppn == NO_MAPPING) return;
+			pte_tmp = ((alloc_page_frame() << 12) | 0x1);
 		}
-	}
-
-	// final iteration for last address
-	currentIndex = vpn & 0x1ff;
-	nextVirtual = (uint64_t*)(phys_to_virt(nextPageTable) + currentIndex * 8);
-
-	// unmap/map according to ppn
-	if (ppn == NO_MAPPING) {
-		*nextVirtual = NO_MAPPING;
-	} else {
-		*nextVirtual = (ppn << 12) | 0x1;
+		va[vpn_addr] = (i != 4) ? pte_tmp : ((ppn != NO_MAPPING) ? ((ppn << 12) | 0x1) : (va[vpn_addr] & (~0x1)));
 	}
 }
 
-uint64_t page_table_query(uint64_t pt, uint64_t vpn){
-	uint64_t currentIndex;
-	uint64_t* nextVirtual;
+uint64_t page_table_query(uint64_t pt, uint64_t vpn) {
+	int i;
+	uint64_t *va = NULL, pte_tmp = (pt << 12);
 
-	// wrap with offset
-	uint64_t nextPageTable = pt << 12;
-
-	for (int i = 4; i > 0; i--) {
-		// get 9 next bits
-		currentIndex = (vpn >> (9 * i)) & 0x1ff;
-
-		// get next address
-		nextVirtual = (uint64_t*)(phys_to_virt(nextPageTable) + currentIndex * 8);
-
-		// check invalid address
-		if (*nextVirtual % 2 == 0 || *nextVirtual == NO_MAPPING) {
-			return NO_MAPPING;
-		} else {
-			nextPageTable = ((*nextVirtual) >> 12) << 12;
-		}
+	for (i = 0; i < LEVELS; i++) {
+		va = (uint64_t *) phys_to_virt(pte_tmp & (~0xfff));
+		pte_tmp = va[((vpn >> (9*(LEVELS - 1 - i))) & 0x1ff)];
+		if (!(pte_tmp & 0x1)) return NO_MAPPING;
 	}
-
-	// final iteration for last address
-	currentIndex = vpn & 0x1ff;
-	nextVirtual = (uint64_t*)(phys_to_virt(nextPageTable) + currentIndex * 8);
-
-	// return NO_MAPPING or the address found
-	if (*nextVirtual % 2 == 0 || *nextVirtual == NO_MAPPING) {
-		return NO_MAPPING;
-	} else {
-		return *nextVirtual >> 12;
-	}
+	return (pte_tmp >> 12);
 }
+
+

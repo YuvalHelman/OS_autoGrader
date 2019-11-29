@@ -170,13 +170,13 @@ int test_override_mapping(uint64_t pt, uint64_t vpn, uint64_t ppn) {
 
     page_table_update(pt, vpn, ppn);
 	if(tester_page_table_query(pt, vpn) != ppn) {
-	    printf(tester_page_table_query(pt, vpn));  // DEBUG
+	    printf("%d", tester_page_table_query(pt, vpn));  // DEBUG
 	    printf("test_override_mapping failed{1}. \n");
 	    return EXIT_FAILED;
 	}
 	page_table_update(pt, vpn, different_ppn); // a different ppn
 	if(tester_page_table_query(pt, vpn) != different_ppn) {
-	    printf(tester_page_table_query(pt, vpn)); // DEBUG
+	    printf("%d", tester_page_table_query(pt, vpn)); // DEBUG
 	    printf("test_override_mapping failed{2}. \n");
 	    return EXIT_FAILED;
 	}
@@ -338,7 +338,7 @@ int main(int argc, char **argv)
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
 
-    if(test_root_node_not_zero(pt, 0xbaa1, 0xafabc) == EXIT_FAILED) {
+    if(test_root_node_not_zero(pt, 0x29a, 0xafab) == EXIT_FAILED) {
         printf("test_root_node_not_zero failed. \n");
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
@@ -355,8 +355,8 @@ int main(int argc, char **argv)
        student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
 
-    printf("grade is: %d\n", student_grade);
+    printf("%d\n", student_grade);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
