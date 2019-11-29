@@ -7,9 +7,10 @@ from pathlib import Path
 from io import StringIO
 
 
-def open_names_csv(full_path_dir: str):  # A full path without a '/' in the end!
-    # Open a new names.csv for writing the results.
-    with open(f'{full_path_dir}/names.csv', 'w') as csvfile:
+def open_names_csv(full_path_dir: str):  # A full path to the csv file
+    """ Open a new names.csv for writing the results.
+        full_path_dir - A full path to the csv file """
+    with open(full_path_dir, 'w') as csvfile:
         fieldnames = ['name', 'id', 'grade', 'comment']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
@@ -17,7 +18,8 @@ def open_names_csv(full_path_dir: str):  # A full path without a '/' in the end!
 
 
 def write_to_grades_csv(full_path_dir, name, id, grade, comment_string):
-    with open(f'{full_path_dir}/names.csv', 'a') as csvfile:
+    """ full_path_dir - A full path to the csv file """
+    with open(full_path_dir, 'a') as csvfile:
         fieldnames = ['name', 'id', 'grade', 'comment']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
@@ -103,8 +105,8 @@ class StandardOutput:
         return self.newstdout.getvalue()
 
 
-def remove_last_line_from_string(s):
-    return "\n".join(s.split("\n")[:-1])
+def remove_two_last_lines_from_string(s):
+    return "\n".join(s.split("\n")[:-2])
 
 
 
