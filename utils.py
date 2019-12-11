@@ -109,7 +109,6 @@ def remove_two_last_lines_from_string(s):
     return "\n".join(s.split("\n")[:-2])
 
 
-
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         argStr = sys.argv[1]
