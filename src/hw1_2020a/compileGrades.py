@@ -53,26 +53,25 @@ def compile_students_files():
 
 def run_test_for_user(student_dir_path: str, student_name, student_id):
     with utils.working_directory(str(student_dir_path)):
-        # with utils.StandardOutput() as stdout:
         sp = subprocess.run(['./tester'], capture_output=True, shell=True)
-        if not isinstance(sp, subprocess.CompletedProcess) or sp.returncode != PROCESS_SUCCESS:
-            # Run a basic-sanity check..
-            sp = subprocess.run(['./tester', '--sanity_check'], capture_output=True, shell=True)
-            if not isinstance(sp, subprocess.CompletedProcess) or sp.returncode != PROCESS_SUCCESS:
-                utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
-                                          student_name, student_id, 60, f"basic functionality fails. ")
-            else: # sanity_check passed!
-                utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
-                                          student_name, student_id, 75,
-                                          f"program raised sig_fault while tested. only basic functionality passed. ")
-                # TODO: instead of auto 60, try to run only the "sanity-check" thingy. should be like 75 if it works.
-            #       Can do that with an argument on the ./tester --full_tests/--sanity
-        else:  # Tester succeed for this dude
+        if isinstance(sp, subprocess.CompletedProcess) and sp.returncode == PROCESS_SUCCESS:
             tester_output = sp.stdout.decode("utf-8")
             student_comments = utils.remove_two_last_lines_from_string(tester_output)
             student_grade = tester_output.split('\n')[-2]
             utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
                                       student_name, student_id, student_grade, student_comments)
+        else: # Run a basic-sanity check..
+
+            sp = subprocess.run(['./tester', '--sanity_check'], capture_output=True, shell=True)
+            print(isinstance(sp, subprocess.CompletedProcess))
+            print(sp.returncode)
+            if isinstance(sp, subprocess.CompletedProcess) and sp.returncode == PROCESS_SUCCESS:
+                utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
+                                          student_name, student_id, 75,
+                                          f"program raised sig_fault while tested. only basic functionality passed. ")
+            else:  # sanity_check passed!
+                utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
+                                          student_name, student_id, 60, f"basic functionality fails. ")
 
 
 if __name__ == '__main__':

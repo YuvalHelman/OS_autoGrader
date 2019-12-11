@@ -63,7 +63,8 @@
 #define NPAGES	(1024*1024)
 #define EXIT_FAILED -1
 #define EXIT_SUCCESS 0
-#define BASIC_FUNC_FAILED -10
+#define BASIC_FUNC_FAILED 242
+#define DEBUG 1
 
 static void* pages[NPAGES];
 
@@ -362,33 +363,54 @@ int test_all_tests_combined() {
     int static student_grade = 100;
 
     if(test_sanity_check(pt, 0xcafe, 0xf00d) == EXIT_FAILED) {
+        if(DEBUG) {
+            printf("checkpoint 1");
+        }
         printf("basic functionality fails. \n");
         return BASIC_FUNC_FAILED;
     }
     if(test_override_mapping(pt, 0xbafb, 0xaa) == EXIT_FAILED) {
+        if(DEBUG) {
+            printf("checkpoint 2");
+        }
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
     if(test_override_prefix_similar_vpn(pt) == EXIT_FAILED) {
+        if(DEBUG) {
+            printf("checkpoint 3");
+        }
         printf("test_override_prefix_similar_vpn failed. \n");
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
     if(test_mark_leaf_invalid(pt, 0x1fa1, 0xabc) == EXIT_FAILED) {
+        if(DEBUG) {
+            printf("checkpoint 4");
+        }
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
 
     if(test_root_node_not_zero(pt, 0x29a, 0xafab) == EXIT_FAILED) {
+        if(DEBUG) {
+            printf("checkpoint 5");
+        }
         printf("test_root_node_not_zero failed. \n");
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
 
     // Tests for page_table_query()
     if(test_unmapped_from_each_level(pt, 0xb5522, 0xa2222) == EXIT_FAILED) {
+        if(DEBUG) {
+            printf("checkpoint 6");
+        }
         printf("test_unmapped_from_each_level failed. \n");
         student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
 
     // Test that
     if(page_table_query(pt, 0x10000f) != NO_MAPPING) {
+        if(DEBUG) {
+            printf("checkpoint 7");
+        }
        printf("test_big_physical_number. \n");
        student_grade -= POINTS_DEDUCTION_PER_TEST;
     }
