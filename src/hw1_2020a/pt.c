@@ -1,103 +1,74 @@
-/*
- * pt.c
- *
- *  Created on: 19 Nov 2019
- *      Author: student
- */
-
 #include "os.h"
-#include <stdio.h>
-#include <inttypes.h>
 
-void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn)
-{
-	uint64_t vpnnew = vpn, vpnCurr = pt, *vpnToCheck, newPage;
-	uint64_t vpns[5];
-	int count = 0;
-	vpns[4] = vpnnew & (511);
-	vpnnew = vpnnew >> 9;
-	vpns[3] = vpnnew & (511);
-	vpnnew = vpnnew >> 9;
-	vpns[2] = vpnnew & (511);
-	vpnnew = vpnnew >> 9;
-	vpns[1] = vpnnew & (511);
-	vpnnew = vpnnew >> 9;
-	vpns[0] = vpnnew & (511);
-	while(count < 4)
-	{
-		vpnCurr += vpns[count] * 8;
-		vpnToCheck = phys_to_virt(vpnCurr);
-		if(((*vpnToCheck) & 1) == 1)
-		{
-			vpnCurr =  *vpnToCheck >> 12;
-		}
-		else
-		{
-			if(ppn == NO_MAPPING)
-			{
-				return;
-			}
-			else
-			{
-				newPage = alloc_page_frame() * 4096;
-				*vpnToCheck = ((newPage << 12) | 1);
-				vpnCurr = newPage;
-			}
+void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn){
+	uint64_t currentIndex;
+	uint64_t* nextVirtual;
 
+	// wrap with offset
+	uint64_t nextPageTable = pt << 12;
+
+	for (int i = 4; i > 0; i--) {
+		// get 9 next bits
+		currentIndex = (vpn >> (9 * i)) & 0x1ff;
+
+		// get next address
+		nextVirtual = (uint64_t*)(phys_to_virt(nextPageTable) + currentIndex * 8);
+
+		// check invalid address
+		if (*nextVirtual % 2 == 0 || *nextVirtual == NO_MAPPING) {
+			// allocate new page and mark as valid
+			nextPageTable = alloc_page_frame() << 12;
+
+			// mark address as valid
+			*nextVirtual = nextPageTable | 0x1;
+
+		} else {
+			nextPageTable = ((*nextVirtual) >> 12) << 12;
 		}
-		count ++;
 	}
-	vpnCurr += vpns[count] * 8;
-	vpnToCheck = phys_to_virt(vpnCurr);
-	if(ppn == NO_MAPPING)
-	{
-		*vpnToCheck = 0x0;
-	}
-	else
-	{
-		*vpnToCheck = (ppn << 12) | 1;
+
+	// final iteration for last address
+	currentIndex = vpn & 0x1ff;
+	nextVirtual = (uint64_t*)(phys_to_virt(nextPageTable) + currentIndex * 8);
+
+	// unmap/map according to ppn
+	if (ppn == NO_MAPPING) {
+		*nextVirtual = NO_MAPPING;
+	} else {
+		*nextVirtual = (ppn << 12) | 0x1;
 	}
 }
 
+uint64_t page_table_query(uint64_t pt, uint64_t vpn){
+	uint64_t currentIndex;
+	uint64_t* nextVirtual;
 
+	// wrap with offset
+	uint64_t nextPageTable = pt << 12;
 
-uint64_t page_table_query(uint64_t pt, uint64_t vpn)
-{
-	uint64_t vpnnew = vpn, vpnCurr = pt, *vpnToCheck;
-	uint64_t vpns[5];
-	int count = 0;
-	vpns[4] = vpnnew & (511);
-	vpnnew = vpnnew >> 9;
-	vpns[3] = vpnnew & (511);
-	vpnnew = vpnnew >> 9;
-	vpns[2] = vpnnew & (511);
-	vpnnew = vpnnew >> 9;
-	vpns[1] = vpnnew & (511);
-	vpnnew = vpnnew >> 9;
-	vpns[0] = vpnnew & (511);
-	while(count < 4)
-	{
-		vpnCurr += vpns[count] * 8;
-		vpnToCheck = phys_to_virt(vpnCurr);
-		if((*vpnToCheck & 1) == 1)
-		{
-			vpnCurr =  *vpnToCheck >> 12;
-		}
-		else
-		{
+	for (int i = 4; i > 0; i--) {
+		// get 9 next bits
+		currentIndex = (vpn >> (9 * i)) & 0x1ff;
+
+		// get next address
+		nextVirtual = (uint64_t*)(phys_to_virt(nextPageTable) + currentIndex * 8);
+
+		// check invalid address
+		if (*nextVirtual % 2 == 0 || *nextVirtual == NO_MAPPING) {
 			return NO_MAPPING;
+		} else {
+			nextPageTable = ((*nextVirtual) >> 12) << 12;
 		}
-		count ++;
 	}
-	vpnCurr += vpns[count] * 8;
-	vpnToCheck = phys_to_virt(vpnCurr);
-	if((*vpnToCheck & 1) ==	0)
-	{
+
+	// final iteration for last address
+	currentIndex = vpn & 0x1ff;
+	nextVirtual = (uint64_t*)(phys_to_virt(nextPageTable) + currentIndex * 8);
+
+	// return NO_MAPPING or the address found
+	if (*nextVirtual % 2 == 0 || *nextVirtual == NO_MAPPING) {
 		return NO_MAPPING;
-	}
-	else
-	{
-		return ((*vpnToCheck) >> 12);
+	} else {
+		return *nextVirtual >> 12;
 	}
 }
-

@@ -4,6 +4,7 @@ import shutil
 import subprocess
 
 PROCESS_SUCCESS = 0
+BASIC_FUNC_FAILED_RET_CODE = 242
 
 
 def build_students_directories():
@@ -60,18 +61,19 @@ def run_test_for_user(student_dir_path: str, student_name, student_id):
             student_grade = tester_output.split('\n')[-2]
             utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
                                       student_name, student_id, student_grade, student_comments)
-        else: # Run a basic-sanity check..
+        else:  # Run a basic-sanity check..
 
-            sp = subprocess.run(['./tester', '--sanity_check'], capture_output=True, shell=True)
-            print(isinstance(sp, subprocess.CompletedProcess))
-            print(sp.returncode)
-            if isinstance(sp, subprocess.CompletedProcess) and sp.returncode == PROCESS_SUCCESS:
+            sp_sanity = subprocess.run(['./tester', '--sanity_check'], capture_output=True, shell=True)
+            tester_output = sp.stdout.decode("utf-8")
+            if sp_sanity.returncode != BASIC_FUNC_FAILED_RET_CODE:
                 utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
                                           student_name, student_id, 75,
                                           f"program raised sig_fault while tested. only basic functionality passed. ")
-            else:  # sanity_check passed!
+                print('75 -', tester_output)
+            else:
                 utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
                                           student_name, student_id, 60, f"basic functionality fails. ")
+                print('60 -', tester_output)
 
 
 if __name__ == '__main__':
