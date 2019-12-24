@@ -15,7 +15,7 @@ p = Path(__file__).resolve()
 
 # Highest level file logger
 filehandler_dbg = logging.FileHandler('hw3.log', mode='w')
-super_logger = setup_logger('hw3 logger', 'hw3.log')
+super_logger = setup_logger(name='hw3 logger', log_file='hw3.log')
 super_logger.error('Log Initialize!')
 
 
