@@ -87,7 +87,7 @@ def working_directory(path):
     try:
         yield
     finally:
-        os.chdir(prev_cwd)
+        os.chdir(str(prev_cwd))
 
 
 class StandardOutput:

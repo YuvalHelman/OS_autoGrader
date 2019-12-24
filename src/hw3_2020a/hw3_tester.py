@@ -13,7 +13,7 @@ p = Path(__file__).resolve()
 
 
 def compile_static_files(gen_log):
-    files_path = "./src/"
+    files_path = "../"
     try:
         p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader_true.c"
             , "-o", "message_reader_true"],
@@ -359,7 +359,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
                 print('user string: {}\ntrue string: {}'.format(output_string, true_string))  # DEBUG
                 OKflag = False
                 for line_str in output_string:
-                    #print("{} ## {}".format(line_str, true_string))  # Debug
+                    # print("{} ## {}".format(line_str, true_string))  # Debug
                     if (true_string in line_str):
                         OKflag = True
                 if OKflag is False:
@@ -410,6 +410,7 @@ def build_tests(file_path_to_exe, o_log):
     majorNumber = 0
 
     copyScriptsToUser(file_path_to_exe, o_log)
+
     ret, majorNumber = load_module(file_path_to_exe, o_log)
     print("Major number: ", majorNumber)  # DEBUG
     if (majorNumber <= 0):
@@ -460,7 +461,7 @@ def iterate_students_directories():
         try:
             with open(log_name_path, 'a+') as output_log:  # a file to throw logs for debugging
                 compiledRet = compile_files(stud_dir_path, output_log)
-                if (compiledRet != 0):
+                if compiledRet != 0:
                     print("{}".format(student_name), " Compilation Failed")
                     utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error')
                 else:  # tests
@@ -477,7 +478,11 @@ def iterate_students_directories():
     general_log.close()
 
 
-if __name__ == '__main__':
+def main():
     # chmod_everything()
     iterate_students_directories()
-    print("hi")
+    print("Done")
+
+
+if __name__ == '__main__':
+    main()
