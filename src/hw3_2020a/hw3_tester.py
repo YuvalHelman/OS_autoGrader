@@ -5,50 +5,23 @@ import subprocess as sp
 import sys
 from pathlib import Path
 from time import sleep
+import logging
 
 # import kmod
 import utils
+from hw3_utils import compile_static_files, setup_logger
 
 p = Path(__file__).resolve()
 
-
-def compile_static_files(gen_log):
-    files_path = "../"
-    try:
-        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader_true.c"
-            , "-o", "message_reader_true"],
-                     cwd=files_path,
-                     stdout=gen_log, stderr=gen_log
-                     )
-        p.wait()
-        if p.returncode != 0:  # check if compilation works
-            print("Reader compile failed")  # DEBUG
-            return 1
-        os.chmod("{}{}".format(files_path, 'message_reader_true'),
-                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
-
-        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_sender_true.c"
-            , "-o", "message_sender_true"],
-                     cwd=files_path,
-                     stdout=gen_log, stderr=gen_log
-                     )
-        p.wait()
-        if p.returncode != 0:  # check if compilation works
-            print("Sender compile failed")  # DEBUG
-            return 1
-        os.chmod("{}{}".format(files_path, 'message_sender_true'),
-                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
-    except OSError as e:
-        print("OSError compile_files: ", e)
-        return 1
-
-    return 0
+# Highest level file logger
+filehandler_dbg = logging.FileHandler('hw3.log', mode='w')
+super_logger = setup_logger('hw3 logger', 'hw3.log')
+super_logger.error('Log Initialize!')
 
 
 def compile_files(exe_files_path, output_log):
     try:
-        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c"
-            , "-o", "message_reader"],
+        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c", "-o", "message_reader"],
                      cwd=exe_files_path,
                      stdout=output_log, stderr=output_log
                      )
@@ -438,7 +411,7 @@ def build_tests(file_path_to_exe, o_log):
 def iterate_students_directories():
     utils.open_names_csv()
 
-    directory_str = "./assignments/"
+    assignments_dir = Path("/home/user/work/OS_autoGrader/assignments/")
 
     with open('compilation_log.txt', 'w') as general_log:
         general_log.write('.\n')
@@ -446,16 +419,13 @@ def iterate_students_directories():
 
     compile_static_files(general_log)
 
-    for student_dir in os.listdir(directory_str):  # iterate on all student folders!
-        general_log.write("Starting on: {}\n".format(student_dir))
-        if (student_dir == ".gitignore"):
-            continue
-        splitted_filename = student_dir.split("_")
+    for student_dir in assignments_dir.iterdir():
+        splitted_filename = student_dir.name.split("_")
         student_name = splitted_filename[0] + " " + splitted_filename[1]
         student_id = splitted_filename[2]
         student_GRADE = 100
 
-        stud_dir_path = directory_str + student_dir + "/"  # ->  ./assignments/Yuval Checker_999999999/
+        stud_dir_path = assignments_dir / student_dir / "/"  # ->  ./assignments/Yuval Checker_999999999/
         log_name_path = stud_dir_path + 'opLog.txt'
         print("Running tests for: " + stud_dir_path)
         try:
@@ -480,7 +450,9 @@ def iterate_students_directories():
 
 def main():
     # chmod_everything()
-    iterate_students_directories()
+
+    # iterate_students_directories()
+
     print("Done")
 
 

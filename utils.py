@@ -7,7 +7,7 @@ from pathlib import Path
 from io import StringIO
 
 
-def open_names_csv(full_path_dir: str):  # A full path to the csv file
+def open_names_csv(full_path_dir="/home/user/work/OS_autoGrader/names.csv"):  # A full path to the csv file
     """ Open a new names.csv for writing the results.
         full_path_dir - A full path to the csv file """
     with open(full_path_dir, 'w') as csvfile:
@@ -17,7 +17,8 @@ def open_names_csv(full_path_dir: str):  # A full path to the csv file
         writer.writerow({'name': 'FULL NAME', 'id': 'ID', 'grade': 'GRADE', 'comment': 'COMMENT'})
 
 
-def write_to_grades_csv(full_path_dir, name, id, grade, comment_string):
+def write_to_grades_csv(name, id, grade, comment_string,
+                        full_path_dir="/home/user/work/OS_autoGrader/names.csv"):
     """ full_path_dir - A full path to the csv file """
     with open(full_path_dir, 'a') as csvfile:
         fieldnames = ['name', 'id', 'grade', 'comment']

@@ -35,7 +35,7 @@ def build_students_directories():
 
 def compile_students_files():
     assignments_path = Path("/home/user/work/OS_autoGrader/assignments/")
-    utils.open_names_csv("/home/user/work/OS_autoGrader/names.csv")  # Create the grades Excel
+    utils.open_names_csv()  # Create the grades Excel
 
     # Create a directory for each student.
     for student_dir in assignments_path.iterdir():  # Example: Yuval Helman_315581819
@@ -46,8 +46,7 @@ def compile_students_files():
             sp = subprocess.run(['gcc', '-o3', '-w', '-Wall', '-std=c11', 'os.c', 'pt.c', "-o", "tester"])
             if sp.returncode != PROCESS_SUCCESS:
                 print("compilation failed for user ", student_name, "_", student_id)
-                utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
-                                          student_name, student_id, 0, "compilation error")
+                utils.write_to_grades_csv(student_name, student_id, 0, "compilation error")
             else:
                 run_test_for_user(student_dir_path, student_name, student_id)
 
@@ -59,21 +58,18 @@ def run_test_for_user(student_dir_path: str, student_name, student_id):
             tester_output = sp.stdout.decode("utf-8")
             student_comments = utils.remove_two_last_lines_from_string(tester_output)
             student_grade = tester_output.split('\n')[-2]
-            utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
-                                      student_name, student_id, student_grade, student_comments)
+            utils.write_to_grades_csv(student_name, student_id, student_grade, student_comments)
             if student_grade != '100':
                 print(student_grade, '-', tester_output)  # DEBUG
         else:  # Run a basic-sanity check..
             sp_sanity = subprocess.run(['./tester', '--sanity_check'], capture_output=True, shell=True)
             tester_output = sp.stdout.decode("utf-8")
             if sp_sanity.returncode != BASIC_FUNC_FAILED_RET_CODE:
-                utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
-                                          student_name, student_id, 75,
+                utils.write_to_grades_csv(student_name, student_id, 75,
                                           f"program raised sig_fault while tested. only basic functionality passed. ")
                 print('75 -', tester_output)  # DEBUG
             else:
-                utils.write_to_grades_csv("/home/user/work/OS_autoGrader/names.csv",
-                                          student_name, student_id, 60, f"basic functionality fails. ")
+                utils.write_to_grades_csv(student_name, student_id, 60, f"basic functionality fails. ")
                 print('60 -', tester_output)  # DEBUG
 
 
