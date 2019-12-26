@@ -9,7 +9,7 @@ import logging
 
 # import kmod
 import utils
-from hw3_utils import compile_static_files, setup_logger
+from .hw3_utils import compile_static_files, setup_logger
 
 p = Path(__file__).resolve()
 
