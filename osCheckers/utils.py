@@ -111,7 +111,7 @@ def remove_two_last_lines_from_string(s):
     return "\n".join(s.split("\n")[:-2])
 
 
-def setup_logger(name, log_file, level=logging.INFO, mode='w'):
+def setup_logger(name, log_file, level=logging.INFO, mode='w', print_to_stdout=True):
     """To setup as many loggers as you want"""
 
     handler = logging.FileHandler(log_file, mode=mode)
@@ -120,6 +120,8 @@ def setup_logger(name, log_file, level=logging.INFO, mode='w'):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(handler)
+    if print_to_stdout:
+        logger.addHandler(logging.StreamHandler(sys.stdout))  # hide to stop printing to stdout
 
     return logger
 

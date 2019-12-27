@@ -35,7 +35,7 @@ def uzip_and_build_test_environment(super_log):
     for student_zipped in assignments_dir.iterdir():
         splitted_filename = student_zipped.name.split("_")
         student_first_name = splitted_filename[0].split(" ")[0]
-        student_last_name = splitted_filename[0].split(" ")[1]
+        student_last_name = (splitted_filename[0].split(" "))[1]
         student_id = splitted_filename[4]
 
         student_dir_path = assignments_dir / f"{student_first_name}_{student_last_name}_{student_id}"
@@ -43,19 +43,19 @@ def uzip_and_build_test_environment(super_log):
             student_dir_path.mkdir()
         except FileNotFoundError as e:
             print(f"directory creation failed for student: {student_first_name}_{student_last_name}_{student_id}", e)
-            super_log.info()
+            super_log.info(f"directory creation failed for student: {student_first_name}_{student_last_name}_{student_id}", e)
             continue
 
         logger_path = student_dir_path / 'testlog.log'
-        stud_logger = utils.setup_logger(name='test log', log_file=logger_path, mode='a')
+        stud_logger = utils.setup_logger(name='test log', log_file=logger_path, mode='w')
 
         with zip.ZipFile(student_zipped, 'r') as ref:
             ref.extractall(path=student_dir_path)
-        
+
         student_zipped.unlink()
 
 
-def compile_student_files(exe_files_path, output_log):
+def compile_student_files(exe_files_path, stud_logger):
     try:
         s = sp.run(["gcc -O3 -Wall -std=c11 message_reader.c -o message_reader"],
                    cwd=exe_files_path, check=True)
@@ -63,6 +63,7 @@ def compile_student_files(exe_files_path, output_log):
                  stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
     except sp.SubprocessError as e:
         print("message_reader compile failed", e)
+        stud_logger.info("message_reader compile failed", e)
         return 1
 
     try:
@@ -72,6 +73,16 @@ def compile_student_files(exe_files_path, output_log):
                  stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
     except sp.SubprocessError as e:
         print("message_sender compile failed", e)
+        return 1
+
+    try:
+        s = sp.run(["make"],
+                   cwd=exe_files_path, check=True)
+        if s.returncode != 0:  # check if compilation works
+            print("Make failed")  # DEBUG
+            return 1
+    except sp.SubprocessError as e:
+        print("make compile failed", e)
         return 1
 
 

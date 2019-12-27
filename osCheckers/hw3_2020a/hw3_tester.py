@@ -8,55 +8,9 @@ from time import sleep
 import logging
 
 from osCheckers import utils
-from osCheckers.hw3_2020a.hw3_utils import compile_static_files, uzip_and_build_test_environment
+from osCheckers.hw3_2020a.hw3_utils import compile_static_files, uzip_and_build_test_environment, compile_student_files
 
 p = Path(__file__).resolve()
-
-
-def compile_files(exe_files_path, output_log):
-    try:
-        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_reader.c", "-o", "message_reader"],
-                     cwd=exe_files_path,
-                     stdout=output_log, stderr=output_log
-                     )
-        p.wait()
-        os.chmod("{}{}".format(exe_files_path, 'message_reader'),
-                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
-        if p.returncode != 0:  # check if compilation works
-            print("reader compile failed")  # DEBUG
-            return 1
-        p = sp.Popen(args=['gcc', '-o3', '-Wall', '-std=gnu99', "message_sender.c"
-            , "-o", "message_sender"],
-                     cwd=exe_files_path,
-                     stdout=output_log, stderr=output_log
-                     )
-        p.wait()
-        os.chmod("{}{}".format(exe_files_path, 'message_sender'),
-                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
-        if p.returncode != 0:  # check if compilation works
-            print("sender compile failed")  # DEBUG
-            return 1
-        p = sp.Popen(args=['make'],
-                     cwd=exe_files_path,
-                     stdout=output_log, stderr=output_log
-                     )
-        p.wait()
-        if p.returncode != 0:  # check if compilation works
-            print("Make failed")  # DEBUG
-            return 1
-
-        # Check if the .ko file was created
-        if not os.path.exists(exe_files_path + "message_slot.ko"):
-            print(".ko file missing")  # DEBUG
-            return 1
-    except OSError as e:
-        print("OSError compile_files: ", e)
-        return 1
-    except:
-        print("error on compile_files")
-        return 1
-
-    return 0
 
 
 '''
@@ -148,7 +102,8 @@ def remove_char_device(file_path_to_exe, log_fd, device_path_name):
     return 0
 
 
-def copy_scripts_to_user(file_path_to_exe, log_fd):
+def copy_scripts_to_user(file_path_to_exe, log_fd):  # TODO: keep going from here.
+    #  TODO: see if this can be altered to python exclusive code!
     try:
         # Copy bash scripts from /src to file_path_to_exe
         s = sp.Popen(args=['cp', '-p', './src/bash_insmod', file_path_to_exe],
@@ -374,7 +329,6 @@ def build_tests(file_path_to_exe, o_log):
     '''
     majorNumber = 0
 
-    copy_scripts_to_user(file_path_to_exe, o_log)
 
     ret, majorNumber = load_module(file_path_to_exe, o_log)
     print("Major number: ", majorNumber)  # DEBUG
@@ -401,34 +355,43 @@ def build_tests(file_path_to_exe, o_log):
     return points_to_reduct, test_errors_str
 
 
-def iterate_students_directories():
+def iterate_students_directories(super_log):
     assignments_dir = Path("/home/user/work/OS_autoGrader/assignments/")
 
     for student_dir in assignments_dir.iterdir():
         splitted_filename = student_dir.name.split("_")
-        student_name = splitted_filename[0]
-        student_id = splitted_filename[4]
+        student_name = splitted_filename[0] + " " + splitted_filename[1]
+        student_id = splitted_filename[2]
         student_GRADE = 100
 
         stud_dir_path = assignments_dir / student_dir / "/"  # ->  ./assignments/Yuval Checker_999999999/
-        log_name_path = stud_dir_path + 'opLog.txt'
-        print("Running tests for: " + stud_dir_path)
+        log_name_path = stud_dir_path + 'hw3.log'
+
+        stud_logger = utils.setup_logger(name='student logger', log_file=log_name_path, mode='w')
+        stud_logger.info(f'Tests Initialize for student {student_name}_{student_id}')
+        super_log.info(f'Tests Initialize for student {student_name}_{student_id}')
+
         try:
-            with open(log_name_path, 'a+') as output_log:  # a file to throw logs for debugging
-                compiledRet = compile_files(stud_dir_path, output_log)
-                if compiledRet != 0:
-                    print("{}".format(student_name), " Compilation Failed")
-                    utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error')
-                else:  # tests
-                    print("student {} ".format(student_name), "compilation successful")
-                    points_to_reduct, test_errors_str = build_tests(stud_dir_path, output_log)
-                    student_GRADE -= points_to_reduct
-                    print("student grade: ", student_GRADE)
-                    utils.write_to_grades_csv(student_name, student_id, student_GRADE, test_errors_str)
-        except OSError as e:
-            print("OSError1: ", e)
-        except ValueError as e2:
-            print("ValueError1: ", e2)
+            compiledRet = compile_student_files(stud_dir_path, stud_logger)
+            if compiledRet != 0:
+                stud_logger.info(f'Compilation phase failed for: {student_name}_{student_id}')
+                utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error')
+                continue
+
+            stud_logger.info(f'Compilation Success')
+
+            copy_scripts_to_user(stud_dir_path, stud_logger)
+
+            points_to_reduct, test_errors_str = build_tests(stud_dir_path, stud_logger)
+
+
+
+            student_GRADE -= points_to_reduct
+            stud_logger.info(f"{student_name}_{student_id} grade: {student_GRADE}")
+            utils.write_to_grades_csv(student_name, student_id, student_GRADE, test_errors_str)
+        except Exception as e:
+            stud_logger.info(f'Tests threw exception for student {student_name}_{student_id}: {e}')
+            super_log.info(f'Tests threw exception for student {student_name}_{student_id}: {e}')
 
 
 def main():
