@@ -8,7 +8,8 @@ from time import sleep
 import logging
 
 from osCheckers import utils
-from osCheckers.hw3_2020a.hw3_utils import compile_static_files, uzip_and_build_test_environment, compile_student_files
+from osCheckers.hw3_2020a.hw3_utils import compile_static_files, uzip_and_build_test_environment,\
+    compile_student_files, copy_scripts_to_user
 
 p = Path(__file__).resolve()
 
@@ -102,61 +103,6 @@ def remove_char_device(file_path_to_exe, log_fd, device_path_name):
     return 0
 
 
-def copy_scripts_to_user(file_path_to_exe, log_fd):  # TODO: keep going from here.
-    #  TODO: see if this can be altered to python exclusive code!
-    try:
-        # Copy bash scripts from /src to file_path_to_exe
-        s = sp.Popen(args=['cp', '-p', './src/bash_insmod', file_path_to_exe],
-                     stdout=log_fd, stderr=log_fd
-                     )
-        s.wait()
-        if s.returncode == 1:
-            print("copy insmod failed for user: ", file_path_to_exe)
-            return 1, -1
-    except:
-        print("copy bash_insmod failed")
-        return 1, -1
-
-    try:
-        s = sp.Popen(args=['cp', '-p', './src/bash_rmmod', file_path_to_exe],
-                     stdout=log_fd, stderr=log_fd
-                     )
-        s.wait()
-        if s.returncode == 1:
-            print("copy rmmod failed for user: ", file_path_to_exe)
-            return 1, -1
-    except:
-        print("copy bash_rmmod failed")
-        return 1, -1
-
-    try:
-        s = sp.Popen(args=['cp', '-p', './src/bash_mknod', file_path_to_exe],
-                     stdout=log_fd, stderr=log_fd
-                     )
-        s.wait()
-        if s.returncode == 1:
-            print("copy mknod failed for user: ", file_path_to_exe)
-            return 1, -1
-    except:
-        print("copy bash_mknod failed")
-        return 1, -1
-    try:
-        s = sp.Popen(args=['cp', '-p', './src/message_reader_true', file_path_to_exe],
-                     stdout=log_fd, stderr=log_fd
-                     )
-        s.wait()
-        s = sp.Popen(args=['cp', '-p', './src/message_sender_true', file_path_to_exe],
-                     stdout=log_fd, stderr=log_fd
-                     )
-        s.wait()
-        if s.returncode == 1:
-            print("copy reader or sender failed for user: ", file_path_to_exe)
-            return 1, -1
-    except:
-        print("copy bash_mknod failed")
-        return 1, -1
-
-
 def load_module(file_path_to_exe, log_fd):
     dmesg_file_path = file_path_to_exe + 'dmesg_file.txt'
     MajorNum_file_path = file_path_to_exe + 'dmesg_file.txt'
@@ -235,7 +181,7 @@ def remove_module(file_path_to_exe, log_fd):
 
 points_to_reduct_for_test = 2  # TODO: change this to whatever would work with the tests
 points_to_reduct_bug = 5  # TODO: change this to whatever would work with the tests
-overwrite_mode, append_mode = 0, 1  # overwrite mode = 0, append_mode = 1
+OVERWRITE_MODE, APPEND_MODE = 0, 1  # overwrite mode = 0, append_mode = 1
 
 
 def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
@@ -244,12 +190,12 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
 
     # Testing the device!
     arguments = [  # debug: (0.dev_name, 1.chID, 2.msgSTR, 3.minor_num, 4.overwrite/append_mode)
-        (device_path_Name, 10, "Hello ", minor_num, overwrite_mode),  # ./tests/output0.txt
-        (device_path_Name, 10, "World", minor_num, append_mode),  # ./tests/output1.txt
-        (device_path_Name, 10, "Overwritten", minor_num, overwrite_mode),  # ./tests/output2.txt
-        (device_path_Name, 20, "##new123", minor_num, append_mode),  # ./tests/output3.txt
-        (device_path_Name, 20, "##appended##", minor_num, append_mode),  # ./tests/output4.txt
-        (device_path_Name, 10, "123ow#", minor_num, overwrite_mode),  # ./tests/output5.txt
+        (device_path_Name, 10, "Hello ", minor_num, OVERWRITE_MODE),  # ./tests/output0.txt
+        (device_path_Name, 10, "World", minor_num, APPEND_MODE),  # ./tests/output1.txt
+        (device_path_Name, 10, "Overwritten", minor_num, OVERWRITE_MODE),  # ./tests/output2.txt
+        (device_path_Name, 20, "##new123", minor_num, APPEND_MODE),  # ./tests/output3.txt
+        (device_path_Name, 20, "##appended##", minor_num, APPEND_MODE),  # ./tests/output4.txt
+        (device_path_Name, 10, "123ow#", minor_num, OVERWRITE_MODE),  # ./tests/output5.txt
     ]
     for args_test_num, test_tuple in enumerate(arguments):
         test_output_name = file_path_to_exe + 'output{}.txt'.format(args_test_num)
@@ -306,7 +252,7 @@ def message_reader_text_test(o_log, file_path_to_exe, dev_name):
         test_output_name = file_path_to_exe + 'outputUserReader.txt'
         with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval Checker_999999999/output1.txt
             # Check If the user's message_reader is valid (Most of them aren't...) :(
-            if send_message(file_path_to_exe, o_log, dev_name, overwrite_mode, minor_num, "messageToBeRead") == 1:
+            if send_message(file_path_to_exe, o_log, dev_name, OVERWRITE_MODE, minor_num, "messageToBeRead") == 1:
                 test_errors_str += "message_sender doesn't work. "
                 points_to_reduct += points_to_reduct_for_test
             # Read with user's message_reader
@@ -329,10 +275,9 @@ def build_tests(file_path_to_exe, o_log):
     '''
     majorNumber = 0
 
-
     ret, majorNumber = load_module(file_path_to_exe, o_log)
     print("Major number: ", majorNumber)  # DEBUG
-    if (majorNumber <= 0):
+    if majorNumber <= 0:
         print("debug here majNum <0. error is: ", sys.exc_info()[0])  # DEBUG
         remove_module(file_path_to_exe, o_log)
         return 40, "Major Number Parsing from Syslog failed. "
@@ -384,8 +329,6 @@ def iterate_students_directories(super_log):
 
             points_to_reduct, test_errors_str = build_tests(stud_dir_path, stud_logger)
 
-
-
             student_GRADE -= points_to_reduct
             stud_logger.info(f"{student_name}_{student_id} grade: {student_GRADE}")
             utils.write_to_grades_csv(student_name, student_id, student_GRADE, test_errors_str)
@@ -403,7 +346,7 @@ def main():
     uzip_and_build_test_environment(super_logger)
 
     # chmod_everything()
-    # iterate_students_directories()
+    iterate_students_directories(super_logger)  # TODO: test this
 
     print("Done")
 
