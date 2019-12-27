@@ -7,16 +7,10 @@ from pathlib import Path
 from time import sleep
 import logging
 
-# import kmod
-import utils
-from .hw3_utils import compile_static_files, setup_logger
+from osCheckers import utils
+from osCheckers.hw3_2020a.hw3_utils import compile_static_files, uzip_and_build_test_environment
 
 p = Path(__file__).resolve()
-
-# Highest level file logger
-filehandler_dbg = logging.FileHandler('hw3.log', mode='w')
-super_logger = setup_logger(name='hw3 logger', log_file='hw3.log')
-super_logger.error('Log Initialize!')
 
 
 def compile_files(exe_files_path, output_log):
@@ -52,7 +46,7 @@ def compile_files(exe_files_path, output_log):
             return 1
 
         # Check if the .ko file was created
-        if (os.path.exists(exe_files_path + "message_slot.ko") == False):
+        if not os.path.exists(exe_files_path + "message_slot.ko"):
             print(".ko file missing")  # DEBUG
             return 1
     except OSError as e:
@@ -77,8 +71,8 @@ def compile_files(exe_files_path, output_log):
 
 def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID, output_fd):
     try:
-        if is_user_file == True:
-            # Using the user's "Message reader"
+        if is_user_file:  # Using the user's "Message reader"
+
             p = sp.Popen(args=['./message_reader', device_path_Name, str(chID)],
                          # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
                          cwd=file_path_to_exe,
@@ -100,8 +94,7 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
 
 def send_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, write_mode, chID, msgStr):
     try:
-        if is_user_file == True:
-            # Using the user's "Message Sender"
+        if is_user_file:  # Using the user's "Message Sender"
             p = sp.Popen(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
                          cwd=file_path_to_exe,
                          stdout=log_fd, stderr=log_fd)
@@ -130,7 +123,7 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, devic
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
-        if (p.returncode == 1):
+        if p.returncode == 1:
             print("mknod failed for user: ", file_path_to_exe)
             return 1
     except OSError as e:
@@ -141,13 +134,12 @@ def create_char_device(file_path_to_exe, log_fd, majorNumber, minorNumber, devic
     return 0
 
 
-def remove_char_device(file_path_to_exe, log_fd, device_path_Name):
+def remove_char_device(file_path_to_exe, log_fd, device_path_name):
     try:
-        p = sp.Popen(args=['sudo rm -f {}'.format(device_path_Name)],
-                     # cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
-                     stdout=log_fd, stderr=log_fd, shell=True
-                     )
-        p.wait()
+        p = sp.run(args=[f'sudo rm -f {device_path_name}'],
+                   # cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
+                   stdout=log_fd, stderr=log_fd, shell=True
+                   )
     except OSError as e:
         print("OSError on remove_char_device: ", e)
         return 1
@@ -156,14 +148,14 @@ def remove_char_device(file_path_to_exe, log_fd, device_path_Name):
     return 0
 
 
-def copyScriptsToUser(file_path_to_exe, log_fd):
+def copy_scripts_to_user(file_path_to_exe, log_fd):
     try:
         # Copy bash scripts from /src to file_path_to_exe
-        p = sp.Popen(args=['cp', '-p', './src/bash_insmod', file_path_to_exe],
+        s = sp.Popen(args=['cp', '-p', './src/bash_insmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
-        p.wait()
-        if (p.returncode == 1):
+        s.wait()
+        if s.returncode == 1:
             print("copy insmod failed for user: ", file_path_to_exe)
             return 1, -1
     except:
@@ -171,11 +163,11 @@ def copyScriptsToUser(file_path_to_exe, log_fd):
         return 1, -1
 
     try:
-        p = sp.Popen(args=['cp', '-p', './src/bash_rmmod', file_path_to_exe],
+        s = sp.Popen(args=['cp', '-p', './src/bash_rmmod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
-        p.wait()
-        if (p.returncode == 1):
+        s.wait()
+        if s.returncode == 1:
             print("copy rmmod failed for user: ", file_path_to_exe)
             return 1, -1
     except:
@@ -183,26 +175,26 @@ def copyScriptsToUser(file_path_to_exe, log_fd):
         return 1, -1
 
     try:
-        p = sp.Popen(args=['cp', '-p', './src/bash_mknod', file_path_to_exe],
+        s = sp.Popen(args=['cp', '-p', './src/bash_mknod', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
-        p.wait()
-        if (p.returncode == 1):
+        s.wait()
+        if s.returncode == 1:
             print("copy mknod failed for user: ", file_path_to_exe)
             return 1, -1
     except:
         print("copy bash_mknod failed")
         return 1, -1
     try:
-        p = sp.Popen(args=['cp', '-p', './src/message_reader_true', file_path_to_exe],
+        s = sp.Popen(args=['cp', '-p', './src/message_reader_true', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
-        p.wait()
-        p = sp.Popen(args=['cp', '-p', './src/message_sender_true', file_path_to_exe],
+        s.wait()
+        s = sp.Popen(args=['cp', '-p', './src/message_sender_true', file_path_to_exe],
                      stdout=log_fd, stderr=log_fd
                      )
-        p.wait()
-        if (p.returncode == 1):
+        s.wait()
+        if s.returncode == 1:
             print("copy reader or sender failed for user: ", file_path_to_exe)
             return 1, -1
     except:
@@ -252,7 +244,7 @@ def load_module(file_path_to_exe, log_fd):
     return 0, majorNumber
 
 
-def module_Exists():
+def module_exists():
     '''
         :returns 'True' if module exists. 'False' if it doesn't exist.
     '''
@@ -275,7 +267,7 @@ def remove_module(file_path_to_exe, log_fd):
                      stdout=log_fd, stderr=log_fd
                      )
         p.wait()
-        if (p.returncode == 1):
+        if p.returncode == 1:
             print("rmmod failed for user:", file_path_to_exe)
             return 1  # DEBUG: if I cant remove the Module, I shouldn't run the other directories until its off
     except OSError as e:
@@ -351,7 +343,7 @@ def run_tests(o_log, file_path_to_exe, device_path_Name, minor_num):
     return points_to_reduct, test_errors_str
 
 
-def test_messageReader_text(o_log, file_path_to_exe, dev_name):
+def message_reader_text_test(o_log, file_path_to_exe, dev_name):
     test_errors_str = ""
     points_to_reduct = 0
     minor_num = 250
@@ -382,7 +374,7 @@ def build_tests(file_path_to_exe, o_log):
     '''
     majorNumber = 0
 
-    copyScriptsToUser(file_path_to_exe, o_log)
+    copy_scripts_to_user(file_path_to_exe, o_log)
 
     ret, majorNumber = load_module(file_path_to_exe, o_log)
     print("Major number: ", majorNumber)  # DEBUG
@@ -398,7 +390,8 @@ def build_tests(file_path_to_exe, o_log):
 
     create_char_device(file_path_to_exe, o_log, majorNumber, minor_num, device_path_Name)
 
-    points_to_reduct, test_errors_str = run_tests(o_log, file_path_to_exe, device_path_Name, minor_num)
+    points_to_reduct, test_errors_str = \
+        run_tests(o_log, file_path_to_exe, device_path_Name, minor_num)
 
     remove_char_device(file_path_to_exe, o_log, device_path_Name)
     remove_module(file_path_to_exe, o_log)
@@ -409,20 +402,12 @@ def build_tests(file_path_to_exe, o_log):
 
 
 def iterate_students_directories():
-    utils.open_names_csv()
-
     assignments_dir = Path("/home/user/work/OS_autoGrader/assignments/")
-
-    with open('compilation_log.txt', 'w') as general_log:
-        general_log.write('.\n')
-    general_log = open('compilation_log.txt', 'a')
-
-    compile_static_files(general_log)
 
     for student_dir in assignments_dir.iterdir():
         splitted_filename = student_dir.name.split("_")
-        student_name = splitted_filename[0] + " " + splitted_filename[1]
-        student_id = splitted_filename[2]
+        student_name = splitted_filename[0]
+        student_id = splitted_filename[4]
         student_GRADE = 100
 
         stud_dir_path = assignments_dir / student_dir / "/"  # ->  ./assignments/Yuval Checker_999999999/
@@ -445,12 +430,16 @@ def iterate_students_directories():
         except ValueError as e2:
             print("ValueError1: ", e2)
 
-    general_log.close()
-
 
 def main():
-    # chmod_everything()
+    # Highest level file logger
+    super_logger = utils.setup_logger(name='hw3 logger', log_file='hw3.log')
+    super_logger.info('Log Initialize!')
+    utils.open_names_csv()
+    compile_static_files(super_logger)
+    uzip_and_build_test_environment(super_logger)
 
+    # chmod_everything()
     # iterate_students_directories()
 
     print("Done")

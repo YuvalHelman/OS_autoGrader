@@ -5,6 +5,7 @@ import zipfile as zip
 import contextlib
 from pathlib import Path
 from io import StringIO
+import logging
 
 
 def open_names_csv(full_path_dir="/home/user/work/OS_autoGrader/names.csv"):  # A full path to the csv file
@@ -34,7 +35,7 @@ def zip_out_folders():
     try:
         for file in os.listdir(directory_str):
             splitted_filename = file.split("_")
-            if (splitted_filename[0] != ".gitignore"):
+            if splitted_filename[0] != ".gitignore":
                 print(file)  # DEBUG
                 # Get FirstName_LastName_ID string
                 full_stud_name = splitted_filename[0].split(" ")[0] + "_" + \
@@ -45,7 +46,7 @@ def zip_out_folders():
                 os.mkdir(directory_to_extract_to, 0o755)  # linux - mkdir , windows - md
                 # Zip the files into the student directory
                 zip_ref = zip.ZipFile("./zip_folders/" + file, 'r')
-                zip_ref.extractall(directory_to_extract_to)
+                zip_ref.extractall(path=directory_to_extract_to)
                 zip_ref.close()
                 count += 1
         print("num of zips: {}".format(count))
@@ -108,6 +109,19 @@ class StandardOutput:
 
 def remove_two_last_lines_from_string(s):
     return "\n".join(s.split("\n")[:-2])
+
+
+def setup_logger(name, log_file, level=logging.INFO, mode='w'):
+    """To setup as many loggers as you want"""
+
+    handler = logging.FileHandler(log_file, mode=mode)
+    handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
 
 
 if __name__ == '__main__':
