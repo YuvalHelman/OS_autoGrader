@@ -56,23 +56,25 @@ def uzip_and_build_test_environment(super_log):
 
 
 def compile_student_files(exe_files_path, stud_logger):
+
     try:
-        s = sp.run(["gcc -O3 -Wall -std=c11 message_reader.c -o message_reader"],
-                   cwd=exe_files_path, check=True)
-        os.chmod(f"./message_reader",
-                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
+        with utils.currentWorkingDir(exe_files_path):
+            s = sp.run(["gcc", "-O3", "-Wall", "-std=c11", "message_reader.c", "-o", "message_reader"],
+                       check=True)
+            os.chmod(f"./message_reader",
+                     stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)
     except sp.SubprocessError as e:
-        print("message_reader compile failed", e)
         stud_logger.info("message_reader compile failed", e)
         return 1
 
     try:
-        s = sp.run(["gcc -O3 -Wall -std=c11 message_sender.c -o message_sender"],
-                   cwd=exe_files_path, check=True)
-        os.chmod(f"./message_sender",
-                 stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)  # DEBUG: testing this
+        with utils.currentWorkingDir(exe_files_path):
+            s = sp.run(["gcc", "-O3", "-Wall", "-std=c11", "message_sender.c", "-o", "message_sender"],
+                        check=True)
+            os.chmod(f"./message_sender",
+                     stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)
     except sp.SubprocessError as e:
-        print("message_sender compile failed", e)
+        stud_logger.info("message_reader compile failed", e)
         return 1
 
     try:
@@ -85,25 +87,12 @@ def compile_student_files(exe_files_path, stud_logger):
         print("make compile failed", e)
         return 1
 
-
-        p = sp.Popen(args=['make'],
-                     cwd=exe_files_path,
-                     stdout=output_log, stderr=output_log
-                     )
-        p.wait()
-        if p.returncode != 0:  # check if compilation works
-            print("Make failed")  # DEBUG
-            return 1
-
-        # Check if the .ko file was created
-        if not os.path.exists(exe_files_path + "message_slot.ko"):
+    try:  # Check if the .ko file was created
+        if not os.path.exists(exe_files_path / "message_slot.ko"):
             print(".ko file missing")  # DEBUG
             return 1
     except OSError as e:
         print("OSError compile_files: ", e)
-        return 1
-    except:
-        print("error on compile_files")
         return 1
 
     return 0
@@ -132,7 +121,7 @@ def copy_scripts_to_user(file_path_to_exe, log_fd):  # TODO: keep going from her
         if s.returncode == 1:
             print("copy rmmod failed for user: ", file_path_to_exe)
             return 1, -1
-    except:
+    except Exception as e:
         print("copy bash_rmmod failed")
         return 1, -1
 

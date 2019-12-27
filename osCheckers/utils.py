@@ -82,10 +82,10 @@ def get_student_name_id_from_file_or_dir(file_name: str, is_dir=False):
 
 
 @contextlib.contextmanager
-def working_directory(path):
+def currentWorkingDir(path):
     """Changes working directory and returns to previous on exit."""
     prev_cwd = Path.cwd()
-    os.chdir(path)
+    os.chdir(str(path))
     try:
         yield
     finally:

@@ -42,7 +42,7 @@ def compile_students_files():
         student_name, student_id = utils.get_student_name_id_from_file_or_dir(str(student_dir), is_dir=True)
         student_dir_path = assignments_path / f"{student_name}_{student_id}"
 
-        with utils.working_directory(str(student_dir_path)):
+        with utils.currentWorkingDir(str(student_dir_path)):
             sp = subprocess.run(['gcc', '-o3', '-w', '-Wall', '-std=c11', 'os.c', 'pt.c', "-o", "tester"])
             if sp.returncode != PROCESS_SUCCESS:
                 print("compilation failed for user ", student_name, "_", student_id)
@@ -52,7 +52,7 @@ def compile_students_files():
 
 
 def run_test_for_user(student_dir_path: str, student_name, student_id):
-    with utils.working_directory(str(student_dir_path)):
+    with utils.currentWorkingDir(str(student_dir_path)):
         sp = subprocess.run(['./tester'], capture_output=True, shell=True)
         if isinstance(sp, subprocess.CompletedProcess) and sp.returncode == PROCESS_SUCCESS:
             tester_output = sp.stdout.decode("utf-8")
