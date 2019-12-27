@@ -63,7 +63,7 @@ def compile_student_files(exe_files_path, stud_logger):
                        check=True)
             os.chmod(f"./message_reader",
                      stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)
-    except sp.SubprocessError as e:
+    except Exception as e:
         stud_logger.info("message_reader compile failed", e)
         return 1
 
@@ -73,7 +73,7 @@ def compile_student_files(exe_files_path, stud_logger):
                         check=True)
             os.chmod(f"./message_sender",
                      stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)
-    except sp.SubprocessError as e:
+    except Exception as e:
         stud_logger.info("message_reader compile failed", e)
         return 1
 
@@ -83,7 +83,7 @@ def compile_student_files(exe_files_path, stud_logger):
         if s.returncode != 0:  # check if compilation works
             print("Make failed")  # DEBUG
             return 1
-    except sp.SubprocessError as e:
+    except Exception as e:
         print("make compile failed", e)
         return 1
 
@@ -91,7 +91,7 @@ def compile_student_files(exe_files_path, stud_logger):
         if not os.path.exists(exe_files_path / "message_slot.ko"):
             print(".ko file missing")  # DEBUG
             return 1
-    except OSError as e:
+    except Exception as e:
         print("OSError compile_files: ", e)
         return 1
 

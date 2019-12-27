@@ -301,18 +301,12 @@ def iterate_students_directories(super_log):
         stud_logger = utils.setup_logger(name='student logger', log_file=log_name_path, mode='w')
         super_log.info(f'Tests Initialize for student {student_name}_{student_id}')
 
-        try:
-            compiledRet = compile_student_files(stud_dir_path, stud_logger)
-            if compiledRet != 0:
-                stud_logger.info(f'Compilation phase failed for: {student_name}_{student_id}')
-                utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error')
-                continue
-        except Exception as e:
-            stud_logger.info(f'Exception while compiling for student {student_name}_{student_id}: {e}')
-            super_log.info(f'Exception while compiling for student {student_name}_{student_id}: {e}')
+        if compile_student_files(stud_dir_path, stud_logger) != 0:
+            stud_logger.info(f'Compilation phase failed for: {student_name}_{student_id}')
+            utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error')
             continue
-
         stud_logger.info(f'Compilation Success')
+        
         device_path_name, minor_num = build_tests_env(stud_dir_path, stud_logger)
         if device_path_name is None:
             continue
