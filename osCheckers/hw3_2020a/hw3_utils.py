@@ -29,10 +29,11 @@ def compile_static_files(gen_log):
     return 0
 
 
-def uzip_and_build_test_environment(super_log):
-    assignments_dir = Path("/home/user/work/OS_autoGrader/assignments/")
+def uzip_and_build_test_environment(super_log, path_from=Path("/home/user/work/OS_autoGrader/zip_files/"),
+                                    path_to=Path("/home/user/work/OS_autoGrader/assignments/")):
+    assignments_dir = path_to
 
-    for student_zipped in assignments_dir.iterdir():
+    for student_zipped in path_from.iterdir():
         splitted_filename = student_zipped.name.split("_")
         student_first_name = splitted_filename[0].split(" ")[0]
         student_last_name = (splitted_filename[0].split(" "))[1]
@@ -43,7 +44,8 @@ def uzip_and_build_test_environment(super_log):
             student_dir_path.mkdir()
         except FileNotFoundError as e:
             print(f"directory creation failed for student: {student_first_name}_{student_last_name}_{student_id}", e)
-            super_log.info(f"directory creation failed for student: {student_first_name}_{student_last_name}_{student_id}", e)
+            super_log.info(
+                f"directory creation failed for student: {student_first_name}_{student_last_name}_{student_id}", e)
             continue
 
         logger_path = student_dir_path / 'testlog.log'
@@ -51,12 +53,10 @@ def uzip_and_build_test_environment(super_log):
 
         with zip.ZipFile(student_zipped, 'r') as ref:
             ref.extractall(path=student_dir_path)
-
-        student_zipped.unlink()
+        # student_zipped.unlink()
 
 
 def compile_student_files(exe_files_path, stud_logger):
-
     try:
         with utils.currentWorkingDir(exe_files_path):
             s = sp.run(["gcc", "-O3", "-Wall", "-std=c11", "message_reader.c", "-o", "message_reader"],
@@ -70,7 +70,7 @@ def compile_student_files(exe_files_path, stud_logger):
     try:
         with utils.currentWorkingDir(exe_files_path):
             s = sp.run(["gcc", "-O3", "-Wall", "-std=c11", "message_sender.c", "-o", "message_sender"],
-                        check=True)
+                       check=True)
             os.chmod(f"./message_sender",
                      stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)
     except Exception as e:

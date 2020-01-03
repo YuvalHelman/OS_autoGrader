@@ -5,5 +5,6 @@ compile_log.txt
 valgrind_log.txt
 excludedStudents/
 assignments/
+zip_files/
 **/.pytest_cache/
 osCheckers/tests/

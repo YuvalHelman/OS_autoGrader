@@ -67,17 +67,13 @@ def send_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, write
     return 0
 
 
-def remove_char_device(file_path_to_exe, log_fd, device_path_name):
+def remove_char_device(stud_logger, device_path_name):
     try:
-        s = sp.run(args=[f'sudo rm -f {device_path_name}'],
-                   # cwd=file_path_to_exe,  # needed for device_path DEBUG: erase later?
-                   stdout=log_fd, stderr=log_fd, shell=True
-                   )
-    except OSError as e:
-        print("OSError on remove_char_device: ", e)
+        s = sp.run(args=['sudo', 'rm', '-f' f'{device_path_name}'], shell=True)
+    except sp.SubprocessError as e:
+        stud_logger.info("remove char device failed", e)
         return 1
 
-    print("remove char device success")  # DEBUG
     return 0
 
 
@@ -152,18 +148,23 @@ def load_module(exe_files_path, stud_logger):
     return 0
 
 
-def remove_module(exe_files_path, stud_logger):
+def remove_module(exe_files_path = None, stud_logger = None):
     try:
-        with utils.currentWorkingDir(exe_files_path):
-            s = sp.run(["sudo", "rmmod", "message_slot"], check=True)
-            if s.returncode == 1:
-                print("rmmod failed for user:", exe_files_path)
-                return 1  # if I can't remove the Module, I shouldn't run the other directories until its off
+        s = sp.run(["sudo", "rmmod", "message_slot"], check=True)
+        if s.returncode == 1:
+            print("rmmod failed for user:", exe_files_path)
+            return 1  # if I can't remove the Module, I shouldn't run the other directories until its off
     except sp.SubprocessError as e:
-        stud_logger.info("remove_module failed", e)
+        try:
+            stud_logger.info("remove_module failed", e)
+        except Exception:
+            pass
         return 1
 
-    stud_logger.info("remove_module success")
+    try:
+        stud_logger.info("remove_module success")
+    except Exception:
+        pass
     return 0
 
 
@@ -194,23 +195,23 @@ def message_reader_text_test(o_log, file_path_to_exe, dev_name):
 
 
 def build_tests_env(exe_files_path, stud_logger):
-    """
-    Checks the tests on 1 student
+    """ Checks the tests on 1 student
     Returns the number of points needed to reduct from the student
     @param file_path_to_exe:
     @param stud_logger:
     @return: (Points_to_deduct, test_errors_str) == (100>=int>=0, String)
     """
+    remove_module()
     if load_module(exe_files_path, stud_logger) != 0:
         stud_logger.info("load_module failed")
         return None, None
 
     MINOR_NUMBER = 20
     dev_name = "charDevice"
-    deviceUniqueIdentifer = exe_files_path.stem  # Student Name
-    device_path_name = f"/dev/{dev_name}{deviceUniqueIdentifer}"
+    device_path_name = f"/dev/tester/{dev_name}{exe_files_path.stem}"  # student name
 
     # create a character device
+    remove_char_device(stud_logger, device_path_name)
     try:
         with utils.currentWorkingDir(exe_files_path):
             s = sp.run(["sudo", "mknod", "-m", "777", device_path_name, "c", str(MAJOR_NUMBER), str(MINOR_NUMBER)],
@@ -283,7 +284,7 @@ def run_tests(o_log, file_path_to_exe, device_path_name, minor_num):
 
 
 def clean_tests_env(file_path_to_exe, device_path_name, stud_logger):
-    remove_char_device(file_path_to_exe, stud_logger, device_path_name)
+    remove_char_device(stud_logger, device_path_name)
     remove_module(file_path_to_exe, stud_logger)
 
 
@@ -306,22 +307,25 @@ def iterate_students_directories(super_log):
             utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error')
             continue
         stud_logger.info(f'Compilation Success')
-        
+
+
         device_path_name, minor_num = build_tests_env(stud_dir_path, stud_logger)
         if device_path_name is None:
             continue
         try:
+            pass
             # points_to_reduct, test_errors_str = \
             #     run_tests(stud_logger, stud_dir_path, device_path_name, minor_num)
-            clean_tests_env(stud_dir_path, stud_logger)
 
             # student_GRADE = 100 - points_to_reduct
             # stud_logger.info(f"{student_name}_{student_id} grade: {student_GRADE}")
             # utils.write_to_grades_csv(student_name, student_id, student_GRADE, test_errors_str)
+            stud_logger.info(f'Tests completed for studednt {student_name}_{student_id}')
         except Exception as e:
-            remove_char_device(stud_dir_path, stud_logger, device_path_name)
             stud_logger.info(f'Exception for student {student_name}_{student_id}: {e}')
             super_log.info(f'Exception for student {student_name}_{student_id}: {e}')
+        finally:
+            clean_tests_env(stud_dir_path, device_path_name, stud_logger)
 
 
 def main():
@@ -330,9 +334,7 @@ def main():
     super_logger.info('Log Initialize!')
     utils.open_names_csv()
     compile_static_files(super_logger)
-    # uzip_and_build_test_environment(super_logger)
-
-    # chmod_everything()
+    uzip_and_build_test_environment(super_logger)
     iterate_students_directories(super_logger)
 
     print("Done")
