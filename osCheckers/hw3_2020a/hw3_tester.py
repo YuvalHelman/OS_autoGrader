@@ -12,7 +12,7 @@ from osCheckers.hw3_2020a.hw3_utils import compile_static_files, uzip_and_build_
     compile_student_files, copy_scripts_to_user
 
 
-def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID, output_fd):
+def read_message(is_user_file, file_path_to_exe, device_path_Name, chID, stud_logger):
     """
     @param is_user_file - a boolean that specifies if the function will use the user's message_reader code, or mine.
     @param file_path_to_exe - the path to the user's directory
@@ -43,7 +43,7 @@ def read_message(is_user_file, file_path_to_exe, log_fd, device_path_Name, chID,
     return 0
 
 
-def send_message(file_path_to_exe, log_fd, device_path_Name, write_mode, chID, msgStr, is_user_file):
+def send_message(file_path_to_exe, device_path_Name, write_mode, chID, msgStr, stud_logger, is_user_file):
     try:
         if is_user_file:  # Using the user's "Message Sender"
             p = sp.run(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
@@ -65,7 +65,7 @@ POINTS_REDUCTION_BUG = 5
 OVERWRITE_MODE, APPEND_MODE = 0, 1
 
 
-def message_reader_text_test(o_log, file_path_to_exe, dev_name):
+def message_reader_text_test(stud_logger, file_path_to_exe, dev_name):
     test_errors_str = ""
     points_to_reduct = 0
     minor_num = 250
@@ -73,11 +73,11 @@ def message_reader_text_test(o_log, file_path_to_exe, dev_name):
         test_output_name = file_path_to_exe + 'outputUserReader.txt'
         with open(test_output_name, 'w') as test_log:  # ./assignments/Yuval Checker_999999999/output1.txt
             # Check If the user's message_reader is valid (Most of them aren't...) :(
-            if send_message(file_path_to_exe, o_log, dev_name, OVERWRITE_MODE, minor_num, "messageToBeRead") == 1:
+            if send_message(file_path_to_exe, dev_name, OVERWRITE_MODE, minor_num, "messageToBeRead", stud_logger, is_user_file=False) == 1:
                 test_errors_str += "message_sender doesn't work. "
                 points_to_reduct += TEST_POINTS_REDUCTION
             # Read with user's message_reader
-            if read_message(True, file_path_to_exe, o_log, dev_name, 1, test_log) == 1:
+            if read_message(True, file_path_to_exe, dev_name, 1, stud_logger) == 1:
                 test_errors_str += "message_reader output not as requested. "
                 points_to_reduct += TEST_POINTS_REDUCTION
     except OSError as e:
@@ -99,25 +99,25 @@ def run_tests(stud_logger, stud_dir_path, device_path_name, minor_num):
         # ./tests/output2.txt
         {'ch_id': 20, 'message': "##new123", 'minor': minor_num, 'mode': APPEND_MODE, 'output': '##new123'},
         # ./tests/output3.txt
-        {'ch_id': 20, 'message': "##appended##", 'minor': minor_num, 'mode': APPEND_MODE,
-         'output': '##new123##appended##'},  # ./tests/output4.txt
+        {'ch_id': 20, 'message': "##appended##", 'minor': minor_num, 'mode': APPEND_MODE, 'output': '##new123##appended##'},
+        # ./tests/output4.txt
         {'ch_id': 10, 'message': "123ow#", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'output': '123ow#'},
         # ./tests/output5.txt
     ]
     for test_number, test_args in enumerate(arguments):
         if send_message(stud_dir_path, stud_logger, device_path_name, test_args['mode'],
-                        test_args['ch_id'], test_args['message'], is_user_file=True) == 1:
-            print("Send message failed on test {test_number} and user {stud_dir_path}")
+                        test_args['ch_id'], test_args['message'], stud_logger, is_user_file=True) == 1:
+            stud_logger.info(f"Send message failed on test {test_number} and user {stud_dir_path}")
             points_to_reduct += TEST_POINTS_REDUCTION
             test_errors_str += "message_sender failed. "
             continue
-        # Read with my message_reader and write to: testOutputFd
+
         test_output_name = stud_dir_path / f'output{test_number}.txt'
         true_test_name = './tests/output{}.txt'.format(test_number)
         with open(test_output_name, 'w+') as testOutputFd:
             if read_message(True, file_path_to_exe, o_log, device_path_name, test_args['ch_id'], testOutputFd) == 1:
                 # DEBUG : change True\False for users\mine message_reader exe
-                print("Read message failed on test {} and user {}".format(test_number, file_path_to_exe))
+                stud_logger.info(f"Read message failed on test {test_number} and user {stud_dir_path}")
                 points_to_reduct += POINTS_REDUCTION_BUG
                 test_errors_str += "message_reader failed. "
                 continue
