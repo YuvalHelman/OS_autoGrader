@@ -278,12 +278,15 @@ def iterate_students_directories(super_log):
 
         if compile_student_files(stud_dir_path, stud_logger) != 0:
             stud_logger.info(f'Compilation phase failed for: {student_name}_{student_id}')
+            super_log.info(f'Compilation phase failed for: {student_name}_{student_id}')
             utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error')
             continue
         stud_logger.info(f'Compilation Success')
-
+        super_log.info(f'Compilation Success for: {student_name}_{student_id}')
+        sleep(0.5)
         try:
             device_path_name, minor_num = build_tests_env(stud_dir_path, stud_logger)
+            super_log.info(f'build_tests_env suceed for: {student_name}_{student_id}')
         except Exception as e:
             stud_logger.info("Building Environment failed")
             utils.write_to_grades_csv(student_name, student_id, 60, "insmod \ mknod failed")
@@ -296,6 +299,7 @@ def iterate_students_directories(super_log):
                 run_tests(stud_logger, stud_dir_path, device_path_name, minor_num)
             student_GRADE = 100 - points_to_reduct
             stud_logger.info(f"{student_name}_{student_id} grade: {student_GRADE}")
+            super_logger.info(f"{student_name}_{student_id} grade: {student_GRADE}")
             utils.write_to_grades_csv(student_name, student_id, student_GRADE, test_errors_str)
             stud_logger.info(f'Tests completed for student {student_name}_{student_id}')
         except Exception as e:

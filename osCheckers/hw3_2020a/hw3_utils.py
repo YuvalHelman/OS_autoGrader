@@ -34,7 +34,7 @@ def uzip_and_build_test_environment(super_log, path_from=Path("/home/user/work/O
     assignments_dir = path_to
 
     try:
-        os.mkdir('sudo mkdir /dev/tester')
+        os.system('sudo mkdir /dev/tester')
     except Exception as e:
         pass
 
