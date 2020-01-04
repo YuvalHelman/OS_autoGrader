@@ -33,6 +33,11 @@ def uzip_and_build_test_environment(super_log, path_from=Path("/home/user/work/O
                                     path_to=Path("/home/user/work/OS_autoGrader/assignments/")):
     assignments_dir = path_to
 
+    try:
+        os.mkdir('sudo mkdir /dev/tester')
+    except Exception as e:
+        pass
+
     for student_zipped in path_from.iterdir():
         splitted_filename = student_zipped.name.split("_")
         student_first_name = splitted_filename[0].split(" ")[0]

@@ -24,9 +24,9 @@ def read_message(file_path_to_exe, device_path_Name, chID, stud_logger, is_user_
     try:
         with utils.currentWorkingDir(file_path_to_exe):
             if is_user_file:
-                p = sp.run(args=['./message_reader', device_path_Name, str(chID)], text=True)
+                p = sp.run(args=['./message_reader', device_path_Name, str(chID)], capture_output=True, text=True)
             else:
-                p = sp.run(args=['./message_reader_true', device_path_Name, str(chID)], text=True)
+                p = sp.run(args=['./message_reader_true', device_path_Name, str(chID)], capture_output=True, text=True)
     except sp.SubprocessError as e:
         stud_logger.info(f"read_message failed: {e}")
         raise sp.SubprocessError
@@ -38,14 +38,12 @@ def send_message(file_path_to_exe, device_path_Name, write_mode, chID, msgStr, s
     try:
         with utils.currentWorkingDir(file_path_to_exe):
             if is_user_file:
-                p = sp.run(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr])
+                p = sp.run(args=['./message_sender', device_path_Name, str(chID), msgStr])
             else:
-                p = sp.run(args=['./message_sender_true', device_path_Name, str(write_mode), str(chID), msgStr])
+                p = sp.run(args=['./message_sender_true', device_path_Name, str(chID), msgStr])
     except sp.SubprocessError as e:
         stud_logger.info(f"send_message failed: {e}")
-        return 1
-
-    return 0
+        raise sp.SubprocessError
 
 
 TEST_POINTS_REDUCTION = 2  # change this to whatever would work with the tests
@@ -80,31 +78,30 @@ def run_tests(stud_logger, stud_dir_path, device_path_name, minor_num):
     test_errors_str = ""
 
     tests_arguments = [
-        {'ch_id': 10, 'message': "Hello ", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'expected': 'Hello '},
+        {'ch_id': 10, 'message': "10Hello hi", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'expected': '10Hello hi'},
         # ./tests/output0.txt
-        {'ch_id': 10, 'message': "World", 'minor': minor_num, 'mode': APPEND_MODE, 'expected': 'Hello World'},
-        # ./tests/output1.txt
-        {'ch_id': 10, 'message': "Overwritten", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'expected': 'Overwritten'},
+        {'ch_id': 10, f'message': "10Overwritten", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'expected': '10Overwritten'},
         # ./tests/output2.txt
-        {'ch_id': 20, 'message': "##new123", 'minor': minor_num, 'mode': APPEND_MODE, 'expected': '##new123'},
+        {'ch_id': 20, 'message': "20NiceString", 'minor': minor_num, 'mode': APPEND_MODE, 'expected': '20NiceString'},
         # ./tests/output3.txt
-        {'ch_id': 20, 'message': "##appended##", 'minor': minor_num, 'mode': APPEND_MODE, 'expected': '##new123##appended##'},
+        {'ch_id': 20, 'message': "20OverWritten", 'minor': minor_num, 'mode': APPEND_MODE, 'expected': '20OverWritten'},
         # ./tests/output4.txt
-        {'ch_id': 10, 'message': "123ow#", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'expected': '123ow#'},
+        {'ch_id': 10, 'message': "10AgainOverwritten", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'expected': '10AgainOverwritten'},
         # ./tests/output5.txt
     ]
     for test_number, test_args in enumerate(tests_arguments):
-        if send_message(stud_dir_path, device_path_name, test_args['mode'],
-                        test_args['ch_id'], test_args['message'], stud_logger, is_user_file=False) == 1:
-            stud_logger.info(f"Send message failed on test {test_number} and user {stud_dir_path}")
+        try:
+            send_message(stud_dir_path, device_path_name, test_args['mode'],test_args['ch_id'],
+                         test_args['message'], stud_logger, is_user_file=True)
+        except sp.SubprocessError as e:
+            stud_logger.info(f"Send message failed on test {test_number} and user {stud_dir_path}: {e}")
             points_to_reduct += TEST_POINTS_REDUCTION
             test_errors_str += "message_sender failed. "
             continue
 
-        test_output_name = stud_dir_path / f'output{test_number}.txt'
-        true_test_name = './tests/output{}.txt'.format(test_number)
         try:
-            user_output = read_message(stud_dir_path, device_path_name, test_args['ch_id'], stud_logger, is_user_file=False)
+            user_output = read_message(stud_dir_path, device_path_name, test_args['ch_id'], stud_logger,
+                                       is_user_file=True)
         except sp.SubprocessError as e:
             stud_logger.info(f"Read message failed on test #{test_number}, user {stud_dir_path} : {e}")
             points_to_reduct += POINTS_REDUCTION_BUG
@@ -113,7 +110,6 @@ def run_tests(stud_logger, stud_dir_path, device_path_name, minor_num):
 
         expected_output = test_args['expected']
         stud_logger.debug(f'user string: {user_output}. true string: {expected_output}')
-        # TODO: check user_output VS. test_args['expected']
         if user_output == expected_output:
             stud_logger.info(f"test {test_number} succeed\n")
         else:
@@ -199,7 +195,7 @@ def load_module(exe_files_path, stud_logger):
             s = sp.run(["sudo", "insmod", "./message_slot.ko"], check=True)
     except sp.SubprocessError as e:
         stud_logger.info("load_module failed", e)
-        return 1
+        raise sp.SubprocessError
 
     stud_logger.info("load_module success")
     return 0
@@ -232,10 +228,13 @@ def build_tests_env(exe_files_path, stud_logger):
     @param stud_logger:
     @return: (Points_to_deduct, test_errors_str) == (100>=int>=0, String)
     """
+
     remove_module()
-    if load_module(exe_files_path, stud_logger) != 0:
+    try:
+        load_module(exe_files_path, stud_logger)
+    except sp.SubprocessError as e:
         stud_logger.info("load_module failed")
-        return None, None
+        raise sp.SubprocessError
 
     MINOR_NUMBER = 20
     dev_name = "charDevice"
@@ -250,7 +249,7 @@ def build_tests_env(exe_files_path, stud_logger):
                        check=True)
     except sp.SubprocessError as e:
         stud_logger.info("insmod failed", e)
-        return None, None
+        raise sp.SubprocessError
 
     return device_path_name, MINOR_NUMBER
 
@@ -283,17 +282,21 @@ def iterate_students_directories(super_log):
             continue
         stud_logger.info(f'Compilation Success')
 
-        device_path_name, minor_num = build_tests_env(stud_dir_path, stud_logger)
-        if device_path_name is None:
+        try:
+            device_path_name, minor_num = build_tests_env(stud_dir_path, stud_logger)
+        except Exception as e:
+            stud_logger.info("Building Environment failed")
+            utils.write_to_grades_csv(student_name, student_id, 60, "insmod \ mknod failed")
+            remove_module(stud_dir_path, stud_logger)
             continue
+
         try:
             copy_scripts_to_user(stud_dir_path, stud_logger)
             points_to_reduct, test_errors_str = \
                 run_tests(stud_logger, stud_dir_path, device_path_name, minor_num)
-
-            # student_GRADE = 100 - points_to_reduct
-            # stud_logger.info(f"{student_name}_{student_id} grade: {student_GRADE}")
-            # utils.write_to_grades_csv(student_name, student_id, student_GRADE, test_errors_str)
+            student_GRADE = 100 - points_to_reduct
+            stud_logger.info(f"{student_name}_{student_id} grade: {student_GRADE}")
+            utils.write_to_grades_csv(student_name, student_id, student_GRADE, test_errors_str)
             stud_logger.info(f'Tests completed for student {student_name}_{student_id}')
         except Exception as e:
             stud_logger.info(f'Exception for student {student_name}_{student_id}: {e}')
