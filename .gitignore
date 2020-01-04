@@ -1,5 +1,6 @@
 .idea/
 names.csv
+last.csv
 **/__pycache__/
 compile_log.txt
 valgrind_log.txt

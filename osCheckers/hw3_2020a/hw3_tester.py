@@ -9,7 +9,7 @@ import logging
 
 from osCheckers import utils
 from osCheckers.hw3_2020a.hw3_utils import compile_static_files, uzip_and_build_test_environment, \
-    compile_student_files, copy_scripts_to_user
+    compile_student_files, copy_scripts_to_user, delete_stud_dir_zips_folder
 
 
 def read_message(file_path_to_exe, device_path_Name, chID, stud_logger, is_user_file=True):
@@ -283,6 +283,7 @@ def iterate_students_directories(super_log):
             continue
         stud_logger.info(f'Compilation Success')
         super_log.info(f'Compilation Success for: {student_name}_{student_id}')
+
         sleep(0.5)
         try:
             device_path_name, minor_num = build_tests_env(stud_dir_path, stud_logger)
@@ -299,8 +300,13 @@ def iterate_students_directories(super_log):
                 run_tests(stud_logger, stud_dir_path, device_path_name, minor_num)
             student_GRADE = 100 - points_to_reduct
             stud_logger.info(f"{student_name}_{student_id} grade: {student_GRADE}")
-            super_logger.info(f"{student_name}_{student_id} grade: {student_GRADE}")
+            super_log.info(f"{student_name}_{student_id} grade: {student_GRADE}")
             utils.write_to_grades_csv(student_name, student_id, student_GRADE, test_errors_str)
+            ############################################################################
+            utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error',
+                                      "/home/user/work/OS_autoGrader/last.csv")
+            delete_stud_dir_zips_folder(stud_dir_path)
+            ############################################################################
             stud_logger.info(f'Tests completed for student {student_name}_{student_id}')
         except Exception as e:
             stud_logger.info(f'Exception for student {student_name}_{student_id}: {e}')

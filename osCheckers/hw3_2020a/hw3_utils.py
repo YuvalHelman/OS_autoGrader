@@ -29,6 +29,19 @@ def compile_static_files(gen_log):
     return 0
 
 
+def delete_stud_dir_zips_folder(stud_path_dir):
+    zip_dir = Path("/home/user/work/OS_autoGrader/zip_files")
+
+    student_items = stud_path_dir.stem.split("_")
+    student_name = student_items[0] + ' ' + student_items[1]
+
+    for stud_zip in zip_dir.iterdir():
+        if stud_zip.name.startswith(student_name):
+            os.unlink(str(stud_zip))
+            return
+
+
+
 def uzip_and_build_test_environment(super_log, path_from=Path("/home/user/work/OS_autoGrader/zip_files/"),
                                     path_to=Path("/home/user/work/OS_autoGrader/assignments/")):
     assignments_dir = path_to
