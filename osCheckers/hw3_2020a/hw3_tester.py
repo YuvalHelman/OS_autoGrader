@@ -189,15 +189,17 @@ def module_exists():
         return True
 
 
-def load_module(exe_files_path, stud_logger):
+def load_module(exe_files_path, stud_logger, super_log):
     try:
         with utils.currentWorkingDir(exe_files_path):
             s = sp.run(["sudo", "insmod", "./message_slot.ko"], check=True)
     except sp.SubprocessError as e:
         stud_logger.info("load_module failed", e)
+        super_log.debug(f"load_module failed: {exe_files_path}: {e}")
         raise sp.SubprocessError
 
     stud_logger.info("load_module success")
+    super_log.debug(f"load_module success by : {exe_files_path}")
     return 0
 
 
@@ -221,7 +223,7 @@ def remove_module(exe_files_path=None, stud_logger=None):
     return 0
 
 
-def build_tests_env(exe_files_path, stud_logger):
+def build_tests_env(exe_files_path, stud_logger, super_log):
     """ Checks the tests on 1 student
     Returns the number of points needed to reduct from the student
     @param file_path_to_exe:
@@ -231,7 +233,7 @@ def build_tests_env(exe_files_path, stud_logger):
 
     remove_module()
     try:
-        load_module(exe_files_path, stud_logger)
+        load_module(exe_files_path, stud_logger, super_log)
     except sp.SubprocessError as e:
         stud_logger.info("load_module failed")
         raise sp.SubprocessError
@@ -284,9 +286,9 @@ def iterate_students_directories(super_log):
         stud_logger.info(f'Compilation Success')
         super_log.info(f'Compilation Success for: {student_name}_{student_id}')
 
-        sleep(0.5)
+        sleep(0.2)  # DEBUG
         try:
-            device_path_name, minor_num = build_tests_env(stud_dir_path, stud_logger)
+            device_path_name, minor_num = build_tests_env(stud_dir_path, stud_logger, super_log)
             super_log.info(f'build_tests_env suceed for: {student_name}_{student_id}')
         except Exception as e:
             stud_logger.info("Building Environment failed")
@@ -303,7 +305,7 @@ def iterate_students_directories(super_log):
             super_log.info(f"{student_name}_{student_id} grade: {student_GRADE}")
             utils.write_to_grades_csv(student_name, student_id, student_GRADE, test_errors_str)
             ############################################################################
-            utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error',
+            utils.write_to_grades_csv(student_name, student_id, student_GRADE, test_errors_str,
                                       "/home/user/work/OS_autoGrader/last.csv")
             delete_stud_dir_zips_folder(stud_dir_path)
             ############################################################################
