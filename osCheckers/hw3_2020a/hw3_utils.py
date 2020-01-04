@@ -98,56 +98,15 @@ def compile_student_files(exe_files_path, stud_logger):
     return 0
 
 
-def copy_scripts_to_user(file_path_to_exe, log_fd):  # TODO: keep going from here.
-    #  TODO: see if this can be altered to python exclusive code!
+def copy_scripts_to_user(student_dir, logger,
+                         from_path='/home/user/work/OS_autoGrader/osCheckers/hw3_2020a'):
+    """ Copy bash scripts from /src to file_path_to_exe """
     try:
-        # Copy bash scripts from /src to file_path_to_exe
-        s = sp.Popen(args=['cp', '-p', './src/bash_insmod', file_path_to_exe],
-                     stdout=log_fd, stderr=log_fd
-                     )
-        s.wait()
-        if s.returncode == 1:
-            print("copy insmod failed for user: ", file_path_to_exe)
-            return 1, -1
-    except:
-        print("copy bash_insmod failed")
-        return 1, -1
+        ret = os.system(f'sudo cp -p {from_path}/message_reader_true {student_dir}')
+    except OSError as e:
+        logger.info(f"copy message_reader_true failed: {e}")
 
     try:
-        s = sp.Popen(args=['cp', '-p', './src/bash_rmmod', file_path_to_exe],
-                     stdout=log_fd, stderr=log_fd
-                     )
-        s.wait()
-        if s.returncode == 1:
-            print("copy rmmod failed for user: ", file_path_to_exe)
-            return 1, -1
-    except Exception as e:
-        print("copy bash_rmmod failed")
-        return 1, -1
-
-    try:
-        s = sp.Popen(args=['cp', '-p', './src/bash_mknod', file_path_to_exe],
-                     stdout=log_fd, stderr=log_fd
-                     )
-        s.wait()
-        if s.returncode == 1:
-            print("copy mknod failed for user: ", file_path_to_exe)
-            return 1, -1
-    except:
-        print("copy bash_mknod failed")
-        return 1, -1
-    try:
-        s = sp.Popen(args=['cp', '-p', './src/message_reader_true', file_path_to_exe],
-                     stdout=log_fd, stderr=log_fd
-                     )
-        s.wait()
-        s = sp.Popen(args=['cp', '-p', './src/message_sender_true', file_path_to_exe],
-                     stdout=log_fd, stderr=log_fd
-                     )
-        s.wait()
-        if s.returncode == 1:
-            print("copy reader or sender failed for user: ", file_path_to_exe)
-            return 1, -1
-    except:
-        print("copy bash_mknod failed")
-        return 1, -1
+        ret = os.system(f'sudo cp -p {from_path}/message_sender_true {student_dir}')
+    except OSError as e:
+        logger.info(f"copy message_reader_true failed: {e}")

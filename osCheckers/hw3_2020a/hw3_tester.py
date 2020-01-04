@@ -12,7 +12,7 @@ from osCheckers.hw3_2020a.hw3_utils import compile_static_files, uzip_and_build_
     compile_student_files, copy_scripts_to_user
 
 
-def read_message(is_user_file, file_path_to_exe, device_path_Name, chID, stud_logger):
+def read_message(file_path_to_exe, device_path_Name, chID, stud_logger, is_user_file=True):
     """
     @param is_user_file - a boolean that specifies if the function will use the user's message_reader code, or mine.
     @param file_path_to_exe - the path to the user's directory
@@ -22,39 +22,27 @@ def read_message(is_user_file, file_path_to_exe, device_path_Name, chID, stud_lo
     @return: 0 on success. 1 else
     """
     try:
-        if is_user_file:  # Using the user's "Message reader"
-
-            p = sp.Popen(args=['./message_reader', device_path_Name, str(chID)],
-                         # Not useful.. as most students print extra junk in addition to the needed text... in different ways..
-                         cwd=file_path_to_exe,
-                         stdout=output_fd, stderr=log_fd)
-            p.wait()
-        else:
-            p = sp.Popen(args=['./message_reader_true', device_path_Name, str(chID)],
-                         cwd=file_path_to_exe,
-                         stdout=output_fd, stderr=log_fd)
-            p.wait()
-    #  if (p.returncode != 0):
-    #     return 1
-    except OSError as e:
-        print("read_message failed: ", e)
-        return 1
-
-    return 0
-
-
-def send_message(file_path_to_exe, device_path_Name, write_mode, chID, msgStr, stud_logger, is_user_file):
-    try:
-        if is_user_file:  # Using the user's "Message Sender"
-            p = sp.run(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr],
-                       cwd=file_path_to_exe,
-                       stdout=log_fd, stderr=log_fd)
-        else:
-            p = sp.run(args=['./message_sender_true', device_path_Name, str(write_mode), str(chID), msgStr],
-                       cwd=file_path_to_exe,
-                       stdout=log_fd, stderr=log_fd)
+        with utils.currentWorkingDir(file_path_to_exe):
+            if is_user_file:
+                p = sp.run(args=['./message_reader', device_path_Name, str(chID)], text=True)
+            else:
+                p = sp.run(args=['./message_reader_true', device_path_Name, str(chID)], text=True)
     except sp.SubprocessError as e:
-        print("send_message failed: ", e)
+        stud_logger.info(f"read_message failed: {e}")
+        raise sp.SubprocessError
+
+    return p.stdout
+
+
+def send_message(file_path_to_exe, device_path_Name, write_mode, chID, msgStr, stud_logger, is_user_file=True):
+    try:
+        with utils.currentWorkingDir(file_path_to_exe):
+            if is_user_file:
+                p = sp.run(args=['./message_sender', device_path_Name, str(write_mode), str(chID), msgStr])
+            else:
+                p = sp.run(args=['./message_sender_true', device_path_Name, str(write_mode), str(chID), msgStr])
+    except sp.SubprocessError as e:
+        stud_logger.info(f"send_message failed: {e}")
         return 1
 
     return 0
@@ -62,7 +50,8 @@ def send_message(file_path_to_exe, device_path_Name, write_mode, chID, msgStr, s
 
 TEST_POINTS_REDUCTION = 2  # change this to whatever would work with the tests
 POINTS_REDUCTION_BUG = 5
-OVERWRITE_MODE, APPEND_MODE = 0, 1
+POINTS_SENDER_DOESNT_WORK = 10
+OVERWRITE_MODE, APPEND_MODE = 0, 1  # Don't change values. these integers are the ones needed.
 
 
 def message_reader_text_test(stud_logger, file_path_to_exe, dev_name):
@@ -90,23 +79,23 @@ def run_tests(stud_logger, stud_dir_path, device_path_name, minor_num):
     points_to_reduct = 0
     test_errors_str = ""
 
-    arguments = [
-        {'ch_id': 10, 'message': "Hello ", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'output': 'Hello '},
+    tests_arguments = [
+        {'ch_id': 10, 'message': "Hello ", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'expected': 'Hello '},
         # ./tests/output0.txt
-        {'ch_id': 10, 'message': "World", 'minor': minor_num, 'mode': APPEND_MODE, 'output': 'Hello World'},
+        {'ch_id': 10, 'message': "World", 'minor': minor_num, 'mode': APPEND_MODE, 'expected': 'Hello World'},
         # ./tests/output1.txt
-        {'ch_id': 10, 'message': "Overwritten", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'output': 'Overwritten'},
+        {'ch_id': 10, 'message': "Overwritten", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'expected': 'Overwritten'},
         # ./tests/output2.txt
-        {'ch_id': 20, 'message': "##new123", 'minor': minor_num, 'mode': APPEND_MODE, 'output': '##new123'},
+        {'ch_id': 20, 'message': "##new123", 'minor': minor_num, 'mode': APPEND_MODE, 'expected': '##new123'},
         # ./tests/output3.txt
-        {'ch_id': 20, 'message': "##appended##", 'minor': minor_num, 'mode': APPEND_MODE, 'output': '##new123##appended##'},
+        {'ch_id': 20, 'message': "##appended##", 'minor': minor_num, 'mode': APPEND_MODE, 'expected': '##new123##appended##'},
         # ./tests/output4.txt
-        {'ch_id': 10, 'message': "123ow#", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'output': '123ow#'},
+        {'ch_id': 10, 'message': "123ow#", 'minor': minor_num, 'mode': OVERWRITE_MODE, 'expected': '123ow#'},
         # ./tests/output5.txt
     ]
-    for test_number, test_args in enumerate(arguments):
-        if send_message(stud_dir_path, stud_logger, device_path_name, test_args['mode'],
-                        test_args['ch_id'], test_args['message'], stud_logger, is_user_file=True) == 1:
+    for test_number, test_args in enumerate(tests_arguments):
+        if send_message(stud_dir_path, device_path_name, test_args['mode'],
+                        test_args['ch_id'], test_args['message'], stud_logger, is_user_file=False) == 1:
             stud_logger.info(f"Send message failed on test {test_number} and user {stud_dir_path}")
             points_to_reduct += TEST_POINTS_REDUCTION
             test_errors_str += "message_sender failed. "
@@ -114,39 +103,23 @@ def run_tests(stud_logger, stud_dir_path, device_path_name, minor_num):
 
         test_output_name = stud_dir_path / f'output{test_number}.txt'
         true_test_name = './tests/output{}.txt'.format(test_number)
-        with open(test_output_name, 'w+') as testOutputFd:
-            if read_message(True, file_path_to_exe, o_log, device_path_name, test_args['ch_id'], testOutputFd) == 1:
-                # DEBUG : change True\False for users\mine message_reader exe
-                stud_logger.info(f"Read message failed on test {test_number} and user {stud_dir_path}")
-                points_to_reduct += POINTS_REDUCTION_BUG
-                test_errors_str += "message_reader failed. "
-                continue
-        # Test output file
-        true_fd = open(true_test_name, 'r')
-        testOutputFd = open(test_output_name, 'r')
-        true_string = true_fd.readline()
-        output_string = testOutputFd.readlines()  # This is a list!
+        try:
+            user_output = read_message(stud_dir_path, device_path_name, test_args['ch_id'], stud_logger, is_user_file=False)
+        except sp.SubprocessError as e:
+            stud_logger.info(f"Read message failed on test #{test_number}, user {stud_dir_path} : {e}")
+            points_to_reduct += POINTS_REDUCTION_BUG
+            test_errors_str += "message_reader failed. "
+            continue
 
-        if true_string:
-            if (output_string):
-                print('user string: {}\ntrue string: {}'.format(output_string, true_string))  # DEBUG
-                OKflag = False
-                for line_str in output_string:
-                    # print("{} ## {}".format(line_str, true_string))  # Debug
-                    if (true_string in line_str):
-                        OKflag = True
-                if OKflag is False:
-                    points_to_reduct += TEST_POINTS_REDUCTION
-                    test_errors_str += "test {} failed. ".format(test_number)
-                    o_log.write("test {} failed\n".format(test_number))
-                else:
-                    o_log.write("test {} succeeded\n".format(test_number))
-            else:
-                points_to_reduct += TEST_POINTS_REDUCTION
-                test_errors_str += "test {} failed. ".format(test_number)
-
-        true_fd.close()
-        testOutputFd.close()
+        expected_output = test_args['expected']
+        stud_logger.debug(f'user string: {user_output}. true string: {expected_output}')
+        # TODO: check user_output VS. test_args['expected']
+        if user_output == expected_output:
+            stud_logger.info(f"test {test_number} succeed\n")
+        else:
+            points_to_reduct += TEST_POINTS_REDUCTION
+            test_errors_str += f"test {test_number} failed. "
+            stud_logger.info(f"test {test_number} failed\n")
 
     return points_to_reduct, test_errors_str
 
@@ -154,9 +127,6 @@ def run_tests(stud_logger, stud_dir_path, device_path_name, minor_num):
 def remove_char_device(stud_logger, device_path_name, check_exit_code=False):
     try:
         ret = os.system(f'sudo rm -f {device_path_name}')
-    except sp.SubprocessError as e:
-        stud_logger.info("remove char device failed", e)
-        return 1
     except OSError as e:
         stud_logger.info("remove char device failed", e)
         return 1
@@ -317,7 +287,7 @@ def iterate_students_directories(super_log):
         if device_path_name is None:
             continue
         try:
-            pass
+            copy_scripts_to_user(stud_dir_path, stud_logger)
             points_to_reduct, test_errors_str = \
                 run_tests(stud_logger, stud_dir_path, device_path_name, minor_num)
 
