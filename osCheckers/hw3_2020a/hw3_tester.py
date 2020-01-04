@@ -281,6 +281,12 @@ def iterate_students_directories(super_log):
         if compile_student_files(stud_dir_path, stud_logger) != 0:
             stud_logger.info(f'Compilation phase failed for: {student_name}_{student_id}')
             super_log.info(f'Compilation phase failed for: {student_name}_{student_id}')
+            ############################################################################
+            utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error',
+                                      "/home/user/work/OS_autoGrader/last_no_compile.csv")
+            delete_stud_dir_zips_folder(stud_dir_path)
+            ############################################################################
+
             utils.write_to_grades_csv(student_name, student_id, 0, 'Compilation error')
             continue
         stud_logger.info(f'Compilation Success')
