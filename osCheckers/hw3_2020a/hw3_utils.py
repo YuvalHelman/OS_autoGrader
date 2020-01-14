@@ -96,11 +96,11 @@ def compile_student_files(exe_files_path, stud_logger):
         return 1
 
     try:
-        s = sp.run(["make"],
-                   cwd=exe_files_path, check=True)
-        if s.returncode != 0:  # check if compilation works
-            print("Make failed")  # DEBUG
-            return 1
+        with utils.currentWorkingDir(exe_files_path):
+            s = sp.run(["make"], check=True)
+            if s.returncode != 0:  # check if compilation works
+                print("Make failed")  # DEBUG
+                return 1
     except Exception as e:
         print("make compile failed", e)
         return 1
