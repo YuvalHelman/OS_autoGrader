@@ -47,6 +47,7 @@ def send_message(file_path_to_exe, device_path_Name, write_mode, chID, msgStr, s
 
 
 TEST_POINTS_REDUCTION = 2  # change this to whatever would work with the tests
+MINOR_POINT_REDUCTION = 1
 POINTS_REDUCTION_BUG = 5
 POINTS_SENDER_DOESNT_WORK = 10
 OVERWRITE_MODE, APPEND_MODE = 0, 1  # Don't change values. these integers are the ones needed.
@@ -112,6 +113,10 @@ def run_tests(stud_logger, stud_dir_path, device_path_name, minor_num):
         stud_logger.debug(f'user string: {user_output}. true string: {expected_output}')
         if user_output == expected_output:
             stud_logger.info(f"test {test_number} succeed\n")
+        elif expected_output in user_output:
+            points_to_reduct += MINOR_POINT_REDUCTION
+            test_errors_str += f"test {test_number} failed. user_output has more characters then expected "
+            stud_logger.info(f"test {test_number} failed. user_output contained in expected_output. not equal")
         else:
             points_to_reduct += TEST_POINTS_REDUCTION
             test_errors_str += f"test {test_number} failed. "
@@ -328,8 +333,8 @@ def main():
     super_logger = utils.setup_logger(name='hw3 logger', log_file='hw3.log')
     super_logger.info('Log Initialize!')
     utils.open_names_csv()
-    compile_static_files(super_logger)
-    uzip_and_build_test_environment(super_logger)
+    # compile_static_files(super_logger)
+    # uzip_and_build_test_environment(super_logger)
     iterate_students_directories(super_logger)
 
     super_logger.info("Done")
