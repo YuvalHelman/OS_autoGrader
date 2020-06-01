@@ -332,7 +332,9 @@ def main():
     # Highest level file logger
     super_logger = utils.setup_logger(name='hw3 logger', log_file='hw3.log')
     super_logger.info('Log Initialize!')
+
     utils.open_names_csv()
+
     # compile_static_files(super_logger)
     # uzip_and_build_test_environment(super_logger)
     iterate_students_directories(super_logger)

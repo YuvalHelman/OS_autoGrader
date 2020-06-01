@@ -10,3 +10,4 @@ assignments/
 zip_files/
 **/.pytest_cache/
 osCheckers/tests/
+tags
